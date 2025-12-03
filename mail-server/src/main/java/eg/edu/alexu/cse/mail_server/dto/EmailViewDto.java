@@ -17,7 +17,6 @@ public class EmailViewDto {
     private int priority;
     private boolean isRead;
 
-    // We only send the file NAMES to the list, not the actual file data (BLOB)
-    // Clicking the name will trigger a separate download request.
+
     private List<String> attachmentNames;
 }
