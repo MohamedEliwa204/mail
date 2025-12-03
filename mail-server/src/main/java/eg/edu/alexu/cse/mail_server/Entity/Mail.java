@@ -43,14 +43,10 @@ public class Mail {
     private String folderName; // inbox, sent, trash, draft
 
     @Builder.Default
-    private boolean isRead = false;
+    private boolean isRead = false; // for ui
 
-    @ElementCollection
-    @CollectionTable(
-            name = "email_attachments",
-            joinColumns = @JoinColumn(name = "mail_id")
-    )
-    @Column(name = "file_path")
-    private List<String> attachments;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "mail_id")
+    private List<Attachment> attachments;
 
 }
