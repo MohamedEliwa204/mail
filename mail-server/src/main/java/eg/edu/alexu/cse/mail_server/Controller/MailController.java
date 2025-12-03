@@ -3,10 +3,7 @@ package eg.edu.alexu.cse.mail_server.Controller;
 import eg.edu.alexu.cse.mail_server.Service.MailService;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -17,14 +14,14 @@ import java.util.Map;
 public class MailController {
     private final MailService mailService;
 
-    @RequestMapping("/send")
+    @PostMapping("/send")
     public Map<String, String> sendMail(@RequestBody ComposeEmailDTO composeEmailDTO) {
         mailService.send(composeEmailDTO);
         return Map.of("message", "Email sent successfully");
 
     }
 
-    @RequestMapping("/draft")
+    @PostMapping("/draft")
     public Map<String, String> draftEmail(@RequestBody ComposeEmailDTO composeEmailDTO) {
         mailService.draft(composeEmailDTO);
         return Map.of("message", "Email drafted successfully");
