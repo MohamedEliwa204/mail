@@ -23,7 +23,7 @@ export class AuthenticationService{
 
     private router = inject(Router)
     private http = inject(HttpClient);
-    private apiURL = 'http://localhost:8080/'
+    private apiURL = 'http://localhost:8080'
 
     user = signal<UserResponseDTO | null>(null);
 
@@ -40,13 +40,14 @@ export class AuthenticationService{
     }
 
     signUp(userForm: UserFormDTO){
-        this.http.post(`${this.apiURL}register`, userForm).subscribe({
+        this.http.post(`${this.apiURL}/api/users/register`, userForm).subscribe({
             next: (response: any) => {
                 this.user.set(response);
                 this.router.navigateByUrl('/mail');
             },
-            error: () => {
-                console.log("Error")
+            error: (e) => {
+                console.log(`Error: ${e.value}`)
+                
             }
         })
     }
