@@ -1,13 +1,9 @@
 package eg.edu.alexu.cse.mail_server.Service.Strategy;
 
+import java.util.Optional;
+
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
-
-import java.io.Serial;
-import java.util.Optional;
 
 // Also Or search if any words matches return true
 @AllArgsConstructor
@@ -15,10 +11,6 @@ public class BodyFilter implements FilterStrategy {
 
     private String body ;
     public BodyFilter() {
-    }
-
-    public BodyFilter(String body) {
-        this.body = body;
     }
 
     @Override

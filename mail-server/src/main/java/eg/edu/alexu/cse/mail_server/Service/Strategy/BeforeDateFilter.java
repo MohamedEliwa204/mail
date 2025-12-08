@@ -21,10 +21,6 @@ public class BeforeDateFilter implements FilterStrategy {
     public BeforeDateFilter() {
     }
 
-    public BeforeDateFilter(LocalDateTime date) {
-        this.date = date;
-    }
-
     @Override
     public boolean filter(Mail mail) {
         LocalDateTime localDate = Optional.ofNullable(mail.getTimestamp()).
