@@ -10,7 +10,6 @@ import java.io.Serial;
 import java.util.Optional;
 
 // Also Or search if any words matches return true
-@AllArgsConstructor
 public class BodyFilter implements FilterStrategy {
 
     private String body ;
@@ -18,7 +17,7 @@ public class BodyFilter implements FilterStrategy {
     }
 
     public BodyFilter(String body) {
-        this.body = body;
+        this.body = body.toLowerCase().trim();
     }
 
     @Override

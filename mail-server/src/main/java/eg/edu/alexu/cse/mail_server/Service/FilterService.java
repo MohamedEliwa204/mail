@@ -55,7 +55,7 @@ public class FilterService {
     }
 
     // Currently the method returns all emails
-    // and email field will be added to get the
+    // an email field will be added to get the
     // emails related to the user requested the filter
     public List<EmailViewDto> getEmailsAnd(MailFilterDTO dto) {
         List<Mail> mails = mailRepository.findAll() ;
