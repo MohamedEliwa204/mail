@@ -8,7 +8,7 @@ import { AuthenticationService, UserFormDTO } from '../services/authentication-s
   standalone: true,
   imports: [FormsModule],
   templateUrl: './signup.html',
-  styleUrl: './signup.css',
+  styleUrls: ['./signup.css'],
 })
 export class Signup {
   firstName: string = '';
