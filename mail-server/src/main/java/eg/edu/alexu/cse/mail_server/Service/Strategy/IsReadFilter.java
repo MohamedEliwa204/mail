@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@AllArgsConstructor
 public class IsReadFilter implements FilterStrategy {
 
     @Getter
