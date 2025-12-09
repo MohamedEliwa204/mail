@@ -54,12 +54,18 @@ public class FilterService {
 
     }
 
-    // Currently the method returns all emails
-    // an email field will be added to get the
-    // emails related to the user requested the filter
+    /**
+     * Filter emails using AND logic - all criteria must match
+     * Only returns emails related to the specified user (as sender or receiver)
+     */
     public List<EmailViewDto> getEmailsAnd(MailFilterDTO dto) {
-        List<Mail> mails = mailRepository.findAll() ;
-        List<EmailViewDto> emails = new ArrayList<>();
+        // Validate userId is provided
+        if (dto.getUserId() == null) {
+            throw new IllegalArgumentException("User ID is required for filtering");
+        }
+
+        // Get only emails related to this user
+        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = new ArrayList<>();
 
         // Refactor : Move these into helper method
@@ -122,8 +128,18 @@ public class FilterService {
 
 
 
+    /**
+     * Filter emails using OR logic - at least one criterion must match
+     * Only returns emails related to the specified user (as sender or receiver)
+     */
     public List<EmailViewDto> getEmailsOr(MailFilterDTO dto) {
-        List<Mail> mails = mailRepository.findAll();
+        // Validate userId is provided
+        if (dto.getUserId() == null) {
+            throw new IllegalArgumentException("User ID is required for filtering");
+        }
+
+        // Get only emails related to this user
+        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = new ArrayList<>();
 
         if (dto.getSender().isPresent()) {

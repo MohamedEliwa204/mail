@@ -16,19 +16,48 @@ import java.util.List;
 public class FilterController {
     private final FilterService filterService;
 
-    @PostMapping("/and")
-    public List<EmailViewDto> getEmailsAnd(@RequestBody MailFilterDTO mailFilterDTO) {
+    /**
+     * Filter emails using AND logic - all criteria must match
+     * Only returns emails for the specified user
+     * @param userId the ID of the user performing the search
+     * @param mailFilterDTO the filter criteria
+     * @return list of filtered emails for this user
+     */
+    @PostMapping("/{userId}/and")
+    public List<EmailViewDto> getEmailsAnd(
+            @PathVariable Long userId,
+            @RequestBody MailFilterDTO mailFilterDTO) {
+        mailFilterDTO.setUserId(userId);
         return filterService.getEmailsAnd(mailFilterDTO);
     }
 
-
-    @PostMapping("/or")
-    public List<EmailViewDto> getEmailsOr(@RequestBody MailFilterDTO mailFilterDTO) {
+    /**
+     * Filter emails using OR logic - at least one criterion must match
+     * Only returns emails for the specified user
+     * @param userId the ID of the user performing the search
+     * @param mailFilterDTO the filter criteria
+     * @return list of filtered emails for this user
+     */
+    @PostMapping("/{userId}/or")
+    public List<EmailViewDto> getEmailsOr(
+            @PathVariable Long userId,
+            @RequestBody MailFilterDTO mailFilterDTO) {
+        mailFilterDTO.setUserId(userId);
         return filterService.getEmailsOr(mailFilterDTO);
     }
 
-    @PostMapping("/search")
-    public List<EmailViewDto> searchEmails(@RequestBody MailFilterDTO mailFilterDTO) {
+    /**
+     * Search emails (default: AND logic)
+     * Only returns emails for the specified user
+     * @param userId the ID of the user performing the search
+     * @param mailFilterDTO the search criteria
+     * @return list of matching emails for this user
+     */
+    @PostMapping("/{userId}/search")
+    public List<EmailViewDto> searchEmails(
+            @PathVariable Long userId,
+            @RequestBody MailFilterDTO mailFilterDTO) {
+        mailFilterDTO.setUserId(userId);
         return filterService.getEmailsAnd(mailFilterDTO);
     }
 }

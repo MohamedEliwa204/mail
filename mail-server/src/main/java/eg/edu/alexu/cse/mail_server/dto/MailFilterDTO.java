@@ -5,6 +5,7 @@ import java.util.Optional;
 
 // Refactor instead of using strings
 public class MailFilterDTO {
+    private Long userId; // Required: The user performing the search
     private Optional<String> sender = Optional.empty();
     private Optional<String> receiver = Optional.empty();
     private Optional<String> subject = Optional.empty();
@@ -15,6 +16,14 @@ public class MailFilterDTO {
     private Optional<Boolean> isRead = Optional.empty();
     private Optional<Integer> priority = Optional.empty();
     // Attachement will be added soon
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
 
     public Optional<String> getSender() {
