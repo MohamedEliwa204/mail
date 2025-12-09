@@ -1,0 +1,37 @@
+.sent-mails {
+    /* Make it fill remaining space next to sidebar */
+    position: absolute;        /* relative to parent or body */
+    top: 80px;                 /* below navbar */
+    left: 300px;               /* width of sidebar */
+    right: 20px;               /* leave some right margin */
+    bottom: 20px;              /* optional padding from bottom */
+
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+
+    overflow-y: auto;          /* scroll if content overflows */
+    box-sizing: border-box;    /* include padding in size */
+}
+
+/* Optional: make text scale nicely */
+.sent-mails * {
+    box-sizing: border-box;
+}
+
+.filterbar{
+    width: 100%;
+    height: 50px;
+
+    background-color: antiquewhite;
+}
+
+.select bar{
+    background-color: blueviolet;
+}
+
+.mail-list{
+    width: 100%;
+    height: 100%;
+    background-color: aqua;
+}

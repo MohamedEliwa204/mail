@@ -1,5 +1,73 @@
-<p>mail works!</p>
+<div class="mail">   
+    <div class="navbar">
+        <div class="title">MansyMail</div>
 
-<p>Welcome {{currentUser()?.name}}</p>
-<p>Your ID is {{currentUser()?.id}}</p>
-<p>Your E-mail is {{currentUser()?.email}}</p>
+        <div class="searchbar">
+            <div class="search">
+                <input type="text">
+            </div>
+            <div class="filter">filter</div>
+        </div>
+
+        <div class="dropdown-btn" id="dropdownBtn" (click)="toggleProfileDropdown()"></div>
+
+    </div>
+
+    <div class="dropdown">
+        <div [style.display] = "isProfileDropdownOpen? 'none': 'block'">
+                    
+            <div class="dropdown-menu" id="dropdownMenu" >
+                <div class="user-email">{{currentUser()?.email}}</div>
+                <div class="profile-image"></div>
+                <div class="user-name">Hello, {{currentUser()?.name}}</div>
+                <div class="buttons">
+                    <button class="add-account" (click)="addAccount()">Add Account</button>
+                    <button class="sign-out" (click)="signOut()">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="composeBtn">Compose</button>
+        <ul class="features">
+            <li>Inbox</li>
+            <li>Starred</li>
+            <li>Sent</li>
+            <li>Drafts</li>
+            <li>Advanced Search</li>
+            <li>Important</li>
+            <li>scheduled</li>
+            <li>All Mail</li>
+            <li>Spam</li>
+            <li>trash</li>
+        </ul>
+    </div>
+
+    <div class="sent-mails">
+        
+        <div class="filterbar"></div>
+        <div class="selectbar">
+            <div class="left-selector">
+                <div class="selector">
+                    <button class="selctorBtn"></button>
+                    <div class="selectorDropDown"></div>
+                </div>
+
+                <div class="refresh"></div>
+
+                <div class="moreDropdown"></div>
+            </div>
+
+            <div class="right-selector">
+                <div class="page-display"></div>
+                <button class="page-left"></button>
+                <button class="page-right"></button>
+            </div>
+            
+        </div>
+
+        <div class="mail-list"></div>
+    </div>
+
+</div> 

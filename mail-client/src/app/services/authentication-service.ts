@@ -54,4 +54,9 @@ export class AuthenticationService{
             }
         })
     }
+
+    signOut(){
+        this.user.set(null);
+        this.router.navigateByUrl('/login');
+    }
 }

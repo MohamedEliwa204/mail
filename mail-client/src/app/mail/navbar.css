@@ -1,0 +1,69 @@
+/* Navbar styling */
+
+.navbar {
+    caret-color: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 80px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  /* space between title and profile */
+    padding: 0 20px;
+
+    background-color: #f0f2f6;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+/* Title */
+.navbar .title {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* Searchbar */
+.navbar .searchbar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    caret-color: black;
+}
+
+.navbar .searchbar input[type="text"] {
+    width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+}
+
+.navbar .searchbar .filter {
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* Profile button */
+.dropdown-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+
+    position: relative;
+    right: 50px;
+
+    background-image: url(Guest-user.png);
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #ccc;
+    flex-shrink: 0;  /* prevent shrinking in flex layout */
+}
