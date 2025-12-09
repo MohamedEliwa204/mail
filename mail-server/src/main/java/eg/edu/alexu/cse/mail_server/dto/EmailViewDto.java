@@ -17,8 +17,8 @@ public class EmailViewDto {
     private int priority;
     private boolean isRead;
 
-
-    private List<String> attachmentNames;
+    // Full attachment data with file content
+    private List<AttachmentDTO> attachments;
 
     public EmailViewDto() {
     }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -16,44 +18,25 @@ public class Attachment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "file_name")
+    @Column(name = "file_name", nullable = false)
     private String fileName;
-    @Column(name = "content_type")
+
+    @Column(name = "content_type", nullable = false)
     private String contentType;
 
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] data;
+    @Column(name = "file_size")
+    private Long fileSize;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "file_path", unique = true)
+    private String filePath; // Path to file on disk
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(name = "indexed_content", columnDefinition = "TEXT")
+    private String indexedContent; // For searching
 
-    public String getFileName() {
-        return fileName;
-    }
+    @Column(name = "upload_date")
+    private LocalDateTime uploadDate;
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mail_id")
+    private Mail mail;
 }
