@@ -1,5 +1,4 @@
-import { Component, inject, Injectable, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -28,14 +27,19 @@ export class AuthenticationService{
     user = signal<UserResponseDTO | null>(null);
 
     logIn(userForm: UserFormDTO){
-        this.http.post(`${this.apiURL}login`, userForm).subscribe({
+        this.http.post(`${this.apiURL}/api/users/login`, userForm).subscribe({
             next: (response: any) => {
                 this.user.set(response);
                 this.router.navigateByUrl('/mail');
             },
-            error: () => {
-                console.log("Error")
+            error: (e) => {
+                if (e.error && e.error.error) {
+                    console.log(`Error: ${e.error.error}`);
+                } else {
+                    console.log('Unknown error', e);
+                }
             }
+
         })
     }
 
@@ -46,8 +50,7 @@ export class AuthenticationService{
                 this.router.navigateByUrl('/mail');
             },
             error: (e) => {
-                console.log(`Error: ${e.value}`)
-                
+                console.log(`Error: ${e.error}`)
             }
         })
     }

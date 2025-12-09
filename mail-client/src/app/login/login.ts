@@ -5,9 +5,10 @@ import { AuthenticationService, UserFormDTO } from '../services/authentication-s
 
 @Component({
   selector: 'app-login',
+  standalone: true,
   imports: [FormsModule],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css'],
 })
 export class Login {
   firstName: string = '';
@@ -15,7 +16,6 @@ export class Login {
   email: string = '';
   password: string = '';
 
-  private http = inject(HttpClient);
   private authenticationService = inject(AuthenticationService);
 
   submit(){

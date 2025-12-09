@@ -16,7 +16,6 @@ export class Signup {
   email: string = '';
   password: string = '';
 
-  private http = inject(HttpClient);
   private authenticationService = inject(AuthenticationService);
 
   submit(){
