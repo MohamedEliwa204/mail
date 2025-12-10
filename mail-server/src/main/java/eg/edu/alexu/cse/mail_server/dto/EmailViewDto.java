@@ -81,6 +81,7 @@ public class EmailViewDto {
         isRead = read;
     }
 
+    /* 
     public List<String> getAttachmentNames() {
         return attachmentNames;
     }
@@ -88,4 +89,5 @@ public class EmailViewDto {
     public void setAttachmentNames(List<String> attachmentNames) {
         this.attachmentNames = attachmentNames;
     }
+    */
 }
