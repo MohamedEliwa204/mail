@@ -1,5 +1,7 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import eg.edu.alexu.cse.mail_server.Entity.Mail;
+import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Service.command.DraftCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.GetMailCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.SendCommand;

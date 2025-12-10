@@ -22,6 +22,7 @@ public class EmailViewDto {
     // Full attachment data with file content
     private List<AttachmentDTO> attachments;
 
+    // No-args constructor required for Jackson deserialization
     public EmailViewDto() {
     }
 
