@@ -1,6 +1,7 @@
 package eg.edu.alexu.cse.mail_server.Service.command;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
+import eg.edu.alexu.cse.mail_server.Entity.User;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
@@ -23,12 +24,12 @@ public class SendCommand implements MailCommand {
     @Override
     @Transactional   // if error in receiver copy consider not sent copy (all or nothing)
     public void execute(ComposeEmailDTO dto) {
-        if (userRepository.findByEmail(dto.getSender()).isEmpty()) {
-            throw new RuntimeException("Sender email not found: " + dto.getSender());
-        }
+        User senderUser = userRepository.findByEmail(dto.getSender())
+                .orElseThrow(() -> new RuntimeException("Sender email not found: " + dto.getSender()));
 
         Mail sentCopy = Mail.builder()
                 .sender(dto.getSender())
+                .senderRel(senderUser)
                 .receiver(String.join(",", dto.getReceivers()))
                 .body(dto.getBody())
                 .subject(dto.getSubject())
@@ -50,6 +51,7 @@ public class SendCommand implements MailCommand {
             if (userRepository.findByEmail(receiverEmail).isPresent()) {
                 Mail inboxCopy = Mail.builder()
                         .sender(dto.getSender())
+                        .senderRel(senderUser)
                         .receiver(receiverEmail)
                         .subject(dto.getSubject())
                         .body(dto.getBody())
