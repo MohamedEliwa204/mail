@@ -45,7 +45,7 @@ public class UserService {
                     .email(user.getEmail())
                     .build();
         }
-        throw new RuntimeException("Invalid credentials");
+        throw new RuntimeException("Incorrect password or invalid email address");
     }
 
 }

@@ -1,0 +1,179 @@
+<div class="mail">   
+    <div class="navbar">
+        <div class="title">MansyMail</div>
+
+        <div class="searchbar">
+            <div class="search">
+                <input type="text">
+            </div>
+            <div class="filter">
+                <img src="icons/filter.svg" alt="attach">
+            </div>
+        </div>
+
+        <div class="dropdown-btn" id="dropdownBtn" (click)="toggleProfileDropdown()"></div>
+
+    </div>
+
+    <div class="dropdown">
+        <div [style.display] = "isProfileDropdownOpen? 'none': 'block'">
+                    
+            <div class="dropdown-menu" id="dropdownMenu" >
+                <div class="user-email">{{currentUser()?.email}}</div>
+                <div class="profile-image"></div>
+                <div class="user-name">Hello, {{currentUser()?.name}}</div>
+                <div class="buttons">
+                    <button class="add-account" (click)="addAccount()">Add Account</button>
+                    <button class="sign-out" (click)="signOut()">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="composeBtn" (click)="compseToggle()">Compose</button>
+        <ul class="features">
+            <li (click)="loadInbox()" [class.active]="currentFolder() === 'inbox'">Inbox</li>
+            <li (click)="loadFolder('starred')" [class.active]="currentFolder() === 'starred'">Starred</li>
+            <li (click)="loadSent()" [class.active]="currentFolder() === 'sent'">Sent</li>
+            <li (click)="loadDrafts()" [class.active]="currentFolder() === 'drafts'">Drafts</li>
+            <li (click)="loadFolder('search')" [class.active]="currentFolder() === 'search'">Advanced Search</li>
+            <li (click)="loadFolder('important')" [class.active]="currentFolder() === 'important'">Important</li>
+            <li (click)="loadFolder('scheduled')" [class.active]="currentFolder() === 'scheduled'">Scheduled</li>
+            <li (click)="loadFolder('all')" [class.active]="currentFolder() === 'all'">All Mail</li>
+            <li (click)="loadFolder('spam')" [class.active]="currentFolder() === 'spam'">Spam</li>
+            <li (click)="loadFolder('trash')" [class.active]="currentFolder() === 'trash'">Trash</li>
+        </ul>
+    </div>
+
+    <div class="compose-section" [style.display]="isComposing? 'flex':'none'">
+        <div class="compose-title">Compose Email
+            <div class="compose-trash" (click)="isComposing = false">
+                <img src="icons/quit.svg" alt="attach">
+            </div>
+        </div>
+        <div class="to-input">
+            <p>To:</p>
+            <input type="text" [(ngModel)] = "composedMail.receivers[0]">
+        </div>
+        <div class="subject-input">
+            <p>Subject:</p>
+            <input type="text" [(ngModel)] = "composedMail.subject">
+        </div>
+        <textarea class="compose-text-area" [(ngModel)] = "composedMail.body"></textarea>
+        <div class="bottom-bar">
+            <button class="compose-send" (click)="sendComposedMail()">Send</button>
+            <div class="compose-attachments">
+                <img src="icons/attach.svg" alt="attach">
+            </div>
+            <div class="compose-trash">
+                <img src="icons/trash.svg" alt="attach">
+            </div>
+        </div>
+    </div>
+
+    <div class="sent-mails">
+        
+        <div class="filterbar">
+            <div class="button-filter">
+                From <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                Any time <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                Has attachment <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                To <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                Is unread <img src="icons/dropdown.svg" alt="">
+            </div>
+            
+        </div>
+
+        <div class="selectbar">
+            <div class="left-selector">
+                <div class="selector">
+                    <button class="selctorBtn">
+                        <img src="icons/blankbox.svg" alt="Select All">
+                    </button>
+                    <div class="selectorDropDown">
+                        <img src="icons/dropdown.svg" alt="More select options">
+                    </div>
+                </div>
+
+                <div class="mail-icons">
+                    <img src="icons/refresh.svg" (click)="refresh()" style="cursor: pointer;" alt="Refresh">
+                </div>
+
+                <div class="mail-icons">
+                    <img src="icons/more.svg" alt="More Options">
+                </div>
+            </div>
+
+            <div class="right-selector">
+                <div class="page-display">{{pageFrom()}}-{{pageTo()}} of {{mailList.length}}</div>
+                <button class="page-left" (click)="pagingLeft()">
+                    <img src="icons/arrowback.svg" alt="Page Left">
+                </button>
+                <button class="page-right" (click)="pagingRight()">
+                    <img src="icons/arrowforward.svg" alt="Page Right">
+                </button>
+            </div>
+            
+        </div>
+
+        <div class="mail-list">
+            <!-- Loading state -->
+             @if(isLoading()){
+                <div style="padding: 20px; text-align: center;">
+                    Loading emails...
+                </div>
+             }
+            
+
+            <!-- Error state -->
+             @if(errorMessage()){
+                <div style="padding: 20px; text-align: center; color: red;">
+                    {{ errorMessage() }}
+                </div>
+             }
+
+
+            <!-- Empty state -->
+             @if(!isLoading() && !errorMessage() && mails().length === 0){
+                <div style="padding: 20px; text-align: center; color: #999;">
+                    No emails found in {{ currentFolder() }}
+                </div>
+             }
+            
+
+            <!-- Email list -->
+            @for(mail of mails(); track mail){
+                <div class="mail-item" [class.unread]="!mail.isRead">
+                    <div class="mail-sender">{{ mail.sender }}</div>
+                    <div class="mail-subject">{{ mail.subject }}</div>
+                    <div class="mail-body-preview">{{ mail.body.substring(0, 100) }}...</div>
+                    <div class="mail-timestamp">{{ mail.timestamp | date:'short' }}</div>
+                </div>
+            }
+            
+        
+            @for(i of generatePage(); track i){
+                <div class="one-mail" 
+                [style.background-color]="mailList[i]['isRead']? '#f5f7fa': '#e8f0fe'"
+                (click)="mailList[i]['isRead'] = true">
+                    <div>{{mailList[i]['from']}}</div>
+                    <div>{{mailList[i]['subject']}}</div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

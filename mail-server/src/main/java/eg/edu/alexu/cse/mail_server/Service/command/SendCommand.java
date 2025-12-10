@@ -1,5 +1,13 @@
 package eg.edu.alexu.cse.mail_server.Service.command;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+import org.springframework.stereotype.Component;
+
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Entity.User;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
@@ -7,13 +15,6 @@ import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 @Component
 @RequiredArgsConstructor
