@@ -7,19 +7,18 @@ import org.junit.jupiter.api.Test;
 import eg.edu.alexu.cse.mail_server.Service.Strategy.* ;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FiltersTest {
+class FiltersTest {
 
     private User user1, user2;
     private Mail mail1, mail2, mail3;
     private LocalDateTime now;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         now = LocalDateTime.now();
 
         // Users
@@ -58,7 +57,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testSenderFilter() {
+    void testSenderFilter() {
         SenderFilter filter = new SenderFilter("John Doe");
         assertTrue(filter.filter(mail1));
         assertEquals(100, filter.getScore(mail1));
@@ -67,7 +66,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testSubjectFilter() {
+    void testSubjectFilter() {
         SubjectFilter filter = new SubjectFilter("Project");
         assertTrue(filter.filter(mail2));
         assertTrue(filter.getScore(mail2) > 0);
@@ -76,7 +75,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testBodyFilter() {
+    void testBodyFilter() {
         BodyFilter filter = new BodyFilter("project plan");
         assertTrue(filter.filter(mail1));
         assertTrue(filter.getScore(mail1) > 0);
@@ -84,7 +83,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testPriorityFilter() {
+    void testPriorityFilter() {
         PriorityFilter filter = new PriorityFilter(3);
         assertTrue(filter.filter(mail1)); // exact match
         assertEquals(100, filter.getScore(mail1));
@@ -97,15 +96,16 @@ public class FiltersTest {
     }
 
     @Test
-    public void testIsReadFilter() {
-        IsReadFilter filter = new IsReadFilter(true);
+    void testIsReadFilter() {
+        IsReadFilter filter = new IsReadFilter();
+        filter.setRead(true);
         assertFalse(filter.filter(mail1));
         assertTrue(filter.filter(mail2));
         assertEquals(100, filter.getScore(mail2));
     }
 
     @Test
-    public void testExactDateFilter() {
+    void testExactDateFilter() {
         ExactDateFilter filter = new ExactDateFilter(now.minusDays(1));
         assertTrue(filter.filter(mail1));
         assertFalse(filter.filter(mail2));
@@ -114,8 +114,9 @@ public class FiltersTest {
     }
 
     @Test
-    public void testBeforeDateFilter() {
-        BeforeDateFilter filter = new BeforeDateFilter(now.minusDays(10));
+    void testBeforeDateFilter() {
+        BeforeDateFilter filter = new BeforeDateFilter();
+        filter.setDate(now.minusDays(10));
         assertTrue(filter.filter(mail2));
         assertFalse(filter.filter(mail1));
         System.out.println("BeforeDateFilter Scores:");
@@ -125,7 +126,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testAfterDateFilter() {
+    void testAfterDateFilter() {
         AfterDataFilter filter = new AfterDataFilter(now.minusDays(30));
         assertTrue(filter.filter(mail1));
         assertFalse(filter.filter(mail3));
@@ -136,7 +137,7 @@ public class FiltersTest {
     }
 
     @Test
-    public void testCombinedFilter() {
+    void testCombinedFilter() {
         List<Mail> allMails = List.of(mail1, mail2, mail3);
 
         // Example: Filter mails from John Doe AND containing 'Server'
@@ -149,7 +150,7 @@ public class FiltersTest {
                 .toList();
 
         assertEquals(1, filtered.size());
-        assertEquals(mail3, filtered.get(0));
+        assertEquals(mail3, filtered.getFirst());
         System.out.println("Combined score: " + Math.min(senderFilter.getScore(mail3), subjectFilter.getScore(mail3)));
     }
 }

@@ -14,8 +14,6 @@ import eg.edu.alexu.cse.mail_server.Service.Strategy.* ;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -108,7 +106,7 @@ class AttachmentFilterTest {
             filter = new AttachmentFilter("test");
             Attachment att = new Attachment();
             att.setFileName(null);
-            att.setData("test content".getBytes(StandardCharsets.UTF_8));
+            att.setIndexedContent("test content");
             mail.getAttachments().add(att);
 
             assertTrue(filter.filter(mail));
@@ -215,12 +213,9 @@ class AttachmentFilterTest {
             filter = new AttachmentFilter("test");
 
             // Create attachment with many matches to test upper bound
-            StringBuilder content = new StringBuilder();
-            for (int i = 0; i < 100; i++) {
-                content.append("test test test ");
-            }
+            String content = "test test test ".repeat(100);
 
-            mail.getAttachments().add(createAttachment("test_test_test.txt", content.toString()));
+            mail.getAttachments().add(createAttachment("test_test_test.txt", content));
 
             int score = filter.getScore(mail);
             assertTrue(score >= 0 && score <= 100,
@@ -239,11 +234,8 @@ class AttachmentFilterTest {
             AttachmentFilter filter2 = new AttachmentFilter("common");
             Mail mail2 = new Mail();
             mail2.setAttachments(new ArrayList<>());
-            StringBuilder content = new StringBuilder();
-            for (int i = 0; i < 50; i++) {
-                content.append("common common common ");
-            }
-            mail2.getAttachments().add(createAttachment("common_common.txt", content.toString()));
+            String content = "common common common ".repeat(50);
+            mail2.getAttachments().add(createAttachment("common_common.txt", content));
             int highScore = filter2.getScore(mail2);
 
             assertTrue(highScore > lowScore * 2,
@@ -287,13 +279,9 @@ class AttachmentFilterTest {
         @DisplayName("Should handle very long content")
         void testVeryLongContent() {
             filter = new AttachmentFilter("needle");
-            StringBuilder longContent = new StringBuilder();
-            for (int i = 0; i < 10000; i++) {
-                longContent.append("haystack ");
-            }
-            longContent.append("needle");
+            String longContent = "haystack ".repeat(10000) + "needle";
 
-            mail.getAttachments().add(createAttachment("large.txt", longContent.toString()));
+            mail.getAttachments().add(createAttachment("large.txt", longContent));
 
             assertTrue(filter.filter(mail));
             assertTrue(filter.getScore(mail) > 0);
@@ -319,7 +307,7 @@ class AttachmentFilterTest {
             filter = new AttachmentFilter("test");
             Attachment att = new Attachment();
             att.setFileName("test.txt");
-            att.setData(new byte[0]);
+            att.setIndexedContent("");
             mail.getAttachments().add(att);
 
             assertTrue(filter.filter(mail));
@@ -424,7 +412,7 @@ class AttachmentFilterTest {
             filter = new AttachmentFilter("report");
             Attachment imageAtt = new Attachment();
             imageAtt.setFileName("photo.jpg");
-            imageAtt.setData(new byte[]{(byte)0xFF, (byte)0xD8, (byte)0xFF}); // JPEG header
+            imageAtt.setIndexedContent(""); // Images typically have no text content
             mail.getAttachments().add(imageAtt);
 
             assertFalse(filter.filter(mail));
@@ -435,7 +423,7 @@ class AttachmentFilterTest {
     private Attachment createAttachment(String filename, String content) {
         Attachment att = new Attachment();
         att.setFileName(filename);
-        att.setData(content.getBytes(StandardCharsets.UTF_8));
+        att.setIndexedContent(content); // Use indexed content instead of binary data
         return att;
     }
 }
