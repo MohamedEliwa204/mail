@@ -25,7 +25,7 @@ export interface Mail {
 }
 
 export interface ComposeEmailDTO {
-  sender: string;
+  sender?: string;
   receivers: string[]; // List of email addresses
   subject: string;
   body: string;

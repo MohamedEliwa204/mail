@@ -50,7 +50,11 @@ export class AuthenticationService{
                 this.router.navigateByUrl('/mail');
             },
             error: (e) => {
-                console.log(`Error: ${e.error}`)
+                if (e.error && e.error.error) {
+                    console.log(`Error: ${e.error.error}`);
+                } else {
+                    console.log('Unknown error', e);
+                }
             }
         })
     }
