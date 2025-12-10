@@ -1,37 +1,86 @@
 .sent-mails {
-    /* Make it fill remaining space next to sidebar */
-    position: absolute;        /* relative to parent or body */
-    top: 80px;                 /* below navbar */
-    left: 300px;               /* width of sidebar */
-    right: 20px;               /* leave some right margin */
-    bottom: 20px;              /* optional padding from bottom */
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    position: absolute;
+    top: 80px;          /* navbar height */
+    left: 260px;        /* sidebar width */
+    right: 16px;
+    bottom: 16px;
+
+    display: flex;
+    flex-direction: column;
 
     background-color: #ffffff;
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 16px;
 
-    overflow-y: auto;          /* scroll if content overflows */
-    box-sizing: border-box;    /* include padding in size */
-}
-
-/* Optional: make text scale nicely */
-.sent-mails * {
     box-sizing: border-box;
+    overflow: hidden;   /* internal scrolling handled below */
 }
 
-.filterbar{
+/* FILTER + SELECT BARS STACK */
+.sent-mails > .filterbar {
+    flex-shrink: 0;
+}
+
+.sent-mails > .selectbar {
+    flex-shrink: 0;
+}
+
+/* MAIL LIST */
+.mail-list {
     width: 100%;
-    height: 50px;
-
-    background-color: antiquewhite;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.select bar{
-    background-color: blueviolet;
+/* Single mail row */
+.one-mail {
+    display: grid;
+    grid-template-columns: 200px 1fr; /* sender | subject */
+    align-items: center;
+
+    padding: 12px 16px;
+    min-height: 48px;
+
+    background-color: #ffffff;
+    border-radius: 10px;
+
+    font-size: 15px;
+    cursor: pointer;
+
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.mail-list{
-    width: 100%;
-    height: 100%;
-    background-color: aqua;
+/* Hover effect */
+.one-mail:hover {
+    background-color: #f5f7fa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Sender */
+.one-mail > div:first-child {
+    font-weight: 600;
+    color: #202124;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Subject */
+.one-mail > div:last-child {
+    color: #5f6368;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

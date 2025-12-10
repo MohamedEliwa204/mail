@@ -46,28 +46,76 @@
 
     <div class="sent-mails">
         
-        <div class="filterbar"></div>
-        <div class="selectbar">
-            <div class="left-selector">
-                <div class="selector">
-                    <button class="selctorBtn"></button>
-                    <div class="selectorDropDown"></div>
-                </div>
-
-                <div class="refresh"></div>
-
-                <div class="moreDropdown"></div>
+        <div class="filterbar">
+            <div class="button-filter">
+                From <img src="icons/dropdown.svg" alt="">
             </div>
 
-            <div class="right-selector">
-                <div class="page-display"></div>
-                <button class="page-left"></button>
-                <button class="page-right"></button>
+            <div class="button-filter">
+                Any time <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                Has attachment <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                To <img src="icons/dropdown.svg" alt="">
+            </div>
+
+            <div class="button-filter">
+                Is unread <img src="icons/dropdown.svg" alt="">
             </div>
             
         </div>
 
-        <div class="mail-list"></div>
+
+
+
+        <div class="selectbar">
+            <div class="left-selector">
+                <div class="selector">
+                    <button class="selctorBtn">
+                        <img src="icons/blankbox.svg" alt="Select All">
+                    </button>
+                    <div class="selectorDropDown">
+                        <img src="icons/dropdown.svg" alt="More select options">
+                    </div>
+                </div>
+
+                <div class="mail-icons">
+                    <img src="icons/refresh.svg" alt="Refresh">
+                </div>
+
+                <div class="mail-icons">
+                    <img src="icons/more.svg" alt="More Options">
+                </div>
+            </div>
+
+            <div class="right-selector">
+                <div class="page-display">{{pageFrom()}}-{{pageTo()}} of {{mailList.length}}</div>
+                <button class="page-left" (click)="pagingLeft()">
+                    <img src="icons/arrowback.svg" alt="Page Left">
+                </button>
+                <button class="page-right" (click)="pagingRight()">
+                    <img src="icons/arrowforward.svg" alt="Page Right">
+                </button>
+            </div>
+            
+        </div>
+
+        <div class="mail-list">
+            @for(i of generatePage(); track i){
+
+                
+                <div class="one-mail" 
+                [style.background-color]="mailList[i]['isRead']? '#f5f7fa': '#e8f0fe'"
+                (click)="mailList[i]['isRead'] = true">
+                    <div>{{mailList[i]['from']}}</div>
+                    <div>{{mailList[i]['subject']}}</div>
+                </div>
+            }
+        </div>
     </div>
 
 </div> 

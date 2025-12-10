@@ -1,0 +1,85 @@
+.selectbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 48px;
+    padding: 0 8px;
+
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* LEFT / RIGHT SECTIONS */
+.left-selector,
+.right-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* SELECT ALL AREA */
+.selector {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* BUTTON RESET */
+.selctorBtn,
+.page-left,
+.page-right {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    transition: background-color 0.2s ease;
+}
+
+.selctorBtn:hover,
+.page-left:hover,
+.page-right:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ICON BUTTONS */
+.mail-icons {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    transition: background-color 0.2s ease;
+}
+
+.mail-icons:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ICON SIZE */
+.mail-icons img,
+.selctorBtn img,
+.page-left img,
+.page-right img {
+    width: 20px;
+    height: 20px;
+}
+
+/* PAGE DISPLAY */
+.page-display {
+    font-size: 14px;
+    color: #555;
+    margin: 0 8px;
+}
