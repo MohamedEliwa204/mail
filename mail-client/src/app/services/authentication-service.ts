@@ -26,9 +26,16 @@ export class AuthenticationService{
 
     user = signal<UserResponseDTO | null>(null);
 
+    constructor(){
+        const savedUser = localStorage.getItem('user');
+        if(savedUser)
+            this.user.set(JSON.parse(savedUser));
+    }
+
     logIn(userForm: UserFormDTO){
         this.http.post(`${this.apiURL}/api/users/login`, userForm).subscribe({
             next: (response: any) => {
+                localStorage.setItem('user', JSON.stringify(response))
                 this.user.set(response);
                 this.router.navigateByUrl('/mail');
             },
@@ -60,6 +67,7 @@ export class AuthenticationService{
     }
 
     signOut(){
+        localStorage.removeItem('user');
         this.user.set(null);
         this.router.navigateByUrl('/login');
     }

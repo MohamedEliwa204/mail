@@ -1,5 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,10 +57,12 @@ public class Mail {
     // Relations it will also ease the process of
     // Navigating between emails and users
     // Currently the relations are bidirectional
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id" , nullable = false)
     private User senderRel ;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "mail_recivers",

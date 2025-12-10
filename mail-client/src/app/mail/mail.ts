@@ -1,19 +1,16 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { AuthenticationService } from '../services/authentication-service';
 import { Router } from '@angular/router';
 import { MailService, Mail as MailEntity, ComposeEmailDTO } from '../services/mail-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-//dummyData
-import { MailList } from './mailList';
-
 @Component({
   selector: 'app-mail',
   imports: [CommonModule, FormsModule],
   templateUrl: './mail.html',
   styleUrls: ['./mail.css', './profile.css', './navbar.css', './sidebar.css', './main-section.css',
-    './filterbar.css', './selectbar.css', "./compose.css"
+    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css"
   ],
 })
 export class Mail implements OnInit {
@@ -22,8 +19,6 @@ export class Mail implements OnInit {
   router = inject(Router);
 
   //dummydata
-  mailList = inject(MailList).mailList;
-
   currentUser = this.authenticationService.user;
 
   getRange(n: number) {
@@ -59,22 +54,22 @@ export class Mail implements OnInit {
   //pagination
   // only 8 mails per page
 
+  itemsPerPage = 8
+
   page = signal(0);
 
   pageFrom = signal(1)
-  pageTo = signal((this.mailList.length < 8)?this.mailList.length: 8)
-
-  itemsPerPage = 7
-
+  numOfItems = this.mails().length
+  pageTo = signal(this.itemsPerPage)
   generatePage() {
-    return Array.from({length: this.itemsPerPage},
+    return Array.from({length: Math.min(this.itemsPerPage, this.mails().length)},
                        (_, i) => i+this.page()*this.itemsPerPage);
   }
 
-  pageDisplay = signal(`${this.pageFrom()}-${this.pageTo()} of ${this.mailList.length}`)
+  pageDisplay = signal(`${this.pageFrom()}-${this.pageTo()} of ${this.mails().length}`)
 
   pagingLeft(){
-    const n = this.mailList.length;
+    const n = this.mails().length;
     const pages = Math.ceil(n/8);
     
     if(this.page() != 0){
@@ -91,8 +86,8 @@ export class Mail implements OnInit {
   }
 
   pagingRight(){
-    const n = this.mailList.length;
-    const pages = Math.ceil(n/8);
+    const n = this.mails().length;
+    const pages = Math.ceil(n/this.itemsPerPage);
     if(this.page() < pages){
       if(this.page() < pages-1){
         this.page.update(value => value+1)
@@ -243,7 +238,9 @@ export class Mail implements OnInit {
     console.log(this.composedMail.priority)
     if(this.composedMail.receivers.length > 0){
       this.mailService.sendMail(this.composedMail).subscribe({
-        next: res => {console.log(res.message)},
+        next: res => {
+          console.log(res.message)
+          this.refresh()},
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
@@ -251,7 +248,7 @@ export class Mail implements OnInit {
           else {
             console.log('Unknown error', e);
           }
-              }
+        }
       });
       this.composedMail.receivers = []
       this.composedMail.subject = ''
@@ -260,4 +257,18 @@ export class Mail implements OnInit {
       console.log("Email is sent")
     }
   }
+
+  //mail preview
+  selectedMail = signal<MailEntity | null>(null);
+
+  setselectedMail(mail: MailEntity){
+    this.selectedMail.set(mail)
+    console.log(this.selectedMail)
+  }
+
+  clearselectedMail(){
+    this.selectedMail.set(null)
+    console.log(this.selectedMail)
+  }
+
 }

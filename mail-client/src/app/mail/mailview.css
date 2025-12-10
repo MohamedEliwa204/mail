@@ -1,0 +1,135 @@
+/* === MAIL PREVIEW CONTAINER === */
+.mail-preview {
+    width: 100%;
+    height: 100%;
+
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+
+}
+
+/* === UTILITY BAR === */
+.utility-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: solid 2px gray;
+    padding-bottom: 10px;
+}
+
+/* Left utility buttons */
+.utility-left {
+    display: flex;
+    gap: 16px;
+}
+
+.utility-left div {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.utility-left div:hover {
+    background-color: #e2e8f0; /* subtle hover effect */
+}
+
+/* Right utility buttons and page display */
+.utility-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-display {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Paging buttons */
+.page-left, .page-right {
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.page-left:hover, .page-right:hover {
+    background-color: #e5e5e5;
+}
+
+/* === MAIL SUBJECT === */
+.mail-subject {
+    width: 100%;
+    font-size: 42px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 16px;
+}
+
+.mail-content{
+    height: 70%;
+    overflow-y: scroll;
+
+    border-bottom: solid 2px gray;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* === MAIL BODY === */
+.mail-body {
+    font-size: 20px;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    white-space: pre-wrap; /* preserve line breaks */
+}
+
+/* === MAIL ATTACHMENTS === */
+.mail-attachments {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.mail-attachments div {
+    padding: 8px 12px;
+    background-color: #f3f4f6;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* === MAIL REPLY BUTTON === */
+.mail-reply {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.replyBtn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    font-size: 30px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.replyBtn:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+}
