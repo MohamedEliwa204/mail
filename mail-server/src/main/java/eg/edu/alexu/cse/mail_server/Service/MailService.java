@@ -1,5 +1,7 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import eg.edu.alexu.cse.mail_server.Entity.Mail;
+import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Service.command.DraftCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.GetMailCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.SendCommand;
@@ -17,6 +19,7 @@ public class MailService {
     private final SendCommand sendCommand;
     private final DraftCommand draftCommand;
     private final GetMailCommand getMailCommand;
+    private final MailRepository mailRepository;
 
     public void send(ComposeEmailDTO composeEmailDTO) {
         sendCommand.execute(composeEmailDTO);
@@ -28,17 +31,17 @@ public class MailService {
 
     // Get inbox mails
     public List<Mail> getInboxMails(String userEmail) {
-        return mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, "inbox");
+        return mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, "INBOX");
     }
 
     // Get sent mails
     public List<Mail> getSentMails(String userEmail) {
-        return mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "sent");
+        return mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "SENT");
     }
 
     // Get draft mails
     public List<Mail> getDraftMails(String userEmail) {
-        return mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "drafts");
+        return mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "DRAFTS");
     }
 
     // Get mails by folder
@@ -67,6 +70,7 @@ public class MailService {
         Mail mail = getMailById(mailId);
         mail.setFolderName("trash");
         mailRepository.save(mail);
+    }
     /**
      * Get mail with all attachments including file data
      *
