@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-@AllArgsConstructor
 
 public class BeforeDateFilter implements FilterStrategy {
 

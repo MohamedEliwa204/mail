@@ -24,6 +24,10 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     List<Mail> findByReceiverAndFolderNameOrderByTimestampDesc(String receiver, String folderName);
 
     List<Mail> findBySenderAndFolderNameOrderByTimestampDesc(String sender, String folderName);
+    // Find all emails where the user is either sender or receiver
+    @Query("SELECT m FROM Mail m WHERE m.senderRel.userId = :userId OR :userId IN (SELECT r.userId FROM m.receiverRel r)")
+    List<Mail> findAllByUserId(@Param("userId") Long userId);
+
 
     @Query("SELECT m FROM Mail m WHERE m.receiver = :email OR m.sender = :email ORDER BY m.timestamp DESC")
     List<Mail> findByReceiverOrSenderOrderByTimestampDesc(@Param("email") String email1, @Param("email") String email2);
