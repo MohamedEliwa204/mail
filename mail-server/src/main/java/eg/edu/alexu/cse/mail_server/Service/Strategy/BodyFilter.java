@@ -6,11 +6,14 @@ import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import lombok.AllArgsConstructor;
 
 // Also Or search if any words matches return true
-@AllArgsConstructor
 public class BodyFilter implements FilterStrategy {
 
     private String body ;
     public BodyFilter() {
+    }
+
+    public BodyFilter(String body) {
+        this.body = body.toLowerCase().trim();
     }
 
     @Override

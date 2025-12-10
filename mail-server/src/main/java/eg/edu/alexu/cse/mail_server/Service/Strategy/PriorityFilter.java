@@ -1,10 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Service.Strategy;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
