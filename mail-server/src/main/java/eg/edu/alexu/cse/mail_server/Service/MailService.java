@@ -7,6 +7,8 @@ import eg.edu.alexu.cse.mail_server.Service.command.GetMailCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.SendCommand;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
+import eg.edu.alexu.cse.mail_server.Entity.Mail;
+import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +73,7 @@ public class MailService {
         mail.setFolderName("trash");
         mailRepository.save(mail);
     }
+
     /**
      * Get mail with all attachments including file data
      *
@@ -78,7 +81,9 @@ public class MailService {
      * @return EmailViewDto with attachments containing file data as Base64
      * @throws IOException if file reading fails
      */
+    
     public EmailViewDto getMailWithAttachments(Long mailId) throws IOException {
         return getMailCommand.execute(mailId);
     }
+    
 }

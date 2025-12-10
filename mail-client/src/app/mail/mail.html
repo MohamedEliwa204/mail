@@ -16,7 +16,7 @@
     </div>
 
     <div class="dropdown">
-        <div [style.display] = "isProfileDropdownOpen? 'none': 'block'">
+        <div [style.display] = "isProfileDropdownOpen? 'block': 'none'">
                     
             <div class="dropdown-menu" id="dropdownMenu" >
                 <div class="user-email">{{currentUser()?.email}}</div>
@@ -73,107 +73,149 @@
     </div>
 
     <div class="sent-mails">
-        
-        <div class="filterbar">
-            <div class="button-filter">
-                From <img src="icons/dropdown.svg" alt="">
-            </div>
 
-            <div class="button-filter">
-                Any time <img src="icons/dropdown.svg" alt="">
-            </div>
+        @if(selectedMail() !== null){
+            <div class="mail-preview">
+                <div class="utility-bar">
+                    <div class="utility-left">
+                        <div class="return-to-list" (click)="clearselectedMail()">
+                            <img src="icons/returnarrow.svg" alt="">
+                        </div>
 
-            <div class="button-filter">
-                Has attachment <img src="icons/dropdown.svg" alt="">
-            </div>
+                        <div class="trash-mail">
+                            <img src="icons/trash.svg" alt="">
+                        </div>
+                    </div>
 
-            <div class="button-filter">
-                To <img src="icons/dropdown.svg" alt="">
-            </div>
+                    <div class="utility-right">
+                        <div class="page-display">{{pageFrom()}}-{{pageTo()}} of {{mails().length}}</div>
+                            <button class="page-left" (click)="pagingLeft()">
+                                <img src="icons/arrowback.svg" alt="Page Left">
+                            </button>
+                            <button class="page-right" (click)="pagingRight()">
+                                <img src="icons/arrowforward.svg" alt="Page Right">
+                            </button>
+                    </div>
+                    
+                </div>
 
-            <div class="button-filter">
-                Is unread <img src="icons/dropdown.svg" alt="">
-            </div>
-            
-        </div>
+                <div class="mail-subject">
+                    {{selectedMail()?.subject}}
+                </div> 
+                <div class="mail-content">
+                    <div class="mail-body">
+                        {{selectedMail()?.body}}
+                    </div>
 
-        <div class="selectbar">
-            <div class="left-selector">
-                <div class="selector">
-                    <button class="selctorBtn">
-                        <img src="icons/blankbox.svg" alt="Select All">
-                    </button>
-                    <div class="selectorDropDown">
-                        <img src="icons/dropdown.svg" alt="More select options">
+                    <div class="mail-attachments">
+                        {{selectedMail()?.attachments}}
                     </div>
                 </div>
+                
 
-                <div class="mail-icons">
-                    <img src="icons/refresh.svg" (click)="refresh()" style="cursor: pointer;" alt="Refresh">
-                </div>
-
-                <div class="mail-icons">
-                    <img src="icons/more.svg" alt="More Options">
+                <div class="mail-reply">
+                    <button class="replyBtn">Reply</button>
                 </div>
             </div>
+        }
+        @else{
+            <div class="filterbar">
+                        <div class="button-filter">
+                            From <img src="icons/dropdown.svg" alt="">
+                        </div>
 
-            <div class="right-selector">
-                <div class="page-display">{{pageFrom()}}-{{pageTo()}} of {{mailList.length}}</div>
-                <button class="page-left" (click)="pagingLeft()">
-                    <img src="icons/arrowback.svg" alt="Page Left">
-                </button>
-                <button class="page-right" (click)="pagingRight()">
-                    <img src="icons/arrowforward.svg" alt="Page Right">
-                </button>
-            </div>
-            
-        </div>
+                        <div class="button-filter">
+                            Any time <img src="icons/dropdown.svg" alt="">
+                        </div>
 
-        <div class="mail-list">
-            <!-- Loading state -->
-             @if(isLoading()){
-                <div style="padding: 20px; text-align: center;">
-                    Loading emails...
-                </div>
-             }
-            
+                        <div class="button-filter">
+                            Has attachment <img src="icons/dropdown.svg" alt="">
+                        </div>
 
-            <!-- Error state -->
-             @if(errorMessage()){
-                <div style="padding: 20px; text-align: center; color: red;">
-                    {{ errorMessage() }}
-                </div>
-             }
+                        <div class="button-filter">
+                            To <img src="icons/dropdown.svg" alt="">
+                        </div>
+
+                        <div class="button-filter">
+                            Is unread <img src="icons/dropdown.svg" alt="">
+                        </div>
+                        
+                    </div>
+
+                    <div class="selectbar">
+                        <div class="left-selector">
+                            <div class="selector">
+                                <button class="selctorBtn">
+                                    <img src="icons/blankbox.svg" alt="Select All">
+                                </button>
+                                <div class="selectorDropDown">
+                                    <img src="icons/dropdown.svg" alt="More select options">
+                                </div>
+                            </div>
+
+                            <div class="mail-icons">
+                                <img src="icons/refresh.svg" (click)="refresh()" style="cursor: pointer;" alt="Refresh">
+                            </div>
+
+                            <div class="mail-icons">
+                                <img src="icons/more.svg" alt="More Options">
+                            </div>
+                        </div>
+
+                        <div class="right-selector">
+                            <div class="page-display">{{pageFrom()}}-{{pageTo()}} of {{mails().length}}</div>
+                            <button class="page-left" (click)="pagingLeft()">
+                                <img src="icons/arrowback.svg" alt="Page Left">
+                            </button>
+                            <button class="page-right" (click)="pagingRight()">
+                                <img src="icons/arrowforward.svg" alt="Page Right">
+                            </button>
+                        </div>
+                        
+                    </div>
+
+                    <div class="mail-list">
+                        <!-- Loading state -->
+                        @if(isLoading()){
+                            <div style="padding: 20px; text-align: center;">
+                                Loading emails...
+                            </div>
+                        }
+                        
+
+                        <!-- Error state -->
+                        @if(errorMessage()){
+                            <div style="padding: 20px; text-align: center; color: red;">
+                                {{ errorMessage() }}
+                            </div>
+                        }
 
 
-            <!-- Empty state -->
-             @if(!isLoading() && !errorMessage() && mails().length === 0){
-                <div style="padding: 20px; text-align: center; color: #999;">
-                    No emails found in {{ currentFolder() }}
-                </div>
-             }
-            
+                        <!-- Empty state -->
+                        @if(!isLoading() && !errorMessage() && mails().length === 0){
+                            <div style="padding: 20px; text-align: center; color: #999;">
+                                No emails found in {{ currentFolder() }}
+                            </div>
+                        }
+                        
 
-            <!-- Email list -->
-            @for(mail of mails(); track mail){
-                <div class="mail-item" [class.unread]="!mail.isRead">
-                    <div class="mail-sender">{{ mail.sender }}</div>
-                    <div class="mail-subject">{{ mail.subject }}</div>
-                    <div class="mail-body-preview">{{ mail.body.substring(0, 100) }}...</div>
-                    <div class="mail-timestamp">{{ mail.timestamp | date:'short' }}</div>
-                </div>
-            }
-            
+                        <!-- Email list -->
+                        @for(i of generatePage(); track i){
+                            <div class="one-mail" 
+                            [style.background-color]="mails()[i]['isRead']? '#f5f7fa': '#e8f0fe'"
+                            (click)="setselectedMail(mails()[i])">
+                                <div>{{mails()[i]['sender']}}</div>
+                                <div>{{mails()[i]['subject']}}</div>
+                                <div>{{mails()[i]['timestamp']}}</div>
+                            </div>
+                        }
+                    </div>
+        }
         
-            @for(i of generatePage(); track i){
-                <div class="one-mail" 
-                [style.background-color]="mailList[i]['isRead']? '#f5f7fa': '#e8f0fe'"
-                (click)="mailList[i]['isRead'] = true">
-                    <div>{{mailList[i]['from']}}</div>
-                    <div>{{mailList[i]['subject']}}</div>
-                </div>
-            }
-        </div>
+        
+        
+
     </div>
+
 
 </div>

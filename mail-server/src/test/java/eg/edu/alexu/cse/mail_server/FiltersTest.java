@@ -154,4 +154,3 @@ class FiltersTest {
         System.out.println("Combined score: " + Math.min(senderFilter.getScore(mail3), subjectFilter.getScore(mail3)));
     }
 }
-

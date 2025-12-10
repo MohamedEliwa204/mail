@@ -111,11 +111,11 @@ public class AttachmentFilter implements FilterStrategy{
 
         String fileNameLower = fileName.toLowerCase();
         int fullMatches = countOccurrences(fileNameLower, query);
-
+        
         if (fullMatches > 0) {
             return fullMatches * FILENAME_FULL_MATCH;
         }
-
+        
         int partialScore = 0;
         for (String part : queryParts) {
             partialScore += FILENAME_PARTIAL_MATCH * countOccurrences(fileNameLower, part);
@@ -128,11 +128,11 @@ public class AttachmentFilter implements FilterStrategy{
         if (content.isEmpty()) return 0;
 
         int fullMatches = countOccurrences(content, query);
-
+        
         if (fullMatches > 0) {
             return fullMatches * CONTENT_FULL_MATCH;
         }
-
+        
         int partialScore = 0;
         for (String part : queryParts) {
             partialScore += CONTENT_PARTIAL_MATCH * countOccurrences(content, part);
@@ -146,18 +146,18 @@ public class AttachmentFilter implements FilterStrategy{
             if (att.getIndexedContent() != null && !att.getIndexedContent().isEmpty()) {
                 return att.getIndexedContent();
             }
-
+            
             // If not, read from file path
             String filePath = att.getFilePath();
             if (filePath == null || filePath.isEmpty()) {
                 return "";
             }
-
+            
             Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
                 return "";
             }
-
+            
             byte[] fileData = Files.readAllBytes(path);
             ByteArrayInputStream stream = new ByteArrayInputStream(fileData);
             return tika.parseToString(stream);

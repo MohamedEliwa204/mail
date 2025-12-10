@@ -42,17 +42,7 @@ public class MailController {
     public List<Mail> getSentMails(@PathVariable String userEmail) {
         return mailService.getSentMails(userEmail);
     }
-    /**
-     * Get mail with all attachments including file data
-     *
-     * @param mailId the ID of the mail
-     * @return EmailViewDto with attachments containing Base64-encoded file data
-     */
-    @GetMapping("/{mailId}")
-    public ResponseEntity<EmailViewDto> getMail(@PathVariable Long mailId) throws IOException {
-        EmailViewDto mail = mailService.getMailWithAttachments(mailId);
-        return ResponseEntity.ok(mail);
-    }
+    
 
 
     // Get draft emails
