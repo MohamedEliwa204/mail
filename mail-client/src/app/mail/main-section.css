@@ -40,7 +40,8 @@
 /* Single mail row */
 .one-mail {
     display: grid;
-    grid-template-columns: 3fr 5fr 2fr; /* sender | subject | timestamp */
+    /* Checkbox | Sender | Subject | Timestamp */
+    grid-template-columns: 40px 3fr 5fr 100px; 
     align-items: center;
 
     padding: 14px 18px;
@@ -48,12 +49,10 @@
 
     background-color: #ffffff;
     border-radius: 14px;
-
     font-size: 15px;
     cursor: pointer;
-
-    transition: all 0.25s ease;
-    border: 1px solid transparent; /* subtle hover effect */
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .one-mail:hover {
@@ -87,4 +86,13 @@
     font-weight: 400;
     text-align: right;
     white-space: nowrap;
+}
+.one-mail.selected {
+    background-color: #c2dbff !important; 
+    border-color: #3b82f6;
+}
+.mail-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
