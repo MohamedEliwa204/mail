@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MailService, Mail as MailEntity, ComposeEmailDTO, Contact } from '../services/mail-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Observable, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-mail',
