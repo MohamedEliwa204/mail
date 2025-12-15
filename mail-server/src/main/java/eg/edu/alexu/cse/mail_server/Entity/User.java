@@ -45,6 +45,13 @@ public class User {
     @ManyToMany(mappedBy = "receiverRel" , fetch = FetchType.LAZY)
     private List<Mail> receivedEmail = new ArrayList<>();
 
+    @OneToMany(
+        mappedBy = "user",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL
+    )
+    private List<Contact> contacts;
+
     public Long getUserId() {
         return userId;
     }

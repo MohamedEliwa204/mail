@@ -174,7 +174,7 @@ export class MailService {
   }
 
   editContact(contact: Contact): Observable<any> {
-    return this.http.put(`${this.apiURL}/contacts/${contact.id}`, contact);
+    return this.http.put(`${this.apiURL}/contacts`, contact);
   }
 
   deleteContact(contactId: number): Observable<any> {

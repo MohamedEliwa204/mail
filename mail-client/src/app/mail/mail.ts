@@ -653,19 +653,15 @@ export class Mail implements OnInit {
     // [BACKEND INTERACTION: GET CONTACTS]
     // Request: GET /api/contacts?userEmail=...
     // Response: List of Contact objects
-    /*
+    
     if (userEmail) {
-      this.mailService.getContacts(userEmail).subscribe(contacts => this.contacts.set(contacts));
+      this.mailService.getContacts(userEmail).subscribe({
+        next: contacts => {this.contacts.set(contacts); 
+                          console.log("CONTACTS ARE RETRIEVED!!");
+                        console.log(contacts)},
+        error: err => console.log("ERROR!!: " + err)
+      });
     }
-    */
-
-    // Frontend Simulation
-    setTimeout(() => {
-      this.contacts.set([
-        { id: 1, name: 'Ahmed Hassan', emails: ['ahmed@test.com'] },
-        { id: 2, name: 'Sara Mohamed', emails: ['sara@test.com'] }
-      ]);
-    }, 300);
   }
 
   openContactsModal() {
@@ -705,9 +701,12 @@ export class Mail implements OnInit {
   }
 
   saveContact() {
+
+    const userEmail = this.currentUser()?.email;
+
     const name = this.contactFormName().trim();
     const emailsInput = this.contactFormEmails().trim();
-    if (!name || !emailsInput) return;
+    if (!name || !emailsInput || !userEmail) return;
 
     const emails = emailsInput.split(',').map(e => e.trim()).filter(e => e.length > 0);
     const editing = this.editingContact();
@@ -717,6 +716,11 @@ export class Mail implements OnInit {
       // Request: PUT /api/contacts/{id}
       // Body: { id: 1, name: "...", emails: ["..."] }
       const updatedContact: Contact = { id: editing.id, name, emails };
+      console.log(updatedContact);
+      this.mailService.editContact(updatedContact).subscribe({
+        next: (c) => console.log("CONTACT IS UPDATED:" + c),
+        error: err => console.log("ERROR!!:" + err) 
+      })
       
       // Frontend Simulation
       this.contacts.update(c => c.map(x => x.id === editing.id ? updatedContact : x));
@@ -727,6 +731,10 @@ export class Mail implements OnInit {
       // Request: POST /api/contacts?userEmail=...
       // Body: { name: "...", emails: ["..."] }
       const newContact: Contact = { id: Date.now(), name, emails };
+      this.mailService.addContact(newContact, userEmail).subscribe({
+        next: (c) => console.log("CONTACT IS CREATED:" + c),
+        error: err => console.log("ERROR!!:" + err)
+      })
       
       // Frontend Simulation
       this.contacts.update(c => [...c, newContact]);
@@ -737,7 +745,13 @@ export class Mail implements OnInit {
   deleteContactById(contactId: number) {
     // [BACKEND INTERACTION: DELETE CONTACT]
     // Request: DELETE /api/contacts/{id}
-    
+
+    console.log(contactId);
+
+    this.mailService.deleteContact(contactId).subscribe({
+      next: () => console.log("SUCCESSFULLY DELETED!!"),
+      error: (err) => console.log("DID NOT DELETE:" + err)
+    })
     // Frontend Simulation
     this.contacts.update(c => c.filter(x => x.id !== contactId));
   }
