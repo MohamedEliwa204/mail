@@ -377,30 +377,33 @@
 
 
             <!-- Email list -->
-            @for(i of generatePage(); track mails()[i].mailId){
-            <div class="one-mail" [class.selected]="isSelected(mails()[i].mailId)"
-                [style.background-color]="isSelected(mails()[i].mailId) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
-                (click)="setselectedMail(mails()[i])">
+            @for(i of generatePage(); track i){
 
-                <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].mailId)">
-                    <input type="checkbox" [checked]="isSelected(mails()[i].mailId)"
-                        style="cursor: pointer; width: 18px; height: 18px;">
-                </div>
+                @if(mails()[i]){
+                   <div class="one-mail" [class.selected]="isSelected(mails()[i].mailId)"
+                    [style.background-color]="isSelected(mails()[i].mailId) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
+                    (click)="setselectedMail(mails()[i])">
 
-                <div>{{mails()[i].sender}}</div>
+                    <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].mailId)">
+                        <input type="checkbox" [checked]="isSelected(mails()[i].mailId)"
+                            style="cursor: pointer; width: 18px; height: 18px;">
+                    </div>
 
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <!-- High Priority Indicator (Red Dot for priority = 1) -->
-                    @if(mails()[i].priority === 1) {
-                    <span
-                        style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
-                        title="High Priority"></span>
-                    }
-                    {{mails()[i].subject}}
-                </div>
+                    <div>{{mails()[i].sender}}</div>
 
-                <div>{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
-            </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <!-- High Priority Indicator (Red Dot for priority = 1) -->
+                        @if(mails()[i].priority === 1) {
+                        <span
+                            style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
+                            title="High Priority"></span>
+                        }
+                        {{mails()[i].subject}}
+                    </div>
+
+                    <div>{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
+                </div> 
+                }
             }
         </div>
         }

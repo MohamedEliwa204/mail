@@ -56,7 +56,7 @@ export class Mail implements OnInit {
   }
 
   //pagination
-  itemsPerPage = 8
+  itemsPerPage = 6
   page = signal(0);
   pageFrom = signal(1)
   numOfItems = this.mails().length
@@ -71,7 +71,7 @@ export class Mail implements OnInit {
 
   pagingLeft() {
     const n = this.mails().length;
-    const pages = Math.ceil(n / 8);
+    const pages = Math.ceil(n / this.itemsPerPage);
 
     if (this.page() != 0) {
       this.page.update(value => value - 1)
@@ -83,7 +83,6 @@ export class Mail implements OnInit {
 
       this.pageFrom.update(value => value - this.itemsPerPage)
     }
-
   }
 
   pagingRight() {
@@ -459,20 +458,40 @@ export class Mail implements OnInit {
     this.composedMail.receivers[0] = email;
   }
 
+  IsendComposedMail(){
+    console.log(this.composedMail.sender)
+    console.log(this.composedMail.receivers)
+    console.log(this.composedMail.subject)
+    console.log(this.composedMail.body)
+    console.log(this.composedMail.priority)
+    if(this.composedMail.receivers.length > 0){
+      this.mailService.sendMail(this.composedMail).subscribe({
+        next: res => {
+          console.log(res.message)
+          this.refresh()},
+        error: e => {
+          if (e.error && e.error.error) {
+            console.log(`Error: ${e.error.error}`);
+          } 
+          else {
+            console.log('Unknown error', e);
+          }
+        }
+      });
+      this.composedMail.receivers = []
+      this.composedMail.subject = ''
+      this.composedMail.body = ''
+      this.composedMail.priority = 1
+      console.log("Email is sent")
+    }
+  }
+
   sendComposedMail() {
     if (this.composedMail.receivers.length === 0) {
       alert('Please enter at least one recipient');
       return;
     }
 
-    // [BACKEND INTERACTION: SEND MAIL WITH ATTACHMENTS]
-    // 1. Backend Task: Receive Multipart request, parse JSON, save files, send email.
-    // 2. Request: POST /api/mail/send-with-attachments
-    // 3. Body: Multipart/Form-Data
-    //    Part 1 'email': JSON Blob { sender: "...", receivers: ["..."], subject: "...", body: "...", priority: 1 }
-    //    Part 2 'attachments': Array of File objects (Binary)
-    
-    /*
     const formData = new FormData();
     const emailData = {
       sender: this.composedMail.sender,
@@ -487,20 +506,49 @@ export class Mail implements OnInit {
     this.selectedAttachments().forEach((file) => {
       formData.append('attachments', file, file.name);
     });
-    
-    this.mailService.sendMailWithAttachments(formData).subscribe(...);
-    */
 
+    console.log(this.composedMail.sender)
+    console.log(this.composedMail.receivers)
+    console.log(this.composedMail.subject)
+    console.log(this.composedMail.body)
+    console.log(this.composedMail.priority)
+    if(this.composedMail.receivers.length > 0){
+      this.mailService.sendMailWithAttachments(formData).subscribe({
+        next: res => {
+          console.log(res.message)
+          setTimeout(() => {
+          alert('Email sent successfully!');
+          this.refresh();
+          this.resetComposeForm();
+        }, 500);
+          this.refresh()},
+        error: e => {
+          if (e.error && e.error.error) {
+            console.log(`Error: ${e.error.error}`);
+          } 
+          else {
+            console.log('Unknown error', e);
+          }
+        }
+      });
+      this.composedMail.receivers = []
+      this.composedMail.subject = ''
+      this.composedMail.body = ''
+      this.composedMail.priority = 1
+      console.log("Email is sent")
+    }
+
+    // [BACKEND INTERACTION: SEND MAIL WITH ATTACHMENTS]
+    // 1. Backend Task: Receive Multipart request, parse JSON, save files, send email.
+    // 2. Request: POST /api/mail/send-with-attachments
+    // 3. Body: Multipart/Form-Data
+    //    Part 1 'email': JSON Blob { sender: "...", receivers: ["..."], subject: "...", body: "...", priority: 1 }
+    //    Part 2 'attachments': Array of File objects (Binary)
+    
     // FRONTEND SIMULATION
     console.log('=== Simulating Email Send ===');
     console.log('Body:', this.composedMail);
     console.log('Attachments:', this.selectedAttachments().length);
-
-    setTimeout(() => {
-      alert('Email sent successfully!');
-      this.refresh();
-      this.resetComposeForm();
-    }, 500);
   }
 
   resetComposeForm() {

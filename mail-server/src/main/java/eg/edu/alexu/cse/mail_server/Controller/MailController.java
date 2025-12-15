@@ -19,7 +19,7 @@ import java.util.Map;
 public class MailController {
     private final MailService mailService;
 
-    @PostMapping("/send")
+    @PostMapping("/send-with-attachments")
     public Map<String, String> sendMail(@RequestBody ComposeEmailDTO composeEmailDTO) {
         mailService.send(composeEmailDTO);
         return Map.of("message", "Email sent successfully");
