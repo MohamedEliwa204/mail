@@ -53,17 +53,12 @@ public class ContactService {
         contactRepository.deleteById(id);
     }
 
-    public List<Contact> getContacts(String email){
-        return contactRepository.findByUser_Email(email);
+    public List<Contact> getContacts(String email, String sort){
+        if(sort.equals("false"))
+            return contactRepository.findByUser_EmailOrderByNameDesc(email);
+        else if(sort.equals("true"))
+            return contactRepository.findByUser_EmailOrderByNameAsc(email);
+        else
+            return contactRepository.findByUser_Email(email);
     }
-
-    /*
-    public List<Contact> getContactsAsc(String name, String email){
-        return contactRepository.findByNameOrEmailOrderByNameAsc(name, email);
-    }
-
-    public List<Contact> getContactsDesc(String name, String email){
-        return contactRepository.findByNameOrEmailOrderByNameDesc(name, email);
-    }
-    */
 }

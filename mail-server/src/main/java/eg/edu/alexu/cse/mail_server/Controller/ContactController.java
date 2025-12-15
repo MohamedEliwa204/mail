@@ -17,6 +17,8 @@ import eg.edu.alexu.cse.mail_server.Entity.Contact;
 import eg.edu.alexu.cse.mail_server.Service.ContactService;
 
 import java.util.List;
+import java.util.Map;
+
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 
@@ -31,9 +33,9 @@ public class ContactController {
     private final ContactService contactService;
 
     @GetMapping("/contacts")
-    public List<Contact> getContacts(@RequestParam String userEmail){
+    public List<Contact> getContacts(@RequestParam Map<String, Object> body){
 
-        return contactService.getContacts(userEmail);
+        return contactService.getContacts((String) body.get("email"), (String) body.get("sort"));
     }
 
     @PostMapping("/contacts")

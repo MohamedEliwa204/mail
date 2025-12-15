@@ -17,4 +17,8 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     List<Contact> findByUser_Email(String email);
 
+    List<Contact> findByUser_EmailOrderByNameDesc(String email);
+
+    List<Contact> findByUser_EmailOrderByNameAsc(String email);
+
 }

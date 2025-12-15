@@ -11,7 +11,7 @@ import { Observable, forkJoin } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './mail.html',
   styleUrls: ['./mail.css', './profile.css', './navbar.css', './sidebar.css', './main-section.css',
-    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css"
+    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css"
   ],
 })
 export class Mail implements OnInit {
@@ -325,70 +325,6 @@ export class Mail implements OnInit {
     */
 
     // Frontend Simulation: Simulate backend response with sorting
-    setTimeout(() => {
-      let mailData = [
-        {
-          mailId: 101,
-          sender: 'manager@company.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Project Deadline Update',
-          body: 'Hello Ahmed, please note that the deadline has been moved to next Sunday. Thanks.',
-          timestamp: '2025-12-13T10:30:00', // ISO Format
-          priority: 1,
-          folderName: 'Inbox',
-          isRead: false,
-          attachments: []
-        },
-        {
-          mailId: 102,
-          sender: 'hr@company.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Holiday Schedule',
-          body: 'Dear All, the office will be closed on Friday.',
-          timestamp: '2025-12-12T09:15:00',
-          priority: 3,
-          folderName: 'Inbox',
-          isRead: true,
-          attachments: [
-            { fileName: 'policy.pdf', contentType: 'application/pdf' }
-          ]
-        },
-        {
-          mailId: 103,
-          sender: 'support@github.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: '[GitHub] Security Alert',
-          body: 'We noticed a new login to your account.',
-          timestamp: '2025-12-10T23:00:00',
-          priority: 1,
-          folderName: 'Inbox',
-          isRead: true,
-          attachments: []
-        },
-        {
-          mailId: 104,
-          sender: 'newsletter@techsite.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Weekly Tech News',
-          body: 'Check out the latest technology trends this week.',
-          timestamp: '2025-12-11T08:00:00',
-          priority: 4,
-          folderName: 'Inbox',
-          isRead: false,
-          attachments: []
-        }
-      ];
-
-      // Sort based on priority mode
-      if (this.isPriorityMode()) {
-        mailData.sort((a, b) => a.priority - b.priority);
-      } else {
-        mailData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      }
-
-      this.mails.set(mailData);
-      this.isLoading.set(false);
-    }, 500);
   }
 
   // Load sent mails
@@ -642,6 +578,7 @@ export class Mail implements OnInit {
   isContactsModalOpen = signal<boolean>(false);
   editingContact = signal<Contact | null>(null);
   contactSearchQuery = signal<string>('');
+  ascendingSorting = signal<boolean>(false);
 
   contactFormName = signal<string>('');
   contactFormEmails = signal<string>(''); 
@@ -655,13 +592,19 @@ export class Mail implements OnInit {
     // Response: List of Contact objects
     
     if (userEmail) {
-      this.mailService.getContacts(userEmail).subscribe({
+      this.mailService.getContacts(userEmail, this.ascendingSorting()).subscribe({
         next: contacts => {this.contacts.set(contacts); 
                           console.log("CONTACTS ARE RETRIEVED!!");
                         console.log(contacts)},
         error: err => console.log("ERROR!!: " + err)
       });
     }
+  }
+
+  sortContacts(){
+    this.ascendingSorting.set(!this.ascendingSorting())
+
+    this.loadContacts()
   }
 
   openContactsModal() {
