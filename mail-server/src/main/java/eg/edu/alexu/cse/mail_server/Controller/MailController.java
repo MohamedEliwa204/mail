@@ -3,13 +3,12 @@ package eg.edu.alexu.cse.mail_server.Controller;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Service.MailService;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
-import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,8 +19,11 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/send-with-attachments")
-    public Map<String, String> sendMail(@RequestBody ComposeEmailDTO composeEmailDTO) {
-        mailService.send(composeEmailDTO);
+    public Map<String, String> sendMail(
+            @RequestPart("email") ComposeEmailDTO composeEmailDTO,
+            @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
+    ) throws IOException {
+        mailService.sendWithAttachments(composeEmailDTO, attachments);
         return Map.of("message", "Email sent successfully");
     }
 
