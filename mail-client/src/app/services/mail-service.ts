@@ -161,11 +161,14 @@ export class MailService {
 
   /* [BACKEND REQ] Contacts Management CRUD */
   
-  getContacts(userEmail: string): Observable<Contact[]> {
-    return this.http.get<Contact[]>(`${this.apiURL}/contacts`, {
-      params: { userEmail }
-    });
-  }
+getContacts(userEmail: string, sortingType: boolean): Observable<Contact[]> {
+  return this.http.get<Contact[]>(`${this.apiURL}/contacts`, {
+    params: {
+      email: userEmail,
+      sort: sortingType.toString()
+    }
+  });
+}
 
   addContact(contact: Contact, userEmail: string): Observable<any> {
     return this.http.post(`${this.apiURL}/contacts`, contact, {
@@ -174,7 +177,7 @@ export class MailService {
   }
 
   editContact(contact: Contact): Observable<any> {
-    return this.http.put(`${this.apiURL}/contacts/${contact.id}`, contact);
+    return this.http.put(`${this.apiURL}/contacts`, contact);
   }
 
   deleteContact(contactId: number): Observable<any> {

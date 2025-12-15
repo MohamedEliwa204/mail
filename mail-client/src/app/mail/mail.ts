@@ -11,7 +11,7 @@ import { Observable, forkJoin } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './mail.html',
   styleUrls: ['./mail.css', './profile.css', './navbar.css', './sidebar.css', './main-section.css',
-    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css"
+    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css"
   ],
 })
 export class Mail implements OnInit {
@@ -56,7 +56,7 @@ export class Mail implements OnInit {
   }
 
   //pagination
-  itemsPerPage = 8
+  itemsPerPage = 6
   page = signal(0);
   pageFrom = signal(1)
   numOfItems = this.mails().length
@@ -71,7 +71,7 @@ export class Mail implements OnInit {
 
   pagingLeft() {
     const n = this.mails().length;
-    const pages = Math.ceil(n / 8);
+    const pages = Math.ceil(n / this.itemsPerPage);
 
     if (this.page() != 0) {
       this.page.update(value => value - 1)
@@ -83,7 +83,6 @@ export class Mail implements OnInit {
 
       this.pageFrom.update(value => value - this.itemsPerPage)
     }
-
   }
 
   pagingRight() {
@@ -325,70 +324,6 @@ export class Mail implements OnInit {
     */
 
     // Frontend Simulation: Simulate backend response with sorting
-    setTimeout(() => {
-      let mailData = [
-        {
-          mailId: 101,
-          sender: 'manager@company.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Project Deadline Update',
-          body: 'Hello Ahmed, please note that the deadline has been moved to next Sunday. Thanks.',
-          timestamp: '2025-12-13T10:30:00', // ISO Format
-          priority: 1,
-          folderName: 'Inbox',
-          isRead: false,
-          attachments: []
-        },
-        {
-          mailId: 102,
-          sender: 'hr@company.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Holiday Schedule',
-          body: 'Dear All, the office will be closed on Friday.',
-          timestamp: '2025-12-12T09:15:00',
-          priority: 3,
-          folderName: 'Inbox',
-          isRead: true,
-          attachments: [
-            { fileName: 'policy.pdf', contentType: 'application/pdf' }
-          ]
-        },
-        {
-          mailId: 103,
-          sender: 'support@github.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: '[GitHub] Security Alert',
-          body: 'We noticed a new login to your account.',
-          timestamp: '2025-12-10T23:00:00',
-          priority: 1,
-          folderName: 'Inbox',
-          isRead: true,
-          attachments: []
-        },
-        {
-          mailId: 104,
-          sender: 'newsletter@techsite.com',
-          receiver: userEmail || 'me@mansy.com',
-          subject: 'Weekly Tech News',
-          body: 'Check out the latest technology trends this week.',
-          timestamp: '2025-12-11T08:00:00',
-          priority: 4,
-          folderName: 'Inbox',
-          isRead: false,
-          attachments: []
-        }
-      ];
-
-      // Sort based on priority mode
-      if (this.isPriorityMode()) {
-        mailData.sort((a, b) => a.priority - b.priority);
-      } else {
-        mailData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-      }
-
-      this.mails.set(mailData);
-      this.isLoading.set(false);
-    }, 500);
   }
 
   // Load sent mails
@@ -523,20 +458,40 @@ export class Mail implements OnInit {
     this.composedMail.receivers[0] = email;
   }
 
+  IsendComposedMail(){
+    console.log(this.composedMail.sender)
+    console.log(this.composedMail.receivers)
+    console.log(this.composedMail.subject)
+    console.log(this.composedMail.body)
+    console.log(this.composedMail.priority)
+    if(this.composedMail.receivers.length > 0){
+      this.mailService.sendMail(this.composedMail).subscribe({
+        next: res => {
+          console.log(res.message)
+          this.refresh()},
+        error: e => {
+          if (e.error && e.error.error) {
+            console.log(`Error: ${e.error.error}`);
+          } 
+          else {
+            console.log('Unknown error', e);
+          }
+        }
+      });
+      this.composedMail.receivers = []
+      this.composedMail.subject = ''
+      this.composedMail.body = ''
+      this.composedMail.priority = 1
+      console.log("Email is sent")
+    }
+  }
+
   sendComposedMail() {
     if (this.composedMail.receivers.length === 0) {
       alert('Please enter at least one recipient');
       return;
     }
 
-    // [BACKEND INTERACTION: SEND MAIL WITH ATTACHMENTS]
-    // 1. Backend Task: Receive Multipart request, parse JSON, save files, send email.
-    // 2. Request: POST /api/mail/send-with-attachments
-    // 3. Body: Multipart/Form-Data
-    //    Part 1 'email': JSON Blob { sender: "...", receivers: ["..."], subject: "...", body: "...", priority: 1 }
-    //    Part 2 'attachments': Array of File objects (Binary)
-    
-    /*
     const formData = new FormData();
     const emailData = {
       sender: this.composedMail.sender,
@@ -551,20 +506,49 @@ export class Mail implements OnInit {
     this.selectedAttachments().forEach((file) => {
       formData.append('attachments', file, file.name);
     });
-    
-    this.mailService.sendMailWithAttachments(formData).subscribe(...);
-    */
 
+    console.log(this.composedMail.sender)
+    console.log(this.composedMail.receivers)
+    console.log(this.composedMail.subject)
+    console.log(this.composedMail.body)
+    console.log(this.composedMail.priority)
+    if(this.composedMail.receivers.length > 0){
+      this.mailService.sendMailWithAttachments(formData).subscribe({
+        next: res => {
+          console.log(res.message)
+          setTimeout(() => {
+          alert('Email sent successfully!');
+          this.refresh();
+          this.resetComposeForm();
+        }, 500);
+          this.refresh()},
+        error: e => {
+          if (e.error && e.error.error) {
+            console.log(`Error: ${e.error.error}`);
+          } 
+          else {
+            console.log('Unknown error', e);
+          }
+        }
+      });
+      this.composedMail.receivers = []
+      this.composedMail.subject = ''
+      this.composedMail.body = ''
+      this.composedMail.priority = 1
+      console.log("Email is sent")
+    }
+
+    // [BACKEND INTERACTION: SEND MAIL WITH ATTACHMENTS]
+    // 1. Backend Task: Receive Multipart request, parse JSON, save files, send email.
+    // 2. Request: POST /api/mail/send-with-attachments
+    // 3. Body: Multipart/Form-Data
+    //    Part 1 'email': JSON Blob { sender: "...", receivers: ["..."], subject: "...", body: "...", priority: 1 }
+    //    Part 2 'attachments': Array of File objects (Binary)
+    
     // FRONTEND SIMULATION
     console.log('=== Simulating Email Send ===');
     console.log('Body:', this.composedMail);
     console.log('Attachments:', this.selectedAttachments().length);
-
-    setTimeout(() => {
-      alert('Email sent successfully!');
-      this.refresh();
-      this.resetComposeForm();
-    }, 500);
   }
 
   resetComposeForm() {
@@ -642,6 +626,7 @@ export class Mail implements OnInit {
   isContactsModalOpen = signal<boolean>(false);
   editingContact = signal<Contact | null>(null);
   contactSearchQuery = signal<string>('');
+  ascendingSorting = signal<boolean>(false);
 
   contactFormName = signal<string>('');
   contactFormEmails = signal<string>(''); 
@@ -653,19 +638,21 @@ export class Mail implements OnInit {
     // [BACKEND INTERACTION: GET CONTACTS]
     // Request: GET /api/contacts?userEmail=...
     // Response: List of Contact objects
-    /*
+    
     if (userEmail) {
-      this.mailService.getContacts(userEmail).subscribe(contacts => this.contacts.set(contacts));
+      this.mailService.getContacts(userEmail, this.ascendingSorting()).subscribe({
+        next: contacts => {this.contacts.set(contacts); 
+                          console.log("CONTACTS ARE RETRIEVED!!");
+                        console.log(contacts)},
+        error: err => console.log("ERROR!!: " + err)
+      });
     }
-    */
+  }
 
-    // Frontend Simulation
-    setTimeout(() => {
-      this.contacts.set([
-        { id: 1, name: 'Ahmed Hassan', emails: ['ahmed@test.com'] },
-        { id: 2, name: 'Sara Mohamed', emails: ['sara@test.com'] }
-      ]);
-    }, 300);
+  sortContacts(){
+    this.ascendingSorting.set(!this.ascendingSorting())
+
+    this.loadContacts()
   }
 
   openContactsModal() {
@@ -705,9 +692,12 @@ export class Mail implements OnInit {
   }
 
   saveContact() {
+
+    const userEmail = this.currentUser()?.email;
+
     const name = this.contactFormName().trim();
     const emailsInput = this.contactFormEmails().trim();
-    if (!name || !emailsInput) return;
+    if (!name || !emailsInput || !userEmail) return;
 
     const emails = emailsInput.split(',').map(e => e.trim()).filter(e => e.length > 0);
     const editing = this.editingContact();
@@ -717,6 +707,11 @@ export class Mail implements OnInit {
       // Request: PUT /api/contacts/{id}
       // Body: { id: 1, name: "...", emails: ["..."] }
       const updatedContact: Contact = { id: editing.id, name, emails };
+      console.log(updatedContact);
+      this.mailService.editContact(updatedContact).subscribe({
+        next: (c) => console.log("CONTACT IS UPDATED:" + c),
+        error: err => console.log("ERROR!!:" + err) 
+      })
       
       // Frontend Simulation
       this.contacts.update(c => c.map(x => x.id === editing.id ? updatedContact : x));
@@ -727,6 +722,10 @@ export class Mail implements OnInit {
       // Request: POST /api/contacts?userEmail=...
       // Body: { name: "...", emails: ["..."] }
       const newContact: Contact = { id: Date.now(), name, emails };
+      this.mailService.addContact(newContact, userEmail).subscribe({
+        next: (c) => console.log("CONTACT IS CREATED:" + c),
+        error: err => console.log("ERROR!!:" + err)
+      })
       
       // Frontend Simulation
       this.contacts.update(c => [...c, newContact]);
@@ -737,7 +736,13 @@ export class Mail implements OnInit {
   deleteContactById(contactId: number) {
     // [BACKEND INTERACTION: DELETE CONTACT]
     // Request: DELETE /api/contacts/{id}
-    
+
+    console.log(contactId);
+
+    this.mailService.deleteContact(contactId).subscribe({
+      next: () => console.log("SUCCESSFULLY DELETED!!"),
+      error: (err) => console.log("DID NOT DELETE:" + err)
+    })
     // Frontend Simulation
     this.contacts.update(c => c.filter(x => x.id !== contactId));
   }
