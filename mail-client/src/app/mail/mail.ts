@@ -408,11 +408,17 @@ export class Mail implements OnInit {
 
   //compose email
   isComposing = false;
+  isEditingDraft = signal<boolean>(false); // Track if we're editing an existing draft
+
   compseToggle() {
     this.isComposing = !this.isComposing;
     // Always load contacts when opening compose (for autocomplete)
     if (this.isComposing) {
       this.loadContacts();
+    }
+    // Reset draft editing flag when opening fresh compose
+    if (this.isComposing) {
+      this.isEditingDraft.set(false);
     }
   }
 
@@ -570,6 +576,13 @@ export class Mail implements OnInit {
    * Called when user clicks X button before sending
    */
   saveDraftAndClose() {
+    // If we opened an existing draft, just close without saving
+    if (this.isEditingDraft()) {
+      console.log('Closing draft without saving (was already a draft)');
+      this.resetComposeForm();
+      return;
+    }
+
     // Check if there's any content to save
     const hasContent = this.composedMail.subject.trim() !== '' ||
                        this.composedMail.body.trim() !== '' ||
@@ -581,7 +594,7 @@ export class Mail implements OnInit {
       return;
     }
 
-    // Save as draft
+    // Save as new draft
     this.mailService.draftEmail(this.composedMail).subscribe({
       next: (res) => {
         console.log('Email saved as draft:', res.message);
@@ -856,6 +869,9 @@ export class Mail implements OnInit {
     // Note: Attachments would need to be handled separately if stored
     // For now, we'll start with empty attachments
     this.selectedAttachments.set([]);
+
+    // Mark that we're editing an existing draft
+    this.isEditingDraft.set(true);
 
     // Open compose window
     this.isComposing = true;
