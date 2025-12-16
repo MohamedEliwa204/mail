@@ -120,7 +120,7 @@ public class SenderFilter implements FilterStrategy {
     }
 
     public void setSenderNames(List<String> senderNames) {
-        this.senderNames = (String[]) senderNames.toArray();
+        this.senderNames = senderNames.toArray(new String[0]);
     }
     public void setSenderNames(String[] senderNames) {
         this.senderNames = senderNames;

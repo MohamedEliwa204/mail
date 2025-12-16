@@ -167,7 +167,7 @@ public class ReceiverFilter implements FilterStrategy {
         String[] mails = mail.getReceiver().split(",") ;
         List<User> receivers = new ArrayList<>();
         for (String receiverStr : mails) {
-            Optional<User> receiver = repo.findByEmail(mail.getReceiver()) ;
+            Optional<User> receiver = repo.findByEmail(receiverStr.trim()) ;
             if(receiver.isEmpty()) throw new NoSuchElementException("Receiver not found");
             receivers.add(receiver.get());
         }

@@ -91,7 +91,7 @@ public class MailService {
     // Delete mail (soft delete - move to trash)
     public void deleteMail(Long mailId) {
         Mail mail = getMailById(mailId);
-        mail.setFolderName("trash");
+        mail.setFolderName("TRASH");
         mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
         mailRepository.save(mail);
     }
@@ -102,7 +102,7 @@ public class MailService {
      */
     public void deleteOldTrashEmails() {
         java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
-        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("trash", thirtyDaysAgo);
+        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("TRASH", thirtyDaysAgo);
 
         if (!oldTrashMails.isEmpty()) {
             mailRepository.deleteAll(oldTrashMails);
