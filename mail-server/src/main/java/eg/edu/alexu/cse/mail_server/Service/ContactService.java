@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -20,11 +19,25 @@ public class ContactService {
     private final UserRepository userRepository;
 
     public void addContact(ContactDTO dto, String email){
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        // Validate contact emails
+        if (dto.getEmails() == null || dto.getEmails().isEmpty()) {
+            throw new IllegalArgumentException("Contact must have at least one email address");
+        }
+
+        // Validate email format for each email
+        for (String contactEmail : dto.getEmails()) {
+            if (!isValidEmail(contactEmail)) {
+                throw new IllegalArgumentException("Invalid email address: " + contactEmail);
+            }
+        }
+
         Contact contact = Contact.builder()
                             .name(dto.getName())
                             .emails(dto.getEmails())
-                            .user(user.orElse(null))
+                            .user(user)
                             .build();
 
         contactRepository.save(contact);
@@ -38,6 +51,18 @@ public class ContactService {
 
         Contact contact = contactRepository.findById(newDto.getId())
                 .orElseThrow(() -> new RuntimeException("Contact not found with id: " + newDto.getId()));
+
+        // Validate contact emails
+        if (newDto.getEmails() == null || newDto.getEmails().isEmpty()) {
+            throw new IllegalArgumentException("Contact must have at least one email address");
+        }
+
+        // Validate email format for each email
+        for (String contactEmail : newDto.getEmails()) {
+            if (!isValidEmail(contactEmail)) {
+                throw new IllegalArgumentException("Invalid email address: " + contactEmail);
+            }
+        }
 
         contact.setName(newDto.getName());
         contact.setEmails(newDto.getEmails());
@@ -60,5 +85,43 @@ public class ContactService {
             return contactRepository.findByUser_EmailOrderByNameAsc(email);
         else
             return contactRepository.findByUser_Email(email);
+    }
+
+    /**
+     * Search contacts by name or email address
+     * @param userEmail The email of the user whose contacts to search
+     * @param searchQuery The search term (name or email)
+     * @return List of contacts matching the search query
+     */
+    public List<Contact> searchContacts(String userEmail, String searchQuery) {
+        if (searchQuery == null || searchQuery.trim().isEmpty()) {
+            return contactRepository.findByUser_Email(userEmail);
+        }
+
+        // Search by name
+        List<Contact> nameMatches = contactRepository.findByUser_EmailAndNameContainingIgnoreCase(userEmail, searchQuery);
+
+        // Search by email address
+        List<Contact> emailMatches = contactRepository.findByUser_EmailAndEmailsContainingIgnoreCase(userEmail, searchQuery);
+
+        // Combine results and remove duplicates
+        nameMatches.addAll(emailMatches);
+        return nameMatches.stream()
+                .distinct()
+                .toList();
+    }
+
+    /**
+     * Validate email address format
+     * @param email Email address to validate
+     * @return true if valid, false otherwise
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
     }
 }

@@ -52,5 +52,12 @@ public class ContactController {
     public void deleteContacts(@PathVariable Long contactId){
         contactService.deleteContact(contactId);
     }
-    
+
+    @GetMapping("/contact-search")
+    public List<Contact> searchContact(
+            @RequestParam String userEmail,
+            @RequestParam String query
+    ) {
+        return contactService.searchContacts(userEmail, query);
+    }
 }
