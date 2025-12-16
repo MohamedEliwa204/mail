@@ -9,44 +9,57 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class SenderFilter implements FilterStrategy {
     // For now we will use sender name
     private String senderName ;
-    private int score ;
 
     public SenderFilter(String senderName) {
-        this.senderName = senderName;
+        this.senderName = senderName.trim().toLowerCase();
     }
 
     public SenderFilter() {
     }
 
-    // The method checks all possible combination for name
-    // returns true if any of them matches
     @Override
     public boolean filter(Mail mail) {
-        // Using optional to avoid polluting code with null checks
-        User sender = Optional.ofNullable(mail.getSenderRel()).orElseThrow(() ->  new NoSuchElementException("Sender is Empty"));
+        User sender = Optional.ofNullable(mail.getSenderRel())
+                .orElseThrow(() -> new NoSuchElementException("Sender is empty"));
 
-        String firstName = mail.getSenderRel().getFirstName();
-        String lastName = mail.getSenderRel().getLastName();
+        String fullName = String.join(" ",
+                sender.getFirstName(),
+                sender.getLastName()
+        ).toLowerCase();
 
-        String fullName = firstName + " " + lastName;
-        String fullNameNoSpace = firstName+lastName;
+        String email = sender.getEmail().toLowerCase();
 
-        String fullNameRev = lastName+" "+firstName;
-        String fullNameRevNoSpace = lastName+firstName;
+        String query = senderName.toLowerCase().trim();
 
-        return firstName.equalsIgnoreCase(senderName) ||
-                lastName.equalsIgnoreCase(senderName) ||
-                fullName.equalsIgnoreCase(senderName) ||
-                fullNameNoSpace.equalsIgnoreCase(senderName) ||
-                fullNameRev.equalsIgnoreCase(senderName) ||
-                fullNameRevNoSpace.equalsIgnoreCase(senderName);
+        // Check if query matches as a substring in full name
+        if (fullName.contains(query) || email.contains(query)) {
+            return true;
+        }
 
+        // Check if query matches email local part
+        String emailLocalPart = email.split("@")[0];
+        if (emailLocalPart.contains(query)) {
+            return true;
+        }
+
+        // Fall back to token-based prefix matching
+        String[] senderTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
+        String[] queryTokens = query.split("\\s+");
+
+        for (String q : queryTokens) {
+            boolean matched = Arrays.stream(senderTokens)
+                    .anyMatch(s -> s.startsWith(q));
+            if (!matched) return false;
+        }
+
+        return true;
     }
 
     /**
@@ -56,23 +69,65 @@ public class SenderFilter implements FilterStrategy {
     public int getScore (Mail mail) {
         User sender = Optional.ofNullable(mail.getSenderRel()).orElseThrow(() ->  new NoSuchElementException("Sender is Empty"));
 
-        String firstName = sender.getFirstName();
-        String lastName = sender.getLastName();
+        String fullName = String.join(" ",
+                sender.getFirstName(),
+                sender.getLastName()
+        ).toLowerCase();
 
-        String fullName = firstName + " " + lastName;
-        String fullNameNoSpace = firstName+lastName;
+        String email = sender.getEmail().toLowerCase();
+        String emailLocalPart = email.split("@")[0];
 
-        String fullNameRev = lastName+" "+firstName;
-        String fullNameRevNoSpace = lastName+firstName;
+        // Exact email match - highest score
+        if (email.equals(senderName)) {
+            return 100;
+        }
 
-        if (fullName.equalsIgnoreCase(senderName)) return 100 ;
-        if (fullNameNoSpace.equalsIgnoreCase(senderName)) return 90 ;
-        if (firstName.equalsIgnoreCase(senderName)) return 80 ;
-        if (lastName.equalsIgnoreCase(senderName)) return 70 ;
-        if (fullNameRev.equalsIgnoreCase(senderName)) return 60 ;
-        if (fullNameRevNoSpace.equalsIgnoreCase(senderName)) return 50 ;
+        // Exact name match
+        if (fullName.equals(senderName)) {
+            return 90;
+        }
 
-        return 0 ;
+        // Exact local part match
+        if (emailLocalPart.equals(senderName)) {
+            return 80;
+        }
+
+        // Email starts with query
+        if (email.startsWith(senderName)) {
+            return 70;
+        }
+
+        // Name starts with query
+        if (fullName.startsWith(senderName)) {
+            return 60;
+        }
+
+        // Email contains query
+        if (email.contains(senderName)) {
+            return 50;
+        }
+
+        // Name contains query
+        if (fullName.contains(senderName)) {
+            return 40;
+        }
+
+        // Token-based prefix matching
+        String[] receiverTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
+        String[] queryTokens = senderName.split("\\s+");
+
+        int matchedTokens = 0;
+        for (String q : queryTokens) {
+            boolean matched = Arrays.stream(receiverTokens)
+                    .anyMatch(s -> s.startsWith(q));
+            if (matched) matchedTokens++;
+        }
+
+        if (matchedTokens == queryTokens.length) {
+            return 30; // All tokens matched
+        }
+
+        return 0;
     }
 
     public String getSenderName() {
@@ -80,7 +135,6 @@ public class SenderFilter implements FilterStrategy {
     }
 
     public void setSenderName(String senderName) {
-        this.senderName = senderName;
-        this.score = 0 ;
+        this.senderName = senderName.trim().toLowerCase();
     }
 }

@@ -16,10 +16,6 @@ public class IsReadFilter implements FilterStrategy {
     public IsReadFilter() {
     }
 
-    public IsReadFilter(boolean isRead) {
-        this.isRead = isRead;
-    }
-
     @Override
     public boolean filter(Mail mail) {
         boolean state = Optional.of(mail.isRead()).orElse(false);

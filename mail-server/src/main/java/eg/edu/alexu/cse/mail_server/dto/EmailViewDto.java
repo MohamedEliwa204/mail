@@ -1,13 +1,15 @@
 package eg.edu.alexu.cse.mail_server.dto;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
 @Data
 @Builder
+@AllArgsConstructor
 public class EmailViewDto {
     private Long id;
     private String sender;
@@ -17,9 +19,10 @@ public class EmailViewDto {
     private int priority;
     private boolean isRead;
 
+    // Full attachment data with file content
+    private List<AttachmentDTO> attachments;
 
-    private List<String> attachmentNames;
-
+    // No-args constructor required for Jackson deserialization
     public EmailViewDto() {
     }
 
@@ -79,6 +82,7 @@ public class EmailViewDto {
         isRead = read;
     }
 
+    /* 
     public List<String> getAttachmentNames() {
         return attachmentNames;
     }
@@ -86,4 +90,5 @@ public class EmailViewDto {
     public void setAttachmentNames(List<String> attachmentNames) {
         this.attachmentNames = attachmentNames;
     }
+    */
 }

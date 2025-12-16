@@ -20,10 +20,6 @@ public class BeforeDateFilter implements FilterStrategy {
     public BeforeDateFilter() {
     }
 
-    public BeforeDateFilter(LocalDateTime date) {
-        this.date = date;
-    }
-
     @Override
     public boolean filter(Mail mail) {
         LocalDateTime localDate = Optional.ofNullable(mail.getTimestamp()).
@@ -35,8 +31,8 @@ public class BeforeDateFilter implements FilterStrategy {
     public int getScore(Mail mail) {
         long daysDifference = java.time.Duration.between(mail.getTimestamp(),date).toDays();
 
-        // the max Difference for now
-        long maxDifference = 3*30 ;
+        // the max Difference for now one year
+        long maxDifference = 12*30 ;
 
         // Closer emails get higher score: linear inverse scaling
         int score = (int) Math.max(0, 100 - (daysDifference * 100) / maxDifference);
