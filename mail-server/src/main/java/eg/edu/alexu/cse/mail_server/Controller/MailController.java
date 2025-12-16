@@ -79,4 +79,5 @@ public class MailController {
         mailService.deleteMail(mailId);
         return Map.of("message", "Mail deleted successfully");
     }
+
 }

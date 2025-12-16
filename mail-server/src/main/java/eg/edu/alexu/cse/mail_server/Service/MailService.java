@@ -92,7 +92,22 @@ public class MailService {
     public void deleteMail(Long mailId) {
         Mail mail = getMailById(mailId);
         mail.setFolderName("trash");
+        mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
         mailRepository.save(mail);
+    }
+
+    /**
+     * Permanently delete emails that have been in trash for more than 30 days
+     * Called by scheduled task
+     */
+    public void deleteOldTrashEmails() {
+        java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
+        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("trash", thirtyDaysAgo);
+
+        if (!oldTrashMails.isEmpty()) {
+            mailRepository.deleteAll(oldTrashMails);
+            System.out.println("Deleted " + oldTrashMails.size() + " old emails from trash");
+        }
     }
 
     /**
