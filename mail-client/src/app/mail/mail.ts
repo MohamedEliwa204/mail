@@ -11,7 +11,7 @@ import { Observable, forkJoin } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './mail.html',
   styleUrls: ['./mail.css', './profile.css', './navbar.css', './sidebar.css', './main-section.css',
-    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css"
+    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css", "./filterDropDown.css"
   ],
 })
 export class Mail implements OnInit {
@@ -592,11 +592,14 @@ export class Mail implements OnInit {
     // 1. Backend Task: Search emails by criteria.
     // 2. Request: GET /api/mail/search
     // 3. Query Params: ?email=..&folder=..&method=sender&query=xyz
-    /*
-    if(email) {
-        this.mailService.searchMails(email, folder, method, query).subscribe(...);
+
+    const filter = {
     }
-    */
+    
+    if(email) {
+        this.mailService.searchMails(email, folder, method, query);
+    }
+    
 
     // --- Frontend Simulation (Mock Logic) ---
     setTimeout(() => {

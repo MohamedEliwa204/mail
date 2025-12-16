@@ -13,6 +13,7 @@
     z-index: 998;             /* Below navbar */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #202124;
+    overflow-x: scroll;
 }
 
 /* Compose Button */

@@ -131,12 +131,6 @@ export class MailService {
     });
   }
 
-  /* [BACKEND REQ] Advanced Search
-     1. Function: Filter emails based on criteria.
-     2. Request: GET /api/mail/search
-     3. Query Params: ?email=x&folder=inbox&method=subject&query=hello
-     4. Response: JSON Array of Mail objects
-  */
   searchMails(userEmail: string, folder: string, method: string, query: string): Observable<Mail[]> {
     return this.http.get<Mail[]>(`${this.apiURL}/search`, {
       params: {
@@ -148,27 +142,19 @@ export class MailService {
     });
   }
 
-  /* [BACKEND REQ] Send Mail With Attachments
-     1. Function: Handle multipart file upload + email metadata.
-     2. Content-Type: multipart/form-data
-     3. Request Parts:
-        - Part 'email': JSON string/blob of ComposeEmailDTO
-        - Part 'attachments': List of Files
-  */
   sendMailWithAttachments(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiURL}/send-with-attachments`, formData);
   }
 
-  /* [BACKEND REQ] Contacts Management CRUD */
   
-getContacts(userEmail: string, sortingType: boolean): Observable<Contact[]> {
-  return this.http.get<Contact[]>(`${this.apiURL}/contacts`, {
-    params: {
-      email: userEmail,
-      sort: sortingType.toString()
-    }
-  });
-}
+  getContacts(userEmail: string, sortingType: boolean): Observable<Contact[]> {
+    return this.http.get<Contact[]>(`${this.apiURL}/contacts`, {
+      params: {
+        email: userEmail,
+        sort: sortingType.toString()
+      }
+    });
+  }
 
   addContact(contact: Contact, userEmail: string): Observable<any> {
     return this.http.post(`${this.apiURL}/contacts`, contact, {
