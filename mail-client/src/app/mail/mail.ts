@@ -616,6 +616,17 @@ export class Mail implements OnInit {
   searchMethod = signal<string>('subject');
   isFilterMenuOpen = signal<boolean>(false);
 
+  // Advanced filter properties
+  searchFrom = signal<string>('');
+  searchTo = signal<string>('');
+  searchSubject = signal<string>('');
+  searchWords = signal<string>('');
+  dateRange = signal<string>('');
+  exactDate = signal<string>('');
+  searchFolder = signal<string>('all');
+  hasAttachment = signal<boolean>(false);
+  isRead = signal<boolean | null>(null);
+
   onSearch() {
     const query = this.searchQuery();
     const folder = this.currentFolder();
