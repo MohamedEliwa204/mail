@@ -61,7 +61,7 @@ export class Mail implements OnInit {
   pageFrom = signal(1)
   numOfItems = this.mails().length
   pageTo = signal(this.itemsPerPage)
-  
+
   generatePage() {
     return Array.from({ length: Math.min(this.itemsPerPage, this.mails().length) },
       (_, i) => i + this.page() * this.itemsPerPage);
@@ -146,7 +146,7 @@ export class Mail implements OnInit {
     return visibleIndices.every(i => this.selectedIds().has(this.mails()[i].mailId));
   }
 
-  //Bulk Actions 
+  //Bulk Actions
   deleteSelectedMails() {
     if (this.selectedIds().size === 0) return;
     if (confirm(`Are you sure you want to delete ${this.selectedIds().size} mails?`)) {
@@ -281,7 +281,7 @@ export class Mail implements OnInit {
     const system = ['inbox', 'sent', 'drafts', 'spam', 'trash'];
     return [...system, ...this.userFolders()];
   });
-  
+
   moveSelectedMails(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     const folderName = selectElement.value;
@@ -310,20 +310,25 @@ export class Mail implements OnInit {
   // Load inbox mails
   loadInbox() {
     const userEmail = this.currentUser()?.email;
+    if (!userEmail) return;
 
     this.currentFolder.set('inbox');
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
     // [BACKEND INTERACTION: GET INBOX]
-    // 1. BE Task: Retrieve inbox emails with optional sorting.
-    // 2. Request: GET /api/mail/inbox/{email}?sort=priority (if isPriorityMode is true)
-    // 3. Response: List of Mail Entities
-    /* const sortParam = this.isPriorityMode() ? 'priority' : 'timestamp';
-    this.mailService.getInbox(userEmail, sortParam).subscribe(...)
-    */
-
-    // Frontend Simulation: Simulate backend response with sorting
+    // Request: GET /api/mail/inbox/{email}
+    this.mailService.getInboxMails(userEmail).subscribe({
+      next: (mails) => {
+        this.mails.set(mails);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading inbox:', error);
+        this.errorMessage.set('Failed to load inbox');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   // Load sent mails
@@ -333,7 +338,7 @@ export class Mail implements OnInit {
 
     this.currentFolder.set('sent');
     this.isLoading.set(true);
-    
+
     // [BACKEND INTERACTION: GET SENT]
     // Request: GET /api/mail/sent/{email}
     this.mailService.getSentMails(userEmail).subscribe({
@@ -413,7 +418,7 @@ export class Mail implements OnInit {
 
   composedMail: ComposeEmailDTO = {
     sender: this.currentUser()?.email,
-    receivers: [''], 
+    receivers: [''],
     subject: '',
     body: '',
     priority: 1
@@ -441,11 +446,11 @@ export class Mail implements OnInit {
     const receiverInput = (this.composedMail.receivers[0] || '').trim().toLowerCase();
     if (!receiverInput || receiverInput.length < 2) return [];
     if (this.contacts().length === 0) return [];
-    
+
     const suggestions: Array<{ name: string, email: string }> = [];
     this.contacts().forEach(contact => {
       contact.emails.forEach(email => {
-        if (email.toLowerCase().includes(receiverInput) || 
+        if (email.toLowerCase().includes(receiverInput) ||
             contact.name.toLowerCase().includes(receiverInput)) {
           suggestions.push({ name: contact.name, email });
         }
@@ -472,7 +477,7 @@ export class Mail implements OnInit {
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
-          } 
+          }
           else {
             console.log('Unknown error', e);
           }
@@ -502,7 +507,7 @@ export class Mail implements OnInit {
     };
     const emailBlob = new Blob([JSON.stringify(emailData)], { type: 'application/json' });
     formData.append('email', emailBlob);
-    
+
     this.selectedAttachments().forEach((file) => {
       formData.append('attachments', file, file.name);
     });
@@ -525,7 +530,7 @@ export class Mail implements OnInit {
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
-          } 
+          }
           else {
             console.log('Unknown error', e);
           }
@@ -544,7 +549,7 @@ export class Mail implements OnInit {
     // 3. Body: Multipart/Form-Data
     //    Part 1 'email': JSON Blob { sender: "...", receivers: ["..."], subject: "...", body: "...", priority: 1 }
     //    Part 2 'attachments': Array of File objects (Binary)
-    
+
     // FRONTEND SIMULATION
     console.log('=== Simulating Email Send ===');
     console.log('Body:', this.composedMail);
@@ -558,6 +563,41 @@ export class Mail implements OnInit {
     this.composedMail.priority = 1;
     this.selectedAttachments.set([]);
     this.isComposing = false;
+  }
+
+  /**
+   * Save email as draft when closing compose window
+   * Called when user clicks X button before sending
+   */
+  saveDraftAndClose() {
+    // Check if there's any content to save
+    const hasContent = this.composedMail.subject.trim() !== '' ||
+                       this.composedMail.body.trim() !== '' ||
+                       this.composedMail.receivers.length > 0;
+
+    if (!hasContent) {
+      // Nothing to save, just close
+      this.isComposing = false;
+      return;
+    }
+
+    // Save as draft
+    this.mailService.draftEmail(this.composedMail).subscribe({
+      next: (res) => {
+        console.log('Email saved as draft:', res.message);
+        alert('Email saved to drafts');
+        this.resetComposeForm();
+        this.refresh(); // Refresh to show new draft
+      },
+      error: (e) => {
+        console.error('Error saving draft:', e);
+        // Still close the window even if save fails
+        const confirmClose = confirm('Failed to save draft. Close anyway?');
+        if (confirmClose) {
+          this.resetComposeForm();
+        }
+      }
+    });
   }
 
   //mail preview
@@ -629,7 +669,7 @@ export class Mail implements OnInit {
   ascendingSorting = signal<boolean>(false);
 
   contactFormName = signal<string>('');
-  contactFormEmails = signal<string>(''); 
+  contactFormEmails = signal<string>('');
 
   // Load contacts
   loadContacts() {
@@ -638,10 +678,10 @@ export class Mail implements OnInit {
     // [BACKEND INTERACTION: GET CONTACTS]
     // Request: GET /api/contacts?userEmail=...
     // Response: List of Contact objects
-    
+
     if (userEmail) {
       this.mailService.getContacts(userEmail, this.ascendingSorting()).subscribe({
-        next: contacts => {this.contacts.set(contacts); 
+        next: contacts => {this.contacts.set(contacts);
                           console.log("CONTACTS ARE RETRIEVED!!");
                         console.log(contacts)},
         error: err => console.log("ERROR!!: " + err)
@@ -668,7 +708,7 @@ export class Mail implements OnInit {
   filteredContacts = computed(() => {
     const query = this.contactSearchQuery().toLowerCase().trim();
     if (!query) return this.contacts();
-    return this.contacts().filter(contact => 
+    return this.contacts().filter(contact =>
       contact.name.toLowerCase().includes(query) ||
       contact.emails.some(email => email.toLowerCase().includes(query))
     );
@@ -710,9 +750,9 @@ export class Mail implements OnInit {
       console.log(updatedContact);
       this.mailService.editContact(updatedContact).subscribe({
         next: (c) => console.log("CONTACT IS UPDATED:" + c),
-        error: err => console.log("ERROR!!:" + err) 
+        error: err => console.log("ERROR!!:" + err)
       })
-      
+
       // Frontend Simulation
       this.contacts.update(c => c.map(x => x.id === editing.id ? updatedContact : x));
       this.resetContactForm();
@@ -726,7 +766,7 @@ export class Mail implements OnInit {
         next: (c) => console.log("CONTACT IS CREATED:" + c),
         error: err => console.log("ERROR!!:" + err)
       })
-      
+
       // Frontend Simulation
       this.contacts.update(c => [...c, newContact]);
       this.resetContactForm();
@@ -746,7 +786,7 @@ export class Mail implements OnInit {
     // Frontend Simulation
     this.contacts.update(c => c.filter(x => x.id !== contactId));
   }
-  
+
   // Save as Draft
   saveDraft() {
     // [BACKEND INTERACTION: SAVE DRAFT]
