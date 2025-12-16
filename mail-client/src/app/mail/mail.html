@@ -249,7 +249,7 @@
                 </div>
 
                 <div class="trash-mail">
-                  <img src="icons/trash.svg" alt="">
+                  <img src="icons/trash.svg" alt="" (click)="trash(selectedMail())">
                 </div>
               </div>
 
@@ -290,11 +290,6 @@
                   </div>
                 </div>
               }
-            </div>
-
-
-            <div class="mail-reply">
-              <button class="replyBtn">Reply</button>
             </div>
           </div>
         }
@@ -388,32 +383,48 @@
             @for(i of generatePage(); track i){
 
               @if(mails()[i]){
-                <div class="one-mail" [class.selected]="isSelected(mails()[i].mailId)"
-                     [style.background-color]="isSelected(mails()[i].mailId) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
-                     (click)="currentFolder() === 'drafts' ? openDraftInCompose(mails()[i]) : setselectedMail(mails()[i])"
+                <div class="one-mail"
+                     [style.background-color]="isSelected(mails()[i].id) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
+                     
                      [style.cursor]="currentFolder() === 'drafts' ? 'pointer' : 'default'"
-                     [title]="currentFolder() === 'drafts' ? 'Click to edit and send' : ''">
+                     [title]="currentFolder() === 'drafts' ? 'Click to edit and send' : ''"
+                     style="display: flex;">
 
-                  <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].mailId)">
-                    <input type="checkbox" [checked]="isSelected(mails()[i].mailId)"
-                           style="cursor: pointer; width: 18px; height: 18px;">
-                  </div>
+                     <div class="one-mail-div" (click)="currentFolder() === 'drafts' ? openDraftInCompose(mails()[i]) : setselectedMail(mails()[i])">
+                        <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].id)">
+                        <input type="checkbox" [checked]="isSelected(mails()[i].id)"
+                              style="cursor: pointer; width: 18px; height: 18px;">
+                        </div>
 
-                  <div>{{mails()[i].sender}}</div>
+                        <div>{{mails()[i].sender}}</div>
 
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <!-- High Priority Indicator (Red Dot for priority = 1) -->
-                    @if(mails()[i].priority === 1) {
-                      <span
-                        style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
-                        title="High Priority"></span>
-                    }
-                    {{mails()[i].subject}}
-                  </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                        <!-- High Priority Indicator (Red Dot for priority = 1) -->
+                          @if(mails()[i].priority === 1) {
+                            <span
+                              style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
+                              title="High Priority"></span>
+                          }
+                          {{mails()[i].subject}}
+                        </div>
 
-                  <div>{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
-                </div>
-              }
+                        <div>{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
+                      </div>
+
+                      @if(currentFolder() != 'trash'){
+                          <div>
+                            <img src="icons/trash.svg" alt="trash" class="mail-trash" (click)="trash(mails()[i])">
+                          </div>
+                        }
+                        @else{
+                          <div>
+                            <img src="icons/trash.svg" alt="trash" class="mail-trash" (click)="trash(mails()[i])">
+                          </div>
+                        }
+
+                      </div>
+                        
+                  }
             }
           </div>
         }
@@ -448,7 +459,7 @@
                 </div>
 
                 <!-- Contacts List -->
-                <div style="border: 1px solid #dadce0; border-radius: 8px; overflow-y: scroll;">
+                <div style="border: 1px solid #dadce0; border-radius: 8px; overflow-y: auto;">
                   <div
                     style="display: flex; justify-content: space-between; background: #f5f5f5; padding: 12px 15px; font-weight: 600; font-size: 14px; color: #5f6368; border-bottom: 1px solid #dadce0;">
                     Contacts ({{ filteredContacts().length }})
@@ -465,7 +476,7 @@
                       }
                     </div>
                   } @else {
-                    <div style="max-height: 250px; overflow-y: scroll; overflow-x: hidden;">
+                    <div style="max-height: 250px; overflow-y: auto; overflow-x: hidden;">
                       @for(contact of filteredContacts(); track contact.id) {
                         <div style="padding: 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: start; transition: background 0.2s;"
                              [style.background]="editingContact()?.id === contact.id ? '#e8f0fe' : 'white'">

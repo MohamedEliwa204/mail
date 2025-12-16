@@ -19,7 +19,7 @@ export interface Attachment {
 }
 
 export interface Mail {
-  mailId: number;
+  id: number;
   sender: string;
   receiver: string;
   body: string;
@@ -88,9 +88,6 @@ export class MailService {
     return this.http.post(`${this.apiURL}/send`, composeEmailDTO);
   }
 
-  /* [BACKEND REQ] Save Draft
-     Request: POST /api/mail/draft
-     Body: ComposeEmailDTO (JSON) */
   draftEmail(composeEmailDTO: ComposeEmailDTO): Observable<any> {
     return this.http.post(`${this.apiURL}/draft`, composeEmailDTO);
   }
@@ -102,9 +99,7 @@ export class MailService {
     return this.http.put(`${this.apiURL}/${mailId}/read`, {});
   }
 
-  /* [BACKEND REQ] Delete Mail
-     Request: DELETE /api/mail/{mailId} */
-  deleteMail(mailId: number): Observable<any> {
+  trashMail(mailId: number | undefined): Observable<any> {
     return this.http.delete(`${this.apiURL}/${mailId}`);
   }
 
