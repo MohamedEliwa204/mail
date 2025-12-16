@@ -49,7 +49,7 @@ export interface MailFilterDTO {
   afterDate?: string;     // ISO format: "2023-12-25T10:30:00"
   beforeDate?: string;    // ISO format: "2023-12-25T10:30:00"
   isRead?: boolean;
-  priority?: number;  
+  priority?: number;
 }
 
 @Injectable({
