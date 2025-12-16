@@ -88,9 +88,6 @@ export class MailService {
     return this.http.post(`${this.apiURL}/send`, composeEmailDTO);
   }
 
-  /* [BACKEND REQ] Save Draft
-     Request: POST /api/mail/draft
-     Body: ComposeEmailDTO (JSON) */
   draftEmail(composeEmailDTO: ComposeEmailDTO): Observable<any> {
     return this.http.post(`${this.apiURL}/draft`, composeEmailDTO);
   }

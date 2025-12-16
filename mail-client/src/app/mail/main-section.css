@@ -39,12 +39,12 @@
 
 /* Single mail row */
 .one-mail {
-    display: grid;
+    display: flex;
     /* Checkbox | Sender | Subject | Timestamp */
-    grid-template-columns: 40px 3fr 5fr 70px 1fr; 
+    flex-direction: row; 
     align-items: center;
 
-    padding: 14px 18px;
+    padding: 10px 14px;
     min-height: 54px;
 
     background-color: #ffffff;
@@ -100,8 +100,27 @@
 .mail-trash{
     border-radius: 50%;
     padding: 5px;
+    margin: 2px;
 }
 
 .mail-trash:hover{
-    background-color: #9fa5b1;
+    background-color: #cfd3db;
+}
+
+.one-mail-div{
+    width: 100%;
+    display: grid;
+    /* Checkbox | Sender | Subject | Timestamp */
+    grid-template-columns: 40px 3fr 5fr 1fr; 
+    align-items: center;
+
+    padding: 14px 18px;
+    min-height: 54px;
+
+    background-color: transparent;
+    border-radius: 14px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }

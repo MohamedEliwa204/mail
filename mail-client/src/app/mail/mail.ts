@@ -573,7 +573,7 @@ export class Mail implements OnInit {
   //mail preview
   selectedMail = signal<MailEntity | null>(null);
 
-  setselectedMail(mail: MailEntity) {
+  setselectedMail(mail: MailEntity | null) {
     this.selectedMail.set(mail)
   }
 
@@ -797,9 +797,6 @@ export class Mail implements OnInit {
   }
 
   deleteContactById(contactId: number) {
-    // [BACKEND INTERACTION: DELETE CONTACT]
-    // Request: DELETE /api/contacts/{id}
-
     console.log(contactId);
 
     this.mailService.deleteContact(contactId).subscribe({
@@ -848,7 +845,10 @@ export class Mail implements OnInit {
     console.log("mail is:" + mail.subject)
     
     this.mailService.trashMail(mail.id).subscribe({
-      next: () => console.log("Deleted Successfully!"),
+      next: () => {
+        console.log("Deleted Successfully!");
+        this.setselectedMail(null); 
+      },
       error: (err) => console.log("Error!!: ", err)
     })
   }
