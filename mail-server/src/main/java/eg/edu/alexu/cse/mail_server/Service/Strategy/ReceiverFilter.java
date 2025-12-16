@@ -2,6 +2,7 @@ package eg.edu.alexu.cse.mail_server.Service.Strategy;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Entity.User;
+import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,9 +12,14 @@ import java.util.Optional;
 public class ReceiverFilter implements FilterStrategy {
 
     private String[] receivers;
+    private UserRepository repo ;
 
     public ReceiverFilter(String[] receivers) {
         this.receivers = receivers;
+    }
+
+    public ReceiverFilter(UserRepository repo) {
+        this.repo = repo;
     }
 
     public String[] getReceivers() {
@@ -28,8 +34,7 @@ public class ReceiverFilter implements FilterStrategy {
     public boolean filter(Mail mail) {
 
         // Using optional to avoid polluting code with null checks
-        List<User> mailReceivers = Optional.ofNullable(mail.getReceiverRel())
-                .orElseThrow(() -> new NoSuchElementException("Receivers list is empty"));
+        List<User> mailReceivers = getReceivers(mail) ;
 
         if (receivers == null || receivers.length == 0) return false ;
 
@@ -79,8 +84,7 @@ public class ReceiverFilter implements FilterStrategy {
 
     @Override
     public int getScore(Mail mail) {
-        List<User> mailReceivers = Optional.ofNullable(mail.getReceiverRel())
-                .orElseThrow(() -> new NoSuchElementException("Receivers list is empty"));
+        List<User> mailReceivers = getReceivers(mail) ;
 
         int maxScore = 0;
         // Currently the max score
@@ -156,5 +160,13 @@ public class ReceiverFilter implements FilterStrategy {
 
         return 0;
     }
+
+    // Currently the mail support one receiver
+    List<User> getReceivers(Mail mail) {
+        Optional<User> receiver = repo.findByEmail(mail.getReceiver()) ;
+        if(receiver.isEmpty()) throw new NoSuchElementException("Receiver not found");
+        return List.of(new User[]{receiver.get()});
+    }
+
 }
 

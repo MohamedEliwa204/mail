@@ -17,8 +17,14 @@ public class SenderFilter implements FilterStrategy {
     // For now we will use sender name
     private String senderName ;
 
+    private UserRepository repo ;
+
     public SenderFilter(String senderName) {
         this.senderName = senderName.trim().toLowerCase();
+    }
+
+    public SenderFilter(UserRepository repo) {
+        this.repo = repo;
     }
 
     public SenderFilter() {
@@ -26,8 +32,9 @@ public class SenderFilter implements FilterStrategy {
 
     @Override
     public boolean filter(Mail mail) {
-        User sender = Optional.ofNullable(mail.getSenderRel())
-                .orElseThrow(() -> new NoSuchElementException("Sender is empty"));
+        Optional<User> senderOpt = repo.findByEmail(mail.getSender()) ;
+        if (senderOpt.isEmpty()) throw new NoSuchElementException("sender not found");
+        User sender = senderOpt.get();
 
         String fullName = String.join(" ",
                 sender.getFirstName(),
@@ -67,7 +74,9 @@ public class SenderFilter implements FilterStrategy {
      * Higher score indicates stronger match.
      */
     public int getScore (Mail mail) {
-        User sender = Optional.ofNullable(mail.getSenderRel()).orElseThrow(() ->  new NoSuchElementException("Sender is Empty"));
+        Optional<User> senderOpt = repo.findByEmail(mail.getSender()) ;
+        if (senderOpt.isEmpty()) throw new NoSuchElementException("sender not found");
+        User sender = senderOpt.get();
 
         String fullName = String.join(" ",
                 sender.getFirstName(),

@@ -2,6 +2,7 @@ package eg.edu.alexu.cse.mail_server.Service;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
+import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.AndDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.OrDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Strategy.*;
@@ -26,15 +27,17 @@ import java.util.List;
 @Service
 public class FilterService {
     private final MailRepository mailRepository;
+    private final UserRepository userRepository;
     private final HashMap<String , FilterStrategy> filters = new HashMap<>();
     private final MailFilter mailFilter;
 
     @Autowired
-    public FilterService(MailRepository mailRepository) {
+    public FilterService(MailRepository mailRepository, UserRepository userRepository) {
         this.mailRepository = mailRepository;
+        this.userRepository = userRepository;
         this.mailFilter = new MailFilter() ;
 
-        FilterStrategy senderFilter = new SenderFilter();
+        FilterStrategy senderFilter = new SenderFilter(userRepository);
         FilterStrategy SubjectFilter = new SubjectFilter();
         FilterStrategy priorityFilter = new PriorityFilter();
         FilterStrategy exactDateFilter = new ExactDateFilter();
@@ -42,8 +45,10 @@ public class FilterService {
         FilterStrategy afterDateFilter = new AfterDataFilter() ;
         FilterStrategy bodyFilter = new BodyFilter() ;
         FilterStrategy isReadFilter = new IsReadFilter() ;
+        FilterStrategy receiverFilter = new ReceiverFilter(userRepository) ;
 
         filters.put("sender", senderFilter);
+        filters.put("receiver", receiverFilter);
         filters.put("subject", SubjectFilter);
         filters.put("priority", priorityFilter);
         filters.put("exactDate", exactDateFilter);
@@ -108,6 +113,10 @@ public class FilterService {
             IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
             isReadFilter.setRead(dto.getIsRead().get());
             activeFilters.add(isReadFilter);
+        }
+        if (dto.getReceiver().isPresent()) {
+            ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
+            receiverFilter.setReceivers(new String[]{dto.getReceiver().get()});
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
@@ -181,6 +190,10 @@ public class FilterService {
             IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
             isReadFilter.setRead(dto.getIsRead().get());
             activeFilters.add(isReadFilter);
+        }
+        if (dto.getReceiver().isPresent()) {
+            ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
+            receiverFilter.setReceivers(new String[]{dto.getReceiver().get()});
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
