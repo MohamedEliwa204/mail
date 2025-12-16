@@ -19,47 +19,47 @@
 
               <div class="filter-item">
                 <label for="from-input">From</label>
-                <input id="from-input" type="text" placeholder="Sender email">
+                <input id="from-input" type="text" placeholder="Sender email" [(ngModel)]="searchFrom">
               </div>
 
               <div class="filter-item">
                 <label for="to-input">To</label>
-                <input id="to-input" type="text" placeholder="Recipient email">
+                <input id="to-input" type="text" placeholder="Recipient email" [(ngModel)]="searchTo">
               </div>
 
               <div class="filter-item">
                 <label for="subject-input">Subject</label>
-                <input id="subject-input" type="text" placeholder="Email subject">
+                <input id="subject-input" type="text" placeholder="Email subject" [(ngModel)]="searchSubject">
               </div>
 
               <div class="filter-item">
                 <label for="words-input">Has the words</label>
-                <input id="words-input" type="text" placeholder="Search in content">
+                <input id="words-input" type="text" placeholder="Search in content" [(ngModel)]="searchWords">
               </div>
 
               <div class="Date">
                 <label for="date-select">Date within</label>
-                <select id="date-select" name="date">
-                  <option value="">1 day</option>
-                  <option value="">3 days</option>
-                  <option value="">1 week</option>
-                  <option value="">2 weeks</option>
-                  <option value="">1 month</option>
-                  <option value="">2 months</option>
-                  <option value="">6 months</option>
-                  <option value="">1 year</option>
+                <select id="date-select" name="date" [(ngModel)]="dateRange">
+                  <option value="1">1 day</option>
+                  <option value="3">3 days</option>
+                  <option value="7">1 week</option>
+                  <option value="14">2 weeks</option>
+                  <option value="30">1 month</option>
+                  <option value="60">2 months</option>
+                  <option value="180">6 months</option>
+                  <option value="365">1 year</option>
                 </select>
-                <input type="datetime-local">
+                <input type="datetime-local" [(ngModel)]="exactDate">
               </div>
 
               <!-- Search and Move Section -->
               <div class="filter-item">
-                <label for="search-label">Search</label>
+                <label for="search-label">Search in</label>
                 <div class="mail-icons">
-                  <select class="move-select">
-                    <option value="">All Mail</option>
+                  <select class="move-select" [(ngModel)]="searchFolder">
+                    <option value="all">All Mail</option>
                     @for(folder of targetFolders(); track folder) {
-                      <option [value]="">{{ folder }}</option>
+                      <option [value]="folder">{{ folder }}</option>
                     }
                   </select>
                 </div>
@@ -67,9 +67,16 @@
 
               <!-- Checkbox Section -->
               <div class="filter-checkbox">
-                <input type="checkbox" id="attachments-checkbox" name="attachments">
+                <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="hasAttachment">
                 <label for="attachments-checkbox">Has Attachments</label>
+
+                <input type="checkbox" id="read-checkbox" name="isRead" [(ngModel)]="isRead">
+                <label for="read-checkbox">Is Read</label>
               </div>
+
+              <button (click)="onSearch()" style="margin-top: 10px; background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                Search
+              </button>
             </div>
           }
         </div>
