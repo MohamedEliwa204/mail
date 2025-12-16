@@ -5,8 +5,7 @@
         <div class="searchbar" style="position: relative;">
 
             <div class="search">
-                <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onSearch()"
-                    [placeholder]="'Search by ' + searchMethod() + '...'">
+                <div type="text" [(ngModel)]="searchQuery">Search by</div>
             </div>
 
             <div class="filter" (click)="toggleFilterMenu()" style="cursor: pointer;" title="Filter Options">
@@ -18,37 +17,37 @@
 
                     <div class="filter-item">
                         <label for="from-input">From</label>
-                        <input id="from-input" type="text" placeholder="Sender email">
+                        <input id="from-input" type="text" placeholder="Sender email" [(ngModel)]="searchFrom">
                     </div>
 
                     <div class="filter-item">
                         <label for="to-input">To</label>
-                        <input id="to-input" type="text" placeholder="Recipient email">
+                        <input id="to-input" type="text" placeholder="Recipient email" [(ngModel)]="searchTo">
                     </div>
 
                     <div class="filter-item">
                         <label for="subject-input">Subject</label>
-                        <input id="subject-input" type="text" placeholder="Email subject">
+                        <input id="subject-input" type="text" placeholder="Email subject" [(ngModel)]="searchSubject">
                     </div>
 
                     <div class="filter-item">
                         <label for="words-input">Has the words</label>
-                        <input id="words-input" type="text" placeholder="Search in content">
+                        <input id="words-input" type="text" placeholder="Search in content" [(ngModel)]="searchWords">
                     </div>
 
                     <div class="Date">
                         <label for="date-select">Date within</label>
                         <select id="date-select" name="date">
-                            <option value="">1 day</option>
-                            <option value="">3 days</option>
-                            <option value="">1 week</option>
-                            <option value="">2 weeks</option>
-                            <option value="">1 month</option>
-                            <option value="">2 months</option>
-                            <option value="">6 months</option>
-                            <option value="">1 year</option>
+                            <option [value]="dateRange">1 day</option>
+                            <option [value]="dateRange">3 days</option>
+                            <option [value]="dateRange">1 week</option>
+                            <option [value]="dateRange">2 weeks</option>
+                            <option [value]="dateRange">1 month</option>
+                            <option [value]="dateRange">2 months</option>
+                            <option [value]="dateRange">6 months</option>
+                            <option [value]="dateRange">1 year</option>
                         </select>
-                        <input type="date">
+                        <input type="datetime-local" [(ngModel)]="exactDate">
                     </div>
 
                     <!-- Search and Move Section -->
@@ -56,9 +55,9 @@
                         <label for="search-label">Search</label>
                         <div class="mail-icons">
                             <select class="move-select">
-                                <option value="">All Mail</option>
+                                <option [value]="searchFolder">All Mail</option>
                                 @for(folder of targetFolders(); track folder) {
-                                    <option [value]="">{{ folder }}</option>
+                                    <option [value]="searchFolder">{{ folder }}</option>
                                 }
                             </select>
                         </div>
@@ -66,9 +65,14 @@
 
                     <!-- Checkbox Section -->
                     <div class="filter-checkbox">
-                        <input type="checkbox" id="attachments-checkbox" name="attachments">
+                        <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="hasAttachment">
                         <label for="attachments-checkbox">Has Attachments</label>
+
+                        <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="isRead">
+                        <label for="attachments-checkbox">Is Read</label>
                     </div>
+
+                    <button (click)="onSearch()">Search</button>
                 </div>
             }
         </div>
