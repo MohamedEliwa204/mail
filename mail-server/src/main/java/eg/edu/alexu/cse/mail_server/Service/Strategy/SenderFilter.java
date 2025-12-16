@@ -2,30 +2,28 @@ package eg.edu.alexu.cse.mail_server.Service.Strategy;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Entity.User;
-import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class SenderFilter implements FilterStrategy {
     // For now we will use sender name
-    private String senderName ;
+    private String[] senderNames ;
 
     private UserRepository repo ;
 
-    public SenderFilter(String senderName) {
-        this.senderName = senderName.trim().toLowerCase();
+    public SenderFilter(String[] senderNames) {
+        this.senderNames = senderNames;
     }
 
     public SenderFilter(UserRepository repo) {
         this.repo = repo;
     }
+
+
 
     public SenderFilter() {
     }
@@ -36,114 +34,95 @@ public class SenderFilter implements FilterStrategy {
         if (senderOpt.isEmpty()) throw new NoSuchElementException("sender not found");
         User sender = senderOpt.get();
 
-        String fullName = String.join(" ",
-                sender.getFirstName(),
-                sender.getLastName()
-        ).toLowerCase();
+        for (String senderName : senderNames) {
 
-        String email = sender.getEmail().toLowerCase();
 
-        String query = senderName.toLowerCase().trim();
+            String fullName = String.join(" ",
+                    sender.getFirstName(),
+                    sender.getLastName()
+            ).toLowerCase();
 
-        // Check if query matches as a substring in full name
-        if (fullName.contains(query) || email.contains(query)) {
-            return true;
+            String email = sender.getEmail().toLowerCase();
+
+            String query = senderName.toLowerCase().trim();
+
+            // Check if query matches as a substring in full name
+            if (fullName.contains(query) || email.contains(query)) {
+                return true;
+            }
+
+            // Check if query matches email local part
+            String emailLocalPart = email.split("@")[0];
+            if (emailLocalPart.contains(query)) {
+                return true;
+            }
+
+            // Fall back to token-based prefix matching
+            String[] senderTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
+            String[] queryTokens = query.split("\\s+");
+
+            for (String q : queryTokens) {
+                boolean matched = Arrays.stream(senderTokens)
+                        .anyMatch(s -> s.startsWith(q));
+                if (!matched) return false;
+            }
         }
 
-        // Check if query matches email local part
-        String emailLocalPart = email.split("@")[0];
-        if (emailLocalPart.contains(query)) {
-            return true;
-        }
-
-        // Fall back to token-based prefix matching
-        String[] senderTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
-        String[] queryTokens = query.split("\\s+");
-
-        for (String q : queryTokens) {
-            boolean matched = Arrays.stream(senderTokens)
-                    .anyMatch(s -> s.startsWith(q));
-            if (!matched) return false;
-        }
-
-        return true;
+        return false;
     }
 
     /**
      * Returns a score based on how closely the mail's sender matches the target senderName.
      * Higher score indicates stronger match.
      */
-    public int getScore (Mail mail) {
+    @Override
+    public int getScore(Mail mail) {
+        int maxScore = 0;
         Optional<User> senderOpt = repo.findByEmail(mail.getSender()) ;
         if (senderOpt.isEmpty()) throw new NoSuchElementException("sender not found");
         User sender = senderOpt.get();
+        for (String queryName : senderNames) {
+            String query = queryName.trim().toLowerCase();
+                int score = calculateMatchScore(sender, query);
+                maxScore = Math.max(maxScore, score);
+        }
 
-        String fullName = String.join(" ",
-                sender.getFirstName(),
-                sender.getLastName()
-        ).toLowerCase();
+        return maxScore;
+    }
 
-        String email = sender.getEmail().toLowerCase();
+    private int calculateMatchScore(User user, String query) {
+        String fullName = (user.getFirstName() + " " + user.getLastName()).toLowerCase();
+        String email = user.getEmail().toLowerCase();
         String emailLocalPart = email.split("@")[0];
 
-        // Exact email match - highest score
-        if (email.equals(senderName)) {
-            return 100;
-        }
+        if (email.equals(query)) return 100;
+        if (fullName.equals(query)) return 90;
+        if (emailLocalPart.equals(query)) return 80;
+        if (email.startsWith(query)) return 70;
+        if (fullName.startsWith(query)) return 60;
+        if (email.contains(query)) return 50;
+        if (fullName.contains(query)) return 40;
 
-        // Exact name match
-        if (fullName.equals(senderName)) {
-            return 90;
-        }
-
-        // Exact local part match
-        if (emailLocalPart.equals(senderName)) {
-            return 80;
-        }
-
-        // Email starts with query
-        if (email.startsWith(senderName)) {
-            return 70;
-        }
-
-        // Name starts with query
-        if (fullName.startsWith(senderName)) {
-            return 60;
-        }
-
-        // Email contains query
-        if (email.contains(senderName)) {
-            return 50;
-        }
-
-        // Name contains query
-        if (fullName.contains(senderName)) {
-            return 40;
-        }
-
-        // Token-based prefix matching
-        String[] receiverTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
-        String[] queryTokens = senderName.split("\\s+");
-
+        String[] userTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
+        String[] queryTokens = query.split("\\s+");
         int matchedTokens = 0;
+
         for (String q : queryTokens) {
-            boolean matched = Arrays.stream(receiverTokens)
-                    .anyMatch(s -> s.startsWith(q));
+            boolean matched = Arrays.stream(userTokens).anyMatch(s -> s.startsWith(q));
             if (matched) matchedTokens++;
         }
 
-        if (matchedTokens == queryTokens.length) {
-            return 30; // All tokens matched
-        }
-
-        return 0;
+        return matchedTokens == queryTokens.length ? 30 : 0;
     }
 
-    public String getSenderName() {
-        return senderName;
+    public String[] getSenderNames() {
+        return senderNames;
     }
 
-    public void setSenderName(String senderName) {
-        this.senderName = senderName.trim().toLowerCase();
+    public void setSenderNames(List<String> senderNames) {
+        this.senderNames = (String[]) senderNames.toArray();
+    }
+    public void setSenderNames(String[] senderNames) {
+        this.senderNames = senderNames;
     }
 }

@@ -46,6 +46,8 @@ public class FilterService {
         FilterStrategy bodyFilter = new BodyFilter() ;
         FilterStrategy isReadFilter = new IsReadFilter() ;
         FilterStrategy receiverFilter = new ReceiverFilter(userRepository) ;
+        FilterStrategy folderFilter = new FolderFilter() ;
+        FilterStrategy hasAttachments = new HasAttachement();
 
         filters.put("sender", senderFilter);
         filters.put("receiver", receiverFilter);
@@ -56,7 +58,8 @@ public class FilterService {
         filters.put("afterDate", afterDateFilter);
         filters.put("body", bodyFilter);
         filters.put("isRead", isReadFilter);
-
+        filters.put("folder", folderFilter);
+        filters.put("hasAttachments", hasAttachments);
     }
 
     /**
@@ -76,7 +79,7 @@ public class FilterService {
         // Refactor : Move these into helper method
         if (dto.getSender().isPresent()) {
             SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderName(dto.getSender().get());
+            senderFilter.setSenderNames(dto.getSender().get());
             activeFilters.add(senderFilter);
         }
         if (dto.getSubject().isPresent()) {
@@ -116,7 +119,7 @@ public class FilterService {
         }
         if (dto.getReceiver().isPresent()) {
             ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
-            receiverFilter.setReceivers(new String[]{dto.getReceiver().get()});
+            receiverFilter.setReceivers(dto.getReceiver().get());
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
@@ -153,7 +156,7 @@ public class FilterService {
 
         if (dto.getSender().isPresent()) {
             SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderName(dto.getSender().get());
+            senderFilter.setSenderNames(dto.getSender().get());
             activeFilters.add(senderFilter);
         }
         if (dto.getSubject().isPresent()) {
@@ -193,7 +196,7 @@ public class FilterService {
         }
         if (dto.getReceiver().isPresent()) {
             ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
-            receiverFilter.setReceivers(new String[]{dto.getReceiver().get()});
+            receiverFilter.setReceivers(dto.getReceiver().get());
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");

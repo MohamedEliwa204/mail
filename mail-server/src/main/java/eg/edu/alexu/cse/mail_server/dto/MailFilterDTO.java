@@ -1,13 +1,14 @@
 package eg.edu.alexu.cse.mail_server.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 // Refactor instead of using strings
 public class MailFilterDTO {
     private Long userId; // Required: The user performing the search
-    private Optional<String> sender = Optional.empty();
-    private Optional<String> receiver = Optional.empty();
+    private Optional<List<String>> sender = Optional.empty();
+    private Optional<List<String>> receiver = Optional.empty();
     private Optional<String> subject = Optional.empty();
     private Optional<String> body = Optional.empty();
     private Optional<LocalDateTime> exactDate = Optional.empty();
@@ -15,7 +16,13 @@ public class MailFilterDTO {
     private Optional<LocalDateTime> beforeDate = Optional.empty();
     private Optional<Boolean> isRead = Optional.empty();
     private Optional<Integer> priority = Optional.empty();
+    private Optional<Boolean> hasAttachment  = Optional.empty();
+    private Optional<String> folder = Optional.empty();
     // Attachement will be added soon
+
+
+    public MailFilterDTO() {
+    }
 
     public Long getUserId() {
         return userId;
@@ -25,20 +32,19 @@ public class MailFilterDTO {
         this.userId = userId;
     }
 
-
-    public Optional<String> getSender() {
+    public Optional<List<String>> getSender() {
         return sender;
     }
 
-    public void setSender(Optional<String> sender) {
+    public void setSender(Optional<List<String>> sender) {
         this.sender = sender;
     }
 
-    public Optional<String> getReceiver() {
+    public Optional<List<String>> getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(Optional<String> receiver) {
+    public void setReceiver(Optional<List<String>> receiver) {
         this.receiver = receiver;
     }
 
@@ -96,5 +102,21 @@ public class MailFilterDTO {
 
     public void setPriority(Optional<Integer> priority) {
         this.priority = priority;
+    }
+
+    public Optional<Boolean> getHasAttachment() {
+        return hasAttachment;
+    }
+
+    public void setHasAttachment(Optional<Boolean> hasAttachment) {
+        this.hasAttachment = hasAttachment;
+    }
+
+    public Optional<String> getFolder() {
+        return folder;
+    }
+
+    public void setFolder(Optional<String> folder) {
+        this.folder = folder;
     }
 }

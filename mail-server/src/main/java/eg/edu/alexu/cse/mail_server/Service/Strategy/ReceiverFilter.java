@@ -4,10 +4,7 @@ import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Entity.User;
 import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 public class ReceiverFilter implements FilterStrategy {
 
@@ -28,6 +25,10 @@ public class ReceiverFilter implements FilterStrategy {
 
     public void setReceivers(String[] receivers) {
         this.receivers = receivers;
+    }
+
+    public void setReceivers(List<String> receivers) {
+        this.receivers = receivers.toArray(new String[0]);
     }
 
     @Override
@@ -163,9 +164,14 @@ public class ReceiverFilter implements FilterStrategy {
 
     // Currently the mail support one receiver
     List<User> getReceivers(Mail mail) {
-        Optional<User> receiver = repo.findByEmail(mail.getReceiver()) ;
-        if(receiver.isEmpty()) throw new NoSuchElementException("Receiver not found");
-        return List.of(new User[]{receiver.get()});
+        String[] mails = mail.getReceiver().split(",") ;
+        List<User> receivers = new ArrayList<>();
+        for (String receiverStr : mails) {
+            Optional<User> receiver = repo.findByEmail(mail.getReceiver()) ;
+            if(receiver.isEmpty()) throw new NoSuchElementException("Receiver not found");
+            receivers.add(receiver.get());
+        }
+        return receivers ;
     }
 
 }
