@@ -57,30 +57,29 @@ public class ReceiverFilter implements FilterStrategy {
         ).toLowerCase();
 
         String email = receiver.getEmail().toLowerCase();
+        String emailLocalPart = email.split("@")[0];
 
         // Check if query matches as a substring in full name or email
-        if (fullName.contains(query) || email.contains(query)) {
+        if (fullName.contains(query) || email.contains(query) || emailLocalPart.contains(query)) {
             return true;
         }
 
-        // Check if query matches email local part
-        String emailLocalPart = email.split("@")[0];
-        if (emailLocalPart.contains(query)) {
-            return true;
-        }
-
-
-        // Fall back to token-based prefix matching
+        // Token-based prefix matching
         String[] receiverTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
         String[] queryTokens = query.split("\\s+");
 
+        boolean allTokensMatched = true;
         for (String q : queryTokens) {
+            if (q.isEmpty()) continue;
             boolean matched = Arrays.stream(receiverTokens)
-                    .anyMatch(s -> s.startsWith(q));
-            if (!matched) return false;
+                    .anyMatch(s -> !s.isEmpty() && s.startsWith(q));
+            if (!matched) {
+                allTokensMatched = false;
+                break;
+            }
         }
 
-        return false;
+        return allTokensMatched;
     }
 
     @Override

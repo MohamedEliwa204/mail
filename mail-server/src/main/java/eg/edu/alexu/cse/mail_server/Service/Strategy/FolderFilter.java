@@ -5,10 +5,10 @@ import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import java.util.Objects;
 
 public class FolderFilter implements FilterStrategy{
-    private String queryFolder ;
+    private String folder ;
     @Override
     public boolean filter(Mail mail) {
-        return Objects.equals(mail.getFolderName(), queryFolder);
+        return Objects.equals(mail.getFolderName(), folder);
     }
 
     @Override
@@ -16,11 +16,11 @@ public class FolderFilter implements FilterStrategy{
         return filter(mail) ? 100 : 0;
     }
 
-    public String getQueryFolder() {
-        return queryFolder;
+    public String getFolder() {
+        return folder;
     }
 
-    public void setQueryFolder(String queryFilter) {
-        this.queryFolder = queryFilter;
+    public void setFolder(String folder) {
+        this.folder = folder;
     }
 }

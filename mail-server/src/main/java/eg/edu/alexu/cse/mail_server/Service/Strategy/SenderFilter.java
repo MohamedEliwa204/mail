@@ -30,41 +30,46 @@ public class SenderFilter implements FilterStrategy {
 
     @Override
     public boolean filter(Mail mail) {
-        Optional<User> senderOpt = repo.findByEmail(mail.getSender()) ;
+        if (senderNames == null || senderNames.length == 0) return false;
+        
+        Optional<User> senderOpt = repo.findByEmail(mail.getSender());
         if (senderOpt.isEmpty()) throw new NoSuchElementException("sender not found");
         User sender = senderOpt.get();
 
+        String fullName = String.join(" ",
+                sender.getFirstName(),
+                sender.getLastName()
+        ).toLowerCase();
+
+        String email = sender.getEmail().toLowerCase();
+        String emailLocalPart = email.split("@")[0];
+
+        // Check each query against the sender
         for (String senderName : senderNames) {
-
-
-            String fullName = String.join(" ",
-                    sender.getFirstName(),
-                    sender.getLastName()
-            ).toLowerCase();
-
-            String email = sender.getEmail().toLowerCase();
-
             String query = senderName.toLowerCase().trim();
 
-            // Check if query matches as a substring in full name
-            if (fullName.contains(query) || email.contains(query)) {
+            // Check if query matches as a substring in full name or email
+            if (fullName.contains(query) || email.contains(query) || emailLocalPart.contains(query)) {
                 return true;
             }
 
-            // Check if query matches email local part
-            String emailLocalPart = email.split("@")[0];
-            if (emailLocalPart.contains(query)) {
-                return true;
-            }
-
-            // Fall back to token-based prefix matching
+            // Token-based prefix matching
             String[] senderTokens = (fullName + " " + emailLocalPart).split("[\\s@._+-]+");
             String[] queryTokens = query.split("\\s+");
 
+            boolean allTokensMatched = true;
             for (String q : queryTokens) {
+                if (q.isEmpty()) continue;
                 boolean matched = Arrays.stream(senderTokens)
-                        .anyMatch(s -> s.startsWith(q));
-                if (!matched) return false;
+                        .anyMatch(s -> !s.isEmpty() && s.startsWith(q));
+                if (!matched) {
+                    allTokensMatched = false;
+                    break;
+                }
+            }
+            
+            if (allTokensMatched) {
+                return true;
             }
         }
 

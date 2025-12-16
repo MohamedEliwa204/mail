@@ -15,6 +15,8 @@ public class MailFilterDTO {
     private LocalDateTime beforeDate;
     private Boolean isRead;
     private Integer priority;
+    private String folder ;
+    private Boolean hasAttachments;
     // Attachment will be added soon
 
     public Long getUserId() {
@@ -95,5 +97,29 @@ public class MailFilterDTO {
 
     public void setPriority(Integer priority) {
         this.priority = priority;
+    }
+
+    public Boolean getRead() {
+        return isRead;
+    }
+
+    public void setRead(Boolean read) {
+        isRead = read;
+    }
+
+    public String getFolder() {
+        return folder;
+    }
+
+    public void setFolder(String folder) {
+        this.folder = folder;
+    }
+
+    public Boolean getHasAttachments() {
+        return hasAttachments;
+    }
+
+    public void setHasAttachments(Boolean hasAttachments) {
+        this.hasAttachments = hasAttachments;
     }
 }
