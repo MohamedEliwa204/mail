@@ -46,7 +46,7 @@ public class ReceiverFilter implements FilterStrategy {
                 if (matchesReceiver(user,query)) return true;
             }
         }
-        return true;
+        return false;  // No match found
     }
 
 
@@ -58,7 +58,7 @@ public class ReceiverFilter implements FilterStrategy {
 
         String email = receiver.getEmail().toLowerCase();
 
-        // Check if query matches as a substring in full name
+        // Check if query matches as a substring in full name or email
         if (fullName.contains(query) || email.contains(query)) {
             return true;
         }

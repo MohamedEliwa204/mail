@@ -451,7 +451,7 @@ export class Mail implements OnInit {
     this.contacts().forEach(contact => {
       contact.emails.forEach(email => {
         if (email.toLowerCase().includes(receiverInput) ||
-            contact.name.toLowerCase().includes(receiverInput)) {
+          contact.name.toLowerCase().includes(receiverInput)) {
           suggestions.push({ name: contact.name, email });
         }
       });
@@ -463,17 +463,18 @@ export class Mail implements OnInit {
     this.composedMail.receivers[0] = email;
   }
 
-  IsendComposedMail(){
+  IsendComposedMail() {
     console.log(this.composedMail.sender)
     console.log(this.composedMail.receivers)
     console.log(this.composedMail.subject)
     console.log(this.composedMail.body)
     console.log(this.composedMail.priority)
-    if(this.composedMail.receivers.length > 0){
+    if (this.composedMail.receivers.length > 0) {
       this.mailService.sendMail(this.composedMail).subscribe({
         next: res => {
           console.log(res.message)
-          this.refresh()},
+          this.refresh()
+        },
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
@@ -517,16 +518,17 @@ export class Mail implements OnInit {
     console.log(this.composedMail.subject)
     console.log(this.composedMail.body)
     console.log(this.composedMail.priority)
-    if(this.composedMail.receivers.length > 0){
+    if (this.composedMail.receivers.length > 0) {
       this.mailService.sendMailWithAttachments(formData).subscribe({
         next: res => {
           console.log(res.message)
           setTimeout(() => {
-          alert('Email sent successfully!');
-          this.refresh();
-          this.resetComposeForm();
-        }, 500);
-          this.refresh()},
+            alert('Email sent successfully!');
+            this.refresh();
+            this.resetComposeForm();
+          }, 500);
+          this.refresh()
+        },
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
@@ -572,8 +574,8 @@ export class Mail implements OnInit {
   saveDraftAndClose() {
     // Check if there's any content to save
     const hasContent = this.composedMail.subject.trim() !== '' ||
-                       this.composedMail.body.trim() !== '' ||
-                       this.composedMail.receivers.length > 0;
+      this.composedMail.body.trim() !== '' ||
+      this.composedMail.receivers.length > 0;
 
     if (!hasContent) {
       // Nothing to save, just close
@@ -616,6 +618,7 @@ export class Mail implements OnInit {
   searchMethod = signal<string>('subject');
   isFilterMenuOpen = signal<boolean>(false);
 
+
   // Advanced filter properties
   searchFrom = signal<string>('');
   searchTo = signal<string>('');
@@ -625,6 +628,48 @@ export class Mail implements OnInit {
   exactDate = signal<string>('');
   searchFolder = signal<string>('all');
   hasAttachment = signal<boolean>(false);
+
+  // General search that search all fields for the query 
+  generalSearch() {
+    const query = this.searchQuery().trim().toLowerCase();
+    const userId = this.currentUser()?.id;
+    if (userId) {
+      let mailFilterDto: MailFilterDTO = {
+        userId: this.currentUser()?.id,
+        sender: [query],
+        receiver: [query],
+        subject: query,
+        body: query,
+      }
+      this.mailService.searchMails(this.searchFolder(), mailFilterDto).subscribe({
+        next: (mails) => {
+          const mappedMails = mails.map((m: any) => ({
+            mailId: m.id || m.mailId,
+            sender: m.sender,
+            receiver: m.receiver,
+            body: m.body,
+            subject: m.subject,
+            timestamp: m.timestamp,
+            priority: m.priority,
+            folderName: m.folderName,
+            isRead: m.isRead ?? m.read,
+            attachments: m.attachments
+          }));
+          this.mails.set(mappedMails);
+          this.isLoading.set(false);
+          this.currentFolder.set('search');
+        },
+        error: (error) => {
+          console.error('Error filtering mails:', error);
+          this.isLoading.set(false);
+        }
+      })
+    }
+    else {
+      this.isLoading.set(false);
+    }
+
+  }
   isRead = signal<boolean | null>(null);
 
   onSearch() {
@@ -689,7 +734,6 @@ export class Mail implements OnInit {
       afterDate: afterDate,
       beforeDate: beforeDate,
       isRead: isRead !== null ? isRead : undefined,
-      priority: undefined,
     };
 
     // --- Console Logs for Testing ---
@@ -755,15 +799,17 @@ export class Mail implements OnInit {
 
     if (userEmail) {
       this.mailService.getContacts(userEmail, this.ascendingSorting()).subscribe({
-        next: contacts => {this.contacts.set(contacts);
-                          console.log("CONTACTS ARE RETRIEVED!!");
-                        console.log(contacts)},
+        next: contacts => {
+          this.contacts.set(contacts);
+          console.log("CONTACTS ARE RETRIEVED!!");
+          console.log(contacts)
+        },
         error: err => console.log("ERROR!!: " + err)
       });
     }
   }
 
-  sortContacts(){
+  sortContacts() {
     this.ascendingSorting.set(!this.ascendingSorting())
 
     this.loadContacts()
