@@ -124,13 +124,13 @@ export class Mail implements OnInit {
   toggleSelectAll() {
     const visibleIndices = this.generatePage();
     const allSelected = visibleIndices.every(i =>
-      this.selectedIds().has(this.mails()[i].mailId)
+      this.selectedIds().has(this.mails()[i].id)
     );
 
     this.selectedIds.update(ids => {
       const newIds = new Set(ids);
       visibleIndices.forEach(i => {
-        const mailId = this.mails()[i].mailId;
+        const mailId = this.mails()[i].id;
         if (allSelected) {
           newIds.delete(mailId);
         } else {
@@ -143,7 +143,7 @@ export class Mail implements OnInit {
   isAllVisibleSelected(): boolean {
     const visibleIndices = this.generatePage();
     if (visibleIndices.length === 0) return false;
-    return visibleIndices.every(i => this.selectedIds().has(this.mails()[i].mailId));
+    return visibleIndices.every(i => this.selectedIds().has(this.mails()[i].id));
   }
 
   //Bulk Actions
@@ -163,7 +163,7 @@ export class Mail implements OnInit {
 
       // Frontend Update
       this.mails.update(currentMails =>
-        currentMails.filter(m => !this.selectedIds().has(m.mailId))
+        currentMails.filter(m => !this.selectedIds().has(m.id))
       );
       this.selectedIds.set(new Set());
     }
@@ -295,7 +295,7 @@ export class Mail implements OnInit {
       // Request: PUT /api/mail/move-batch
       // Body: { mailIds: [1, 2], targetFolder: "spam" }
       this.mails.update(currentMails =>
-        currentMails.filter(m => !this.selectedIds().has(m.mailId))
+        currentMails.filter(m => !this.selectedIds().has(m.id))
       );
       this.selectedIds.set(new Set());
     }
@@ -339,8 +339,6 @@ export class Mail implements OnInit {
     this.currentFolder.set('sent');
     this.isLoading.set(true);
 
-    // [BACKEND INTERACTION: GET SENT]
-    // Request: GET /api/mail/sent/{email}
     this.mailService.getSentMails(userEmail).subscribe({
       next: (mails) => {
         this.mails.set(mails);
@@ -461,34 +459,6 @@ export class Mail implements OnInit {
 
   selectContactEmail(email: string) {
     this.composedMail.receivers[0] = email;
-  }
-
-  IsendComposedMail(){
-    console.log(this.composedMail.sender)
-    console.log(this.composedMail.receivers)
-    console.log(this.composedMail.subject)
-    console.log(this.composedMail.body)
-    console.log(this.composedMail.priority)
-    if(this.composedMail.receivers.length > 0){
-      this.mailService.sendMail(this.composedMail).subscribe({
-        next: res => {
-          console.log(res.message)
-          this.refresh()},
-        error: e => {
-          if (e.error && e.error.error) {
-            console.log(`Error: ${e.error.error}`);
-          }
-          else {
-            console.log('Unknown error', e);
-          }
-        }
-      });
-      this.composedMail.receivers = []
-      this.composedMail.subject = ''
-      this.composedMail.body = ''
-      this.composedMail.priority = 1
-      console.log("Email is sent")
-    }
   }
 
   sendComposedMail() {
@@ -709,8 +679,6 @@ export class Mail implements OnInit {
     console.log(filter);
   }
 
-
-
   toggleFilterMenu() {
     this.isFilterMenuOpen.update(v => !v);
   }
@@ -866,12 +834,23 @@ export class Mail implements OnInit {
 
   // Save as Draft
   saveDraft() {
-    // [BACKEND INTERACTION: SAVE DRAFT]
-    // 1. BE Task: Save email to drafts folder without sending.
-    // 2. Request: POST /api/mail/draft
-    // 3. Body: ComposeEmailDTO
     console.log('💾 Saving Draft:', this.composedMail);
     alert('Draft saved successfully!');
     this.resetComposeForm();
   }
+
+  trash(mail: MailEntity | null){
+    if (mail == null) {
+      return
+    }
+    console.log("mail is:" + mail.body)
+    console.log("mail is:" + mail.id)
+    console.log("mail is:" + mail.subject)
+    
+    this.mailService.trashMail(mail.id).subscribe({
+      next: () => console.log("Deleted Successfully!"),
+      error: (err) => console.log("Error!!: ", err)
+    })
+  }
+
 }

@@ -41,7 +41,7 @@
 .one-mail {
     display: grid;
     /* Checkbox | Sender | Subject | Timestamp */
-    grid-template-columns: 40px 3fr 5fr 100px; 
+    grid-template-columns: 40px 3fr 5fr 70px 1fr; 
     align-items: center;
 
     padding: 14px 18px;
@@ -95,4 +95,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.mail-trash{
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.mail-trash:hover{
+    background-color: #9fa5b1;
 }

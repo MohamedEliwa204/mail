@@ -249,7 +249,7 @@
                 </div>
 
                 <div class="trash-mail">
-                  <img src="icons/trash.svg" alt="">
+                  <img src="icons/trash.svg" alt="" (click)="trash(selectedMail())">
                 </div>
               </div>
 
@@ -290,11 +290,6 @@
                   </div>
                 </div>
               }
-            </div>
-
-
-            <div class="mail-reply">
-              <button class="replyBtn">Reply</button>
             </div>
           </div>
         }
@@ -388,14 +383,14 @@
             @for(i of generatePage(); track i){
 
               @if(mails()[i]){
-                <div class="one-mail" [class.selected]="isSelected(mails()[i].mailId)"
-                     [style.background-color]="isSelected(mails()[i].mailId) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
+                <div class="one-mail" [class.selected]="isSelected(mails()[i].id)"
+                     [style.background-color]="isSelected(mails()[i].id) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
                      (click)="currentFolder() === 'drafts' ? openDraftInCompose(mails()[i]) : setselectedMail(mails()[i])"
                      [style.cursor]="currentFolder() === 'drafts' ? 'pointer' : 'default'"
                      [title]="currentFolder() === 'drafts' ? 'Click to edit and send' : ''">
 
-                  <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].mailId)">
-                    <input type="checkbox" [checked]="isSelected(mails()[i].mailId)"
+                  <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].id)">
+                    <input type="checkbox" [checked]="isSelected(mails()[i].id)"
                            style="cursor: pointer; width: 18px; height: 18px;">
                   </div>
 
@@ -412,6 +407,10 @@
                   </div>
 
                   <div>{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
+
+                  <div>
+                    <img src="icons/trash.svg" alt="trash" class="mail-trash" (click)="trash(mails()[i])">
+                  </div>
                 </div>
               }
             }
