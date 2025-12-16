@@ -44,6 +44,7 @@ public class SendCommand implements MailCommand {
                 .folderName("SENT")
                 .isRead(true)
                 .timestamp(LocalDateTime.now())
+                .owner(senderUser)  // Set owner for sent copy
                 .build();
 
         mailRepository.save(sentCopy);
@@ -55,6 +56,7 @@ public class SendCommand implements MailCommand {
             String receiverEmail = receiverQueue.poll();
 
             if (userRepository.findByEmail(receiverEmail).isPresent()) {
+                User receiverUser = userRepository.findByEmail(receiverEmail).get();
                 Mail inboxCopy = Mail.builder()
                         .sender(dto.getSender())
                         .senderRel(senderUser)
@@ -65,6 +67,7 @@ public class SendCommand implements MailCommand {
                         .timestamp(LocalDateTime.now())
                         .folderName("INBOX")
                         .isRead(false)
+                        .owner(receiverUser)  // Set owner as receiver for inbox copy
                         .build();
 
                 mailRepository.save(inboxCopy);
@@ -100,6 +103,7 @@ public class SendCommand implements MailCommand {
                 .folderName("SENT")
                 .isRead(true)
                 .timestamp(LocalDateTime.now())
+                .owner(senderUser)  // Set owner for sent copy
                 .build();
 
         mailRepository.save(sentCopy);
@@ -119,6 +123,7 @@ public class SendCommand implements MailCommand {
             String receiverEmail = receiverQueue.poll();
 
             if (userRepository.findByEmail(receiverEmail).isPresent()) {
+                User receiverUser = userRepository.findByEmail(receiverEmail).get();
                 Mail inboxCopy = Mail.builder()
                         .sender(dto.getSender())
                         .senderRel(senderUser)
@@ -129,6 +134,7 @@ public class SendCommand implements MailCommand {
                         .timestamp(LocalDateTime.now())
                         .folderName("INBOX")
                         .isRead(false)
+                        .owner(receiverUser)  // Set owner as receiver for inbox copy
                         .build();
 
                 mailRepository.save(inboxCopy);

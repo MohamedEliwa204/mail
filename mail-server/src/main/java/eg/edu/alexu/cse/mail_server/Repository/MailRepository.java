@@ -34,4 +34,14 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     // Find trash emails older than specified date for automatic deletion
     List<Mail> findByFolderNameAndDeletedAtBefore(String folderName, java.time.LocalDateTime deletedAt);
+
+    // Owner-based queries for personal folders (trash, drafts, custom folders)
+    List<Mail> findByOwnerIdAndFolderNameOrderByTimestampDesc(Long ownerId, String folderName);
+
+    // Find trash emails for a specific owner (for loading trash folder)
+    List<Mail> findByOwnerIdAndFolderName(Long ownerId, String folderName);
+
+    // Find mail by ID and owner (for deletion security)
+    @Query("SELECT m FROM Mail m WHERE m.mailId = :mailId AND m.ownerId = :ownerId")
+    Mail findByMailIdAndOwnerId(@Param("mailId") Long mailId, @Param("ownerId") Long ownerId);
 }

@@ -62,6 +62,12 @@ public class MailController {
         return mailService.getDraftMails(userEmail);
     }
 
+    // Get trash emails
+    @GetMapping("/trash/{userEmail}")
+    public List<EmailViewDto> getTrashMails(@PathVariable String userEmail) {
+        return mailService.getTrashMails(userEmail);
+    }
+
     // Get emails by folder
     @GetMapping("/folder/{userEmail}/{folderName}")
     public List<EmailViewDto> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
