@@ -22,15 +22,18 @@ public class ContactService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
 
-        // Validate contact emails
         if (dto.getEmails() == null || dto.getEmails().isEmpty()) {
             throw new IllegalArgumentException("Contact must have at least one email address");
         }
 
-        // Validate email format for each email
         for (String contactEmail : dto.getEmails()) {
             if (!isValidEmail(contactEmail)) {
                 throw new IllegalArgumentException("Invalid email address: " + contactEmail);
+            }
+
+            // Verify that the contact email exists in the database
+            if (!userRepository.findByEmail(contactEmail).isPresent()) {
+                throw new IllegalArgumentException("Email not found in database: " + contactEmail);
             }
         }
 
@@ -52,15 +55,18 @@ public class ContactService {
         Contact contact = contactRepository.findById(newDto.getId())
                 .orElseThrow(() -> new RuntimeException("Contact not found with id: " + newDto.getId()));
 
-        // Validate contact emails
         if (newDto.getEmails() == null || newDto.getEmails().isEmpty()) {
             throw new IllegalArgumentException("Contact must have at least one email address");
         }
 
-        // Validate email format for each email
         for (String contactEmail : newDto.getEmails()) {
             if (!isValidEmail(contactEmail)) {
                 throw new IllegalArgumentException("Invalid email address: " + contactEmail);
+            }
+
+            // Verify that the contact email exists in the database
+            if (!userRepository.findByEmail(contactEmail).isPresent()) {
+                throw new IllegalArgumentException("Email not found in database: " + contactEmail);
             }
         }
 
