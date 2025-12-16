@@ -14,34 +14,62 @@
             </div>
 
             @if(isFilterMenuOpen()) {
-            <div class="filter-dropdown">
+                <div class="filter-dropdown">
 
-                <div class="filter-item">
-                    <label for="">Form</label>
-                    <input type="text">
+                    <div class="filter-item">
+                        <label for="from-input">From</label>
+                        <input id="from-input" type="text" placeholder="Sender email">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="to-input">To</label>
+                        <input id="to-input" type="text" placeholder="Recipient email">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="subject-input">Subject</label>
+                        <input id="subject-input" type="text" placeholder="Email subject">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="words-input">Has the words</label>
+                        <input id="words-input" type="text" placeholder="Search in content">
+                    </div>
+
+                    <div class="Date">
+                        <label for="date-select">Date within</label>
+                        <select id="date-select" name="date">
+                            <option value="">1 day</option>
+                            <option value="">3 days</option>
+                            <option value="">1 week</option>
+                            <option value="">2 weeks</option>
+                            <option value="">1 month</option>
+                            <option value="">2 months</option>
+                            <option value="">6 months</option>
+                            <option value="">1 year</option>
+                        </select>
+                        <input type="date">
+                    </div>
+
+                    <!-- Search and Move Section -->
+                    <div class="filter-item">
+                        <label for="search-label">Search</label>
+                        <div class="mail-icons">
+                            <select class="move-select">
+                                <option value="">All Mail</option>
+                                @for(folder of targetFolders(); track folder) {
+                                    <option [value]="">{{ folder }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox Section -->
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="attachments-checkbox" name="attachments">
+                        <label for="attachments-checkbox">Has Attachments</label>
+                    </div>
                 </div>
-
-                <div class="filter-item">
-                    <label for="">To</label>
-                    <input type="text">
-                </div>
-
-                <div class="filter-item">
-                    <label for="">Subject</label>
-                    <input type="text">
-                </div>
-
-                <div class="filter-item">
-                    <label for="">Has the words</label>
-                    <input type="text">
-                </div>
-
-                <div class="Date">
-                    <div></div>
-                </div>
-
-                <div></div>
-            </div>
             }
         </div>
 
@@ -274,26 +302,6 @@
                 style="cursor: pointer; border: 1px solid #dadce0; padding: 6px 12px; border-radius: 4px; transition: all 0.3s;">
                 {{ isPriorityMode() ? '⭐ Priority View' : '📧 Default View' }}
             </button>
-
-            <div class="button-filter">
-                From <img src="icons/dropdown.svg" alt="">
-            </div>
-
-            <div class="button-filter">
-                Any time <img src="icons/dropdown.svg" alt="">
-            </div>
-
-            <div class="button-filter">
-                Has attachment <img src="icons/dropdown.svg" alt="">
-            </div>
-
-            <div class="button-filter">
-                To <img src="icons/dropdown.svg" alt="">
-            </div>
-
-            <div class="button-filter">
-                Is unread <img src="icons/dropdown.svg" alt="">
-            </div>
 
         </div>
 
