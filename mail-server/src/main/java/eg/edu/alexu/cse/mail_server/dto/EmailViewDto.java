@@ -13,14 +13,17 @@ import lombok.Data;
 public class EmailViewDto {
     private Long id;
     private String sender;
+    private String receiver;
     private String subject;
     private String body;
     private LocalDateTime timestamp;
     private int priority;
     private boolean isRead;
+    private String folderName;
 
-    // Full attachment data with file content
+    // Full attachment data with file content (includes Base64 encoded files)
     private List<AttachmentDTO> attachments;
+
 
     // No-args constructor required for Jackson deserialization
     public EmailViewDto() {

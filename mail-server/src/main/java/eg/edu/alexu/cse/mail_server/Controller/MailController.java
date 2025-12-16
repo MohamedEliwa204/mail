@@ -3,6 +3,7 @@ package eg.edu.alexu.cse.mail_server.Controller;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Service.MailService;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
+import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,13 +36,13 @@ public class MailController {
 
     // Get inbox emails
     @GetMapping("/inbox/{userEmail}")
-    public List<Mail> getInboxMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getInboxMails(@PathVariable String userEmail) {
         return mailService.getInboxMails(userEmail);
     }
 
     // Get sent emails
     @GetMapping("/sent/{userEmail}")
-    public List<Mail> getSentMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getSentMails(@PathVariable String userEmail) {
         return mailService.getSentMails(userEmail);
     }
     
@@ -49,13 +50,13 @@ public class MailController {
 
     // Get draft emails
     @GetMapping("/drafts/{userEmail}")
-    public List<Mail> getDraftMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getDraftMails(@PathVariable String userEmail) {
         return mailService.getDraftMails(userEmail);
     }
 
     // Get emails by folder
     @GetMapping("/folder/{userEmail}/{folderName}")
-    public List<Mail> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
+    public List<EmailViewDto> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
         return mailService.getMailsByFolder(userEmail, folderName);
     }
 

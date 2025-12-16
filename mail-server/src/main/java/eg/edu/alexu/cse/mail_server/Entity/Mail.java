@@ -47,6 +47,7 @@ public class Mail {
     @Builder.Default
     private boolean isRead = false; // for ui
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_id")
     private List<Attachment> attachments;

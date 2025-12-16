@@ -73,7 +73,7 @@ public class AttachmentService {
      */
     public List<AttachmentDTO> getAttachmentsWithData(Long mailId) throws IOException {
         List<Attachment> attachments = getAttachmentsByMailId(mailId);
-        List<eg.edu.alexu.cse.mail_server.dto.AttachmentDTO> attachmentDTOs = new ArrayList<>();
+        List<AttachmentDTO> attachmentDTOs = new ArrayList<>();
 
         for (Attachment attachment : attachments) {
 
@@ -82,7 +82,7 @@ public class AttachmentService {
             // Encode to Base64 for JSON transfer
             String base64Data = java.util.Base64.getEncoder().encodeToString(fileData);
 
-            eg.edu.alexu.cse.mail_server.dto.AttachmentDTO dto = eg.edu.alexu.cse.mail_server.dto.AttachmentDTO.builder()
+            AttachmentDTO dto = AttachmentDTO.builder()
                     .id(attachment.getId())
                     .fileName(attachment.getFileName())
                     .contentType(attachment.getContentType())
