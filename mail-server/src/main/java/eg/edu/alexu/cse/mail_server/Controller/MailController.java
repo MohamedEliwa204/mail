@@ -45,8 +45,6 @@ public class MailController {
         return mailService.getSentMails(userEmail);
     }
     
-
-
     // Get draft emails
     @GetMapping("/drafts/{userEmail}")
     public List<Mail> getDraftMails(@PathVariable String userEmail) {

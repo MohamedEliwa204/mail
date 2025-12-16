@@ -126,8 +126,6 @@ public class FilterService {
 
     }
 
-
-
     /**
      * Filter emails using OR logic - at least one criterion must match
      * Only returns emails related to the specified user (as sender or receiver)

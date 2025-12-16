@@ -35,3 +35,5 @@ build/
 # Local env file for secrets
 .env
 application.yaml
+
+attachments

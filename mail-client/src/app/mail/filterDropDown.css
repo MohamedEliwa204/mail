@@ -1,0 +1,32 @@
+/* Change from .filterDropDown to .filter-dropdown */
+.filter-dropdown {
+    position: relative;
+    top: 155px; 
+    right: 0;
+    background: white;
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+    width: 160px; 
+    z-index: 2000; 
+    overflow: hidden; 
+    display: flex; 
+    flex-direction: column;
+}
+
+.filter-item {
+    padding: 10px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    border-bottom: 1px solid #eee;
+}
+
+.filter-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Remove last border */
+.filter-item:last-child {
+    border-bottom: none;
+}
+
