@@ -111,6 +111,39 @@ public class MailService {
     }
 
     /**
+     * Copy an email to a custom folder
+     * Creates a duplicate of the email with the specified folder name
+     * @param mailId ID of the email to copy
+     * @param folderName Name of the target folder
+     */
+    public void copyEmailToFolder(Long mailId, String folderName) {
+        // Get original email
+        Mail originalMail = getMailById(mailId);
+
+        // Validate folder name
+        if (folderName == null || folderName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Folder name cannot be empty");
+        }
+
+        // Create a copy of the email
+        Mail copiedMail = Mail.builder()
+                .sender(originalMail.getSender())
+                .senderRel(originalMail.getSenderRel())
+                .receiver(originalMail.getReceiver())
+                .subject(originalMail.getSubject())
+                .body(originalMail.getBody())
+                .priority(originalMail.getPriority())
+                .timestamp(java.time.LocalDateTime.now()) // New timestamp for the copy
+                .folderName(folderName.toLowerCase()) // Store folder name in lowercase
+                .isRead(originalMail.isRead())
+                .receiverRel(originalMail.getReceiverRel())
+                .attachments(originalMail.getAttachments()) // Reference same attachments
+                .build();
+
+        mailRepository.save(copiedMail);
+    }
+
+    /**
      * Get mail with all attachments including file data
      *
      * @param mailId the ID of the mail
