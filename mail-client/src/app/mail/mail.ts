@@ -787,6 +787,28 @@ export class Mail implements OnInit {
     this.contacts.update(c => c.filter(x => x.id !== contactId));
   }
 
+  /**
+   * Open a draft email in compose window for editing
+   * @param mail - The draft email to edit
+   */
+  openDraftInCompose(mail: MailEntity) {
+    // Populate compose form with draft data
+    this.composedMail.receivers = [mail.receiver || ''];
+    this.composedMail.subject = mail.subject || '';
+    this.composedMail.body = mail.body || '';
+    this.composedMail.priority = mail.priority || 1;
+
+    // Note: Attachments would need to be handled separately if stored
+    // For now, we'll start with empty attachments
+    this.selectedAttachments.set([]);
+
+    // Open compose window
+    this.isComposing = true;
+
+    // TODO: Optionally delete the draft from backend after opening
+    // so it doesn't duplicate when user saves/sends
+  }
+
   // Save as Draft
   saveDraft() {
     // [BACKEND INTERACTION: SAVE DRAFT]
