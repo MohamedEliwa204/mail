@@ -613,18 +613,7 @@ export class Mail implements OnInit {
 
   //Search & Filter Logic
   searchQuery = signal<string>('');
-  searchFrom = signal<string>('');
-  searchTo = signal<string>('');
-  searchSubject = signal<string>('');
-  searchWords = signal<string>('');
-  dateRange = signal<string>('');
-  exactDate = signal<string>('');
-
   searchMethod = signal<string>('subject');
-
-  searchFolder = signal<string>('');
-  hasAttachment = signal<boolean>(false);
-  isRead = signal<boolean>(false);
   isFilterMenuOpen = signal<boolean>(false);
 
   // Advanced filter properties

@@ -5,13 +5,14 @@
 
         <div class="searchbar" style="position: relative;">
 
-            <div class="search">
-                <div type="text" [(ngModel)]="searchQuery">Search by</div>
-            </div>
+          <div class="search">
+            <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onSearch()"
+                   [placeholder]="'Search by ' + searchMethod() + '...'">
+          </div>
 
-            <div class="filter" (click)="toggleFilterMenu()" style="cursor: pointer;" title="Filter Options">
-                <img src="icons/filter.svg" alt="filter">
-            </div>
+          <div class="filter" (click)="toggleFilterMenu()" style="cursor: pointer;" title="Filter Options">
+            <img src="icons/filter.svg" alt="filter">
+          </div>
 
             @if(isFilterMenuOpen()) {
                 <div class="filter-dropdown">
@@ -69,8 +70,8 @@
                         <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="hasAttachment">
                         <label for="attachments-checkbox">Has Attachments</label>
 
-                        <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="isRead">
-                        <label for="attachments-checkbox">Is Read</label>
+                        <input type="checkbox" id="read-checkbox" name="isRead" [(ngModel)]="isRead">
+                        <label for="read-checkbox">Is Read</label>
                     </div>
 
                     <button (click)="onSearch()">Search</button>
