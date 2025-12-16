@@ -79,7 +79,7 @@ public class MailService {
         Long userId = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"))
                 .getUserId();
-        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "TRASH");
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "trash");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
@@ -114,7 +114,7 @@ public class MailService {
         if (mail == null) {
             throw new IllegalArgumentException("Mail not found or you don't have permission to delete it");
         }
-        mail.setFolderName("TRASH");
+        mail.setFolderName("trash");
         mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
         mailRepository.save(mail);
     }
@@ -122,7 +122,7 @@ public class MailService {
     // Overload for backward compatibility (when userId is not available)
     public void deleteMail(Long mailId) {
         Mail mail = getMailById(mailId);
-        mail.setFolderName("TRASH");
+        mail.setFolderName("trash");
         mail.setDeletedAt(java.time.LocalDateTime.now());
         mailRepository.save(mail);
     }
@@ -133,7 +133,7 @@ public class MailService {
      */
     public void deleteOldTrashEmails() {
         java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
-        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("TRASH", thirtyDaysAgo);
+        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("trash", thirtyDaysAgo);
 
         if (!oldTrashMails.isEmpty()) {
             mailRepository.deleteAll(oldTrashMails);

@@ -598,7 +598,7 @@ export class Mail implements OnInit {
   searchFolder = signal<string>('all');
   hasAttachment = signal<boolean>(false);
 
-  // General search that search all fields for the query 
+  // General search that search all fields for the query
   generalSearch() {
     const query = this.searchQuery().trim().toLowerCase();
     const userId = this.currentUser()?.id;
@@ -613,7 +613,7 @@ export class Mail implements OnInit {
       this.mailService.searchMails(this.searchFolder(), mailFilterDto).subscribe({
         next: (mails) => {
           const mappedMails = mails.map((m: any) => ({
-            mailId: m.id || m.mailId,
+            id: m.id || m.mailId,
             sender: m.sender,
             receiver: m.receiver,
             body: m.body,
@@ -716,7 +716,7 @@ export class Mail implements OnInit {
         next: (mails) => {
           // Map backend response to frontend Mail interface
           const mappedMails = mails.map((m: any) => ({
-            mailId: m.id || m.mailId,
+            id: m.id || m.mailId,
             sender: m.sender,
             receiver: m.receiver,
             body: m.body,
@@ -907,11 +907,11 @@ export class Mail implements OnInit {
     console.log("mail is:" + mail.body)
     console.log("mail is:" + mail.id)
     console.log("mail is:" + mail.subject)
-    
+
     this.mailService.trashMail(mail.id).subscribe({
       next: () => {
         console.log("Deleted Successfully!");
-        this.setselectedMail(null); 
+        this.setselectedMail(null);
       },
       error: (err) => console.log("Error!!: ", err)
     })
