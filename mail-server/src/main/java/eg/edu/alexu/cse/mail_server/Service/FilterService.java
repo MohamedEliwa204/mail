@@ -2,8 +2,10 @@ package eg.edu.alexu.cse.mail_server.Service;
 
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
+import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.AndDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.OrDecorator;
+import eg.edu.alexu.cse.mail_server.Service.Factory.FilterBuilder;
 import eg.edu.alexu.cse.mail_server.Service.Strategy.*;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import eg.edu.alexu.cse.mail_server.dto.MailFilterDTO;
@@ -26,31 +28,14 @@ import java.util.List;
 @Service
 public class FilterService {
     private final MailRepository mailRepository;
-    private final HashMap<String , FilterStrategy> filters = new HashMap<>();
     private final MailFilter mailFilter;
+    private final FilterBuilder filterBuilder ;
 
     @Autowired
-    public FilterService(MailRepository mailRepository) {
+    public FilterService(MailRepository mailRepository, FilterBuilder filterBuilder) {
         this.mailRepository = mailRepository;
+        this.filterBuilder = filterBuilder;
         this.mailFilter = new MailFilter() ;
-
-        FilterStrategy senderFilter = new SenderFilter();
-        FilterStrategy SubjectFilter = new SubjectFilter();
-        FilterStrategy priorityFilter = new PriorityFilter();
-        FilterStrategy exactDateFilter = new ExactDateFilter();
-        FilterStrategy beforeDateFilter = new BeforeDateFilter() ;
-        FilterStrategy afterDateFilter = new AfterDataFilter() ;
-        FilterStrategy bodyFilter = new BodyFilter() ;
-        FilterStrategy isReadFilter = new IsReadFilter() ;
-
-        filters.put("sender", senderFilter);
-        filters.put("subject", SubjectFilter);
-        filters.put("priority", priorityFilter);
-        filters.put("exactDate", exactDateFilter);
-        filters.put("beforeDate", beforeDateFilter);
-        filters.put("afterDate", afterDateFilter);
-        filters.put("body", bodyFilter);
-        filters.put("isRead", isReadFilter);
 
     }
 
@@ -66,65 +51,16 @@ public class FilterService {
 
         // Get only emails related to this user
         List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
-        List<FilterStrategy> activeFilters = new ArrayList<>();
+        List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
-        // Refactor : Move these into helper method
-        if (dto.getSender().isPresent()) {
-            SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderName(dto.getSender().get());
-            activeFilters.add(senderFilter);
-        }
-        if (dto.getSubject().isPresent()) {
-            SubjectFilter subjectFilter = (SubjectFilter) filters.get("subject");
-            subjectFilter.setQuery(dto.getSubject().get());
-            activeFilters.add(subjectFilter);
-        }
-        if (dto.getBody().isPresent()) {
-            BodyFilter bodyFilter = (BodyFilter) filters.get("body");
-            bodyFilter.setBody(dto.getBody().get());
-            activeFilters.add(bodyFilter);
-        }
-        if (dto.getAfterDate().isPresent()) {
-            AfterDataFilter afterDataFilter = (AfterDataFilter) filters.get("afterDate");
-            afterDataFilter.setDate(dto.getAfterDate().get());
-            activeFilters.add(afterDataFilter);
-        }
-        if (dto.getBeforeDate().isPresent()) {
-            BeforeDateFilter beforeDateFilter = (BeforeDateFilter) filters.get("beforeDate");
-            beforeDateFilter.setDate(dto.getBeforeDate().get());
-            activeFilters.add(beforeDateFilter);
-        }
-        if (dto.getExactDate().isPresent()) {
-            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("beforeDate");
-            exactDateFilter.setDate(dto.getBeforeDate().get());
-            activeFilters.add(exactDateFilter);
-        }
-        if (dto.getPriority().isPresent()) {
-            PriorityFilter priorityFilter = (PriorityFilter) filters.get("priority");
-            priorityFilter.setPriority(dto.getPriority().get());
-            activeFilters.add(priorityFilter);
-        }
-        if (dto.getIsRead().isPresent()) {
-            IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
-            isReadFilter.setRead(dto.getIsRead().get());
-            activeFilters.add(isReadFilter);
-        }
-//        if (dto.getAttachmentContent() != null) {
-//            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
-//            attachmentFilter.setContent(dto.getAttachmentContent());
-//            activeFilters.add(attachmentFilter);
-//        }
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
 
-        FilterStrategy filter = activeFilters.getFirst() ;
-
-        for (int i = 1 ; i < activeFilters.size() ; i++) filter = new AndDecorator(filter , activeFilters.get(i)) ;
-
+        FilterStrategy filter = combineFilters(activeFilters,true) ;
         mailFilter.setFilterStrategy(filter);
         return convertToDTO(mailFilter.getEmails(mails)) ;
-
-
     }
+
+
 
     /**
      * Filter emails using OR logic - at least one criterion must match
@@ -138,65 +74,13 @@ public class FilterService {
 
         // Get only emails related to this user
         List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
-        List<FilterStrategy> activeFilters = new ArrayList<>();
+        List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
-        if (dto.getSender().isPresent()) {
-            SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderName(dto.getSender().get());
-            activeFilters.add(senderFilter);
-        }
-        if (dto.getSubject().isPresent()) {
-            SubjectFilter subjectFilter = (SubjectFilter) filters.get("subject");
-            subjectFilter.setQuery(dto.getSubject().get());
-            activeFilters.add(subjectFilter);
-        }
-        if (dto.getBody().isPresent()) {
-            BodyFilter bodyFilter = (BodyFilter) filters.get("body");
-            bodyFilter.setBody(dto.getBody().get());
-            activeFilters.add(bodyFilter);
-        }
-        if (dto.getAfterDate().isPresent()) {
-            AfterDataFilter afterDataFilter = (AfterDataFilter) filters.get("afterDate");
-            afterDataFilter.setDate(dto.getAfterDate().get());
-            activeFilters.add(afterDataFilter);
-        }
-        if (dto.getBeforeDate().isPresent()) {
-            BeforeDateFilter beforeDateFilter = (BeforeDateFilter) filters.get("beforeDate");
-            beforeDateFilter.setDate(dto.getBeforeDate().get());
-            activeFilters.add(beforeDateFilter);
-        }
-        if (dto.getExactDate().isPresent()) {
-            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("beforeDate");
-            exactDateFilter.setDate(dto.getBeforeDate().get());
-            activeFilters.add(exactDateFilter);
-        }
-        if (dto.getPriority().isPresent()) {
-            PriorityFilter priorityFilter = (PriorityFilter) filters.get("priority");
-            priorityFilter.setPriority(dto.getPriority().get());
-            activeFilters.add(priorityFilter);
-        }
-        if (dto.getIsRead().isPresent()) {
-            IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
-            isReadFilter.setRead(dto.getIsRead().get());
-            activeFilters.add(isReadFilter);
-        }
-//        if (dto.getAttachmentContent() != null) {
-//            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
-//            attachmentFilter.setContent(dto.getAttachmentContent());
-//            activeFilters.add(attachmentFilter);
-//        }
+        if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
 
-        if (activeFilters.isEmpty()) return convertToDTO(mails);
-
-        FilterStrategy filter = activeFilters.getFirst();
-        for (int i = 1; i < activeFilters.size(); i++) {
-            filter = new OrDecorator(filter, activeFilters.get(i));
-        }
-
+        FilterStrategy filter = combineFilters(activeFilters,false) ;
         mailFilter.setFilterStrategy(filter);
-        List<Mail> filteredMails = mailFilter.getEmails(mails);
-
-        return convertToDTO(filteredMails);
+        return convertToDTO(mailFilter.getEmails(mails)) ;
     }
 
     private EmailViewDto toDTO(Mail mail) {
@@ -218,5 +102,30 @@ public class FilterService {
         return dtos;
     }
 
+    private List<FilterStrategy> buildFilters(MailFilterDTO filterDTO) {
+        return filterBuilder
+                .withSenderFilter(filterDTO.getSender())
+                .withSubjectFilter(filterDTO.getSubject())
+                .withBodyFilter(filterDTO.getBody())
+                .withAfterDateFilter(filterDTO.getAfterDate())
+                .withBeforeDateFilter(filterDTO.getBeforeDate())
+                .withExactDateFilter(filterDTO.getExactDate())
+                .withPriorityFilter(filterDTO.getPriority())
+                .withIsReadFilter(filterDTO.getIsRead())
+                .withReceiverFilter(filterDTO.getReceiver())
+                .withFolderFilter(filterDTO.getFolder())
+                .withHasAttachmentsFilter(filterDTO.getHasAttachments())
+                .build();
+    }
+
+    private FilterStrategy combineFilters(List<FilterStrategy> filters, boolean useAnd) {
+        FilterStrategy combined = filters.get(0);
+        for (int i = 1; i < filters.size(); i++) {
+            combined = useAnd
+                    ? new AndDecorator(combined, filters.get(i))
+                    : new OrDecorator(combined, filters.get(i));
+        }
+        return combined;
+    }
 
 }
