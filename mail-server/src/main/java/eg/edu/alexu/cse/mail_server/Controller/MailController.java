@@ -5,11 +5,11 @@ import eg.edu.alexu.cse.mail_server.Service.MailService;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,8 +20,11 @@ public class MailController {
     private final MailService mailService;
 
     @PostMapping("/send-with-attachments")
-    public Map<String, String> sendMail(@RequestBody ComposeEmailDTO composeEmailDTO) {
-        mailService.send(composeEmailDTO);
+    public Map<String, String> sendMail(
+            @RequestPart("email") ComposeEmailDTO composeEmailDTO,
+            @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
+    ) throws IOException {
+        mailService.sendWithAttachments(composeEmailDTO, attachments);
         return Map.of("message", "Email sent successfully");
     }
 
@@ -33,27 +36,25 @@ public class MailController {
 
     // Get inbox emails
     @GetMapping("/inbox/{userEmail}")
-    public List<Mail> getInboxMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getInboxMails(@PathVariable String userEmail) {
         return mailService.getInboxMails(userEmail);
     }
 
     // Get sent emails
     @GetMapping("/sent/{userEmail}")
-    public List<Mail> getSentMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getSentMails(@PathVariable String userEmail) {
         return mailService.getSentMails(userEmail);
     }
     
-
-
     // Get draft emails
     @GetMapping("/drafts/{userEmail}")
-    public List<Mail> getDraftMails(@PathVariable String userEmail) {
+    public List<EmailViewDto> getDraftMails(@PathVariable String userEmail) {
         return mailService.getDraftMails(userEmail);
     }
 
     // Get emails by folder
     @GetMapping("/folder/{userEmail}/{folderName}")
-    public List<Mail> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
+    public List<EmailViewDto> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
         return mailService.getMailsByFolder(userEmail, folderName);
     }
 
@@ -76,4 +77,5 @@ public class MailController {
         mailService.deleteMail(mailId);
         return Map.of("message", "Mail deleted successfully");
     }
+
 }

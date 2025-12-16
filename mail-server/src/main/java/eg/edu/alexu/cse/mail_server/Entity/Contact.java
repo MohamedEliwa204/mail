@@ -33,12 +33,12 @@ public class Contact {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, name = "contact_name", nullable = false)
+    @Column(unique = false, name = "contact_name", nullable = false)
     private String name;
 
     @ElementCollection
     @CollectionTable(name = "contact_emails", joinColumns = @JoinColumn(name = "contact_id"))
-    @Column(unique = true, name = "contact_address", nullable = false)
+    @Column(unique = false, name = "contact_address", nullable = false)
     private List<String> emails;
 
     @JsonIgnore

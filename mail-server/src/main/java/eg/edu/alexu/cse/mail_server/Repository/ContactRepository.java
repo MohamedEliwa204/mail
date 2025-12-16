@@ -21,4 +21,10 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     List<Contact> findByUser_EmailOrderByNameAsc(String email);
 
+    // Search contacts by name or email (case-insensitive)
+    List<Contact> findByUser_EmailAndNameContainingIgnoreCase(String userEmail, String searchQuery);
+
+    // Search by email address in the emails list
+    List<Contact> findByUser_EmailAndEmailsContainingIgnoreCase(String userEmail, String searchQuery);
+
 }

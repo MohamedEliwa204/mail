@@ -1,0 +1,22 @@
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+target/
+dist/
+build/
+out/
+
+# Node modules
+node_modules/
+
+# Angular
+.angular/
+

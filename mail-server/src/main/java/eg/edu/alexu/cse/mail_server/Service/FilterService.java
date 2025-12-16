@@ -76,50 +76,51 @@ public class FilterService {
         List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = new ArrayList<>();
 
-        // Refactor : Move these into helper method
-        if (dto.getSender().isPresent()) {
+        // Build active filters based on non-null DTO fields
+        if (dto.getSender() != null && !dto.getSender().isEmpty()) {
             SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderNames(dto.getSender().get());
+            senderFilter.setSenderNames(dto.getSender());
             activeFilters.add(senderFilter);
         }
-        if (dto.getSubject().isPresent()) {
+        if (dto.getSubject() != null && !dto.getSubject().isEmpty()) {
             SubjectFilter subjectFilter = (SubjectFilter) filters.get("subject");
-            subjectFilter.setQuery(dto.getSubject().get());
+            subjectFilter.setQuery(dto.getSubject());
             activeFilters.add(subjectFilter);
         }
-        if (dto.getBody().isPresent()) {
+        if (dto.getBody() != null && !dto.getBody().isEmpty()) {
             BodyFilter bodyFilter = (BodyFilter) filters.get("body");
-            bodyFilter.setBody(dto.getBody().get());
+            bodyFilter.setBody(dto.getBody());
             activeFilters.add(bodyFilter);
         }
-        if (dto.getAfterDate().isPresent()) {
+        if (dto.getAfterDate() != null) {
             AfterDataFilter afterDataFilter = (AfterDataFilter) filters.get("afterDate");
-            afterDataFilter.setDate(dto.getAfterDate().get());
+            afterDataFilter.setDate(dto.getAfterDate());
             activeFilters.add(afterDataFilter);
         }
-        if (dto.getBeforeDate().isPresent()) {
+        if (dto.getBeforeDate() != null) {
             BeforeDateFilter beforeDateFilter = (BeforeDateFilter) filters.get("beforeDate");
-            beforeDateFilter.setDate(dto.getBeforeDate().get());
+            beforeDateFilter.setDate(dto.getBeforeDate());
             activeFilters.add(beforeDateFilter);
         }
-        if (dto.getExactDate().isPresent()) {
-            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("beforeDate");
-            exactDateFilter.setDate(dto.getBeforeDate().get());
+        if (dto.getExactDate() != null) {
+            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("exactDate");
+            exactDateFilter.setDate(dto.getExactDate());
             activeFilters.add(exactDateFilter);
         }
-        if (dto.getPriority().isPresent()) {
+        if (dto.getPriority() != null) {
             PriorityFilter priorityFilter = (PriorityFilter) filters.get("priority");
-            priorityFilter.setPriority(dto.getPriority().get());
+            priorityFilter.setPriority(dto.getPriority());
             activeFilters.add(priorityFilter);
         }
-        if (dto.getIsRead().isPresent()) {
+        if (dto.getIsRead() != null) {
             IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
-            isReadFilter.setRead(dto.getIsRead().get());
+            isReadFilter.setRead(dto.getIsRead());
             activeFilters.add(isReadFilter);
         }
-        if (dto.getReceiver().isPresent()) {
+        if (dto.getReceiver() != null && !dto.getReceiver().isEmpty()) {
             ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
-            receiverFilter.setReceivers(dto.getReceiver().get());
+            receiverFilter.setReceivers(dto.getReceiver());
+            activeFilters.add(receiverFilter);
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");
@@ -154,49 +155,50 @@ public class FilterService {
         List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = new ArrayList<>();
 
-        if (dto.getSender().isPresent()) {
+        if (dto.getSender() != null && !dto.getSender().isEmpty()) {
             SenderFilter senderFilter = (SenderFilter) filters.get("sender");
-            senderFilter.setSenderNames(dto.getSender().get());
+            senderFilter.setSenderNames(dto.getSender());
             activeFilters.add(senderFilter);
         }
-        if (dto.getSubject().isPresent()) {
+        if (dto.getSubject() != null && !dto.getSubject().isEmpty()) {
             SubjectFilter subjectFilter = (SubjectFilter) filters.get("subject");
-            subjectFilter.setQuery(dto.getSubject().get());
+            subjectFilter.setQuery(dto.getSubject());
             activeFilters.add(subjectFilter);
         }
-        if (dto.getBody().isPresent()) {
+        if (dto.getBody() != null && !dto.getBody().isEmpty()) {
             BodyFilter bodyFilter = (BodyFilter) filters.get("body");
-            bodyFilter.setBody(dto.getBody().get());
+            bodyFilter.setBody(dto.getBody());
             activeFilters.add(bodyFilter);
         }
-        if (dto.getAfterDate().isPresent()) {
+        if (dto.getAfterDate() != null) {
             AfterDataFilter afterDataFilter = (AfterDataFilter) filters.get("afterDate");
-            afterDataFilter.setDate(dto.getAfterDate().get());
+            afterDataFilter.setDate(dto.getAfterDate());
             activeFilters.add(afterDataFilter);
         }
-        if (dto.getBeforeDate().isPresent()) {
+        if (dto.getBeforeDate() != null) {
             BeforeDateFilter beforeDateFilter = (BeforeDateFilter) filters.get("beforeDate");
-            beforeDateFilter.setDate(dto.getBeforeDate().get());
+            beforeDateFilter.setDate(dto.getBeforeDate());
             activeFilters.add(beforeDateFilter);
         }
-        if (dto.getExactDate().isPresent()) {
-            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("beforeDate");
-            exactDateFilter.setDate(dto.getBeforeDate().get());
+        if (dto.getExactDate() != null) {
+            ExactDateFilter exactDateFilter = (ExactDateFilter) filters.get("exactDate");
+            exactDateFilter.setDate(dto.getExactDate());
             activeFilters.add(exactDateFilter);
         }
-        if (dto.getPriority().isPresent()) {
+        if (dto.getPriority() != null) {
             PriorityFilter priorityFilter = (PriorityFilter) filters.get("priority");
-            priorityFilter.setPriority(dto.getPriority().get());
+            priorityFilter.setPriority(dto.getPriority());
             activeFilters.add(priorityFilter);
         }
-        if (dto.getIsRead().isPresent()) {
+        if (dto.getIsRead() != null) {
             IsReadFilter isReadFilter = (IsReadFilter) filters.get("isRead");
-            isReadFilter.setRead(dto.getIsRead().get());
+            isReadFilter.setRead(dto.getIsRead());
             activeFilters.add(isReadFilter);
         }
-        if (dto.getReceiver().isPresent()) {
+        if (dto.getReceiver() != null && !dto.getReceiver().isEmpty()) {
             ReceiverFilter receiverFilter = (ReceiverFilter) filters.get("receiver");
-            receiverFilter.setReceivers(dto.getReceiver().get());
+            receiverFilter.setReceivers(dto.getReceiver());
+            activeFilters.add(receiverFilter);
         }
 //        if (dto.getAttachmentContent() != null) {
 //            AttachmentContentFilter attachmentFilter = (AttachmentContentFilter) filters.get("attachment");

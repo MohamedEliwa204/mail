@@ -47,6 +47,10 @@ public class Mail {
     @Builder.Default
     private boolean isRead = false; // for ui
 
+    // Track when email was moved to trash for automatic deletion after 30 days
+    private LocalDateTime deletedAt;
+
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_id")
     private List<Attachment> attachments;
