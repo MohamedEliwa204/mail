@@ -11,7 +11,7 @@ import { Observable, forkJoin } from 'rxjs';
   imports: [CommonModule, FormsModule],
   templateUrl: './mail.html',
   styleUrls: ['./mail.css', './profile.css', './navbar.css', './sidebar.css', './main-section.css',
-    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css"
+    './filterbar.css', './selectbar.css', "./compose.css", "./mailview.css", "./contact.css", "./filterDropDown.css"
   ],
 })
 export class Mail implements OnInit {
@@ -613,7 +613,18 @@ export class Mail implements OnInit {
 
   //Search & Filter Logic
   searchQuery = signal<string>('');
+  searchFrom = signal<string>('');
+  searchTo = signal<string>('');
+  searchSubject = signal<string>('');
+  searchWords = signal<string>('');
+  dateRange = signal<string>('');
+  exactDate = signal<string>('');
+
   searchMethod = signal<string>('subject');
+
+  searchFolder = signal<string>('');
+  hasAttachment = signal<boolean>(false);
+  isRead = signal<boolean>(false);
   isFilterMenuOpen = signal<boolean>(false);
 
   // Advanced filter properties
@@ -628,47 +639,91 @@ export class Mail implements OnInit {
   isRead = signal<boolean | null>(null);
 
   onSearch() {
-    const query = this.searchQuery();
-    const folder = this.currentFolder();
-    const method = this.searchMethod();
-    const email = this.currentUser()?.email;
+    // Parse input fields
+    const from = this.searchFrom().split(',').map(e => e.trim()).filter(e => e.length > 0);
+    const to = this.searchTo().split(',').map(e => e.trim()).filter(e => e.length > 0);
+    const subject = this.searchSubject();
+    const words = this.searchWords();
+    const dateRange = this.dateRange();
+    const exactDate = this.exactDate();
+    const hasAttachments = this.hasAttachment();
+    const isRead = this.isRead();
+    const folder = this.searchFolder();
 
-    if (!query || query.trim() === '') {
-      this.refresh();
-      return;
-    }
     this.isLoading.set(true);
 
-    // [BACKEND INTERACTION: SEARCH]
-    // 1. Backend Task: Search emails by criteria.
-    // 2. Request: GET /api/mail/search
-    // 3. Query Params: ?email=..&folder=..&method=sender&query=xyz
-    /*
-    if(email) {
-        this.mailService.searchMails(email, folder, method, query).subscribe(...);
-    }
-    */
+    // Date calculation
+    let dateBefore: Date | null = null;
+    let dateAfter: Date | null = null;
 
-    // --- Frontend Simulation (Mock Logic) ---
-    setTimeout(() => {
-      this.mails.update(current =>
-        current.filter(mail => {
-          const valueToCheck = (mail as any)[method]?.toString().toLowerCase() || '';
-          return valueToCheck.includes(query.toLowerCase());
-        })
-      );
-      this.isLoading.set(false);
-    }, 300);
+    if (exactDate) {
+      dateBefore = new Date(exactDate);
+      dateAfter = new Date(exactDate);
+    } else {
+      // Fallback: use "now"
+      dateBefore = new Date();
+      dateAfter = new Date();
+    }
+    let adder = 0;
+
+    if (dateRange === "1 day") adder = 1;
+    else if (dateRange === "3 days") adder = 3;
+    else if (dateRange === "1 week") adder = 7;
+    else if (dateRange === "2 weeks") adder = 14;
+    else if (dateRange === "1 month") adder = 1;
+    else if (dateRange === "2 months") adder = 2;
+    else if (dateRange === "6 months") adder = 6;
+    else if (dateRange === "1 year") adder = 1;
+
+    if (dateRange.includes("month")) {
+      dateBefore.setMonth(dateBefore.getMonth() - adder);
+      dateAfter.setMonth(dateAfter.getMonth() + adder);
+    } else if (dateRange.includes("year")) {
+      dateBefore.setFullYear(dateBefore.getFullYear() - adder);
+      dateAfter.setFullYear(dateAfter.getFullYear() + adder);
+    } else {
+      dateBefore.setDate(dateBefore.getDate() - adder);
+      dateAfter.setDate(dateAfter.getDate() + adder);
+    }
+
+    const beforeDate = dateBefore.toISOString().slice(0, 19);
+    const afterDate = dateAfter.toISOString().slice(0, 19);
+
+    const filter = {
+      userId: this.currentUser()?.id,
+      sender: from,
+      receiver: to,
+      subject: subject,
+      body: words,
+      exactDate: exactDate,
+      dateAfter: afterDate,
+      dateBefore: beforeDate,
+      isRead: isRead,
+      hasAttachments: hasAttachments,
+      folder: folder,
+    };
+
+    // --- Console Logs for Testing ---
+    console.log('--- Filter Object Test ---');
+    console.log('User ID:', filter.userId);
+    console.log('Sender:', filter.sender);
+    console.log('Receiver:', filter.receiver);
+    console.log('Subject:', filter.subject);
+    console.log('Body / Words:', filter.body);
+    console.log('Exact Date:', filter.exactDate);
+    console.log('Date Before:', filter.dateBefore);
+    console.log('Date After:', filter.dateAfter);
+    console.log('Is Read:', filter.isRead);
+    console.log('Has Attachments:', filter.hasAttachments);
+    console.log('Folder:', filter.folder);
+    console.log('--- Full Filter Object ---');
+    console.log(filter);
   }
+
+
 
   toggleFilterMenu() {
     this.isFilterMenuOpen.update(v => !v);
-  }
-
-  setSearchMethod(method: string) {
-    this.searchMethod.set(method);
-    this.isFilterMenuOpen.set(false);
-    if (this.searchQuery()) this.onSearch();
   }
 
   // ==================== CONTACTS MANAGEMENT ====================

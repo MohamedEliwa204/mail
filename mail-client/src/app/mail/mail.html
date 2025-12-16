@@ -5,80 +5,77 @@
 
         <div class="searchbar" style="position: relative;">
 
-          <div class="search">
-            <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onSearch()"
-                   [placeholder]="'Search by ' + searchMethod() + '...'">
-          </div>
-
-          <div class="filter" (click)="toggleFilterMenu()" style="cursor: pointer;" title="Filter Options">
-            <img src="icons/filter.svg" alt="filter">
-          </div>
-
-          @if(isFilterMenuOpen()) {
-            <div class="filter-dropdown">
-
-              <div class="filter-item">
-                <label for="from-input">From</label>
-                <input id="from-input" type="text" placeholder="Sender email" [(ngModel)]="searchFrom">
-              </div>
-
-              <div class="filter-item">
-                <label for="to-input">To</label>
-                <input id="to-input" type="text" placeholder="Recipient email" [(ngModel)]="searchTo">
-              </div>
-
-              <div class="filter-item">
-                <label for="subject-input">Subject</label>
-                <input id="subject-input" type="text" placeholder="Email subject" [(ngModel)]="searchSubject">
-              </div>
-
-              <div class="filter-item">
-                <label for="words-input">Has the words</label>
-                <input id="words-input" type="text" placeholder="Search in content" [(ngModel)]="searchWords">
-              </div>
-
-              <div class="Date">
-                <label for="date-select">Date within</label>
-                <select id="date-select" name="date" [(ngModel)]="dateRange">
-                  <option value="1">1 day</option>
-                  <option value="3">3 days</option>
-                  <option value="7">1 week</option>
-                  <option value="14">2 weeks</option>
-                  <option value="30">1 month</option>
-                  <option value="60">2 months</option>
-                  <option value="180">6 months</option>
-                  <option value="365">1 year</option>
-                </select>
-                <input type="datetime-local" [(ngModel)]="exactDate">
-              </div>
-
-              <!-- Search and Move Section -->
-              <div class="filter-item">
-                <label for="search-label">Search in</label>
-                <div class="mail-icons">
-                  <select class="move-select" [(ngModel)]="searchFolder">
-                    <option value="all">All Mail</option>
-                    @for(folder of targetFolders(); track folder) {
-                      <option [value]="folder">{{ folder }}</option>
-                    }
-                  </select>
-                </div>
-              </div>
-
-              <!-- Checkbox Section -->
-              <div class="filter-checkbox">
-                <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="hasAttachment">
-                <label for="attachments-checkbox">Has Attachments</label>
-
-                <input type="checkbox" id="read-checkbox" name="isRead" [(ngModel)]="isRead">
-                <label for="read-checkbox">Is Read</label>
-              </div>
-
-              <button (click)="onSearch()" style="margin-top: 10px; background: #1a73e8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 500;">
-                Search
-              </button>
+            <div class="search">
+                <div type="text" [(ngModel)]="searchQuery">Search by</div>
             </div>
-          }
+
+            <div class="filter" (click)="toggleFilterMenu()" style="cursor: pointer;" title="Filter Options">
+                <img src="icons/filter.svg" alt="filter">
+            </div>
+
+            @if(isFilterMenuOpen()) {
+                <div class="filter-dropdown">
+
+                    <div class="filter-item">
+                        <label for="from-input">From</label>
+                        <input id="from-input" type="text" placeholder="Sender email" [(ngModel)]="searchFrom">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="to-input">To</label>
+                        <input id="to-input" type="text" placeholder="Recipient email" [(ngModel)]="searchTo">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="subject-input">Subject</label>
+                        <input id="subject-input" type="text" placeholder="Email subject" [(ngModel)]="searchSubject">
+                    </div>
+
+                    <div class="filter-item">
+                        <label for="words-input">Has the words</label>
+                        <input id="words-input" type="text" placeholder="Search in content" [(ngModel)]="searchWords">
+                    </div>
+
+                    <div class="Date">
+                        <label for="date-select">Date within</label>
+                        <select id="date-select" name="date">
+                            <option [value]="dateRange">1 day</option>
+                            <option [value]="dateRange">3 days</option>
+                            <option [value]="dateRange">1 week</option>
+                            <option [value]="dateRange">2 weeks</option>
+                            <option [value]="dateRange">1 month</option>
+                            <option [value]="dateRange">2 months</option>
+                            <option [value]="dateRange">6 months</option>
+                            <option [value]="dateRange">1 year</option>
+                        </select>
+                        <input type="datetime-local" [(ngModel)]="exactDate">
+                    </div>
+
+                    <!-- Search and Move Section -->
+                    <div class="filter-item">
+                        <label for="search-label">Search</label>
+                        <div class="mail-icons">
+                            <select class="move-select">
+                                <option [value]="searchFolder">All Mail</option>
+                                @for(folder of targetFolders(); track folder) {
+                                    <option [value]="searchFolder">{{ folder }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox Section -->
+                    <div class="filter-checkbox">
+                        <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="hasAttachment">
+                        <label for="attachments-checkbox">Has Attachments</label>
+
+                        <input type="checkbox" id="attachments-checkbox" name="attachments" [(ngModel)]="isRead">
+                        <label for="attachments-checkbox">Is Read</label>
+                    </div>
+
+                    <button (click)="onSearch()">Search</button>
+                </div>
+            }
         </div>
 
         <!-- Contacts Button -->
@@ -111,24 +108,24 @@
       <div class="sidebar">
         <button class="composeBtn" (click)="compseToggle()">Compose</button>
         <ul class="features">
-          <li (click)="loadInbox()" [class.active]="currentFolder() === 'inbox'">Inbox</li>
-          <li (click)="loadFolder('starred')" [class.active]="currentFolder() === 'starred'">Starred</li>
-          <li (click)="loadSent()" [class.active]="currentFolder() === 'sent'">Sent</li>
-          <li (click)="loadDrafts()" [class.active]="currentFolder() === 'drafts'">Drafts</li>
-          <li (click)="loadFolder('important')" [class.active]="currentFolder() === 'important'">Important</li>
-          <li (click)="loadFolder('scheduled')" [class.active]="currentFolder() === 'scheduled'">Scheduled</li>
-          <li (click)="loadFolder('all')" [class.active]="currentFolder() === 'all'">All Mail</li>
-          <li (click)="loadFolder('spam')" [class.active]="currentFolder() === 'spam'">Spam</li>
-          <li (click)="loadFolder('trash')" [class.active]="currentFolder() === 'trash'">Trash</li>
-          <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
-          <div
-            style= "display: flex; justify-content: space-between; padding: 0 10px; margin-bottom: 8px; color: #5f6368; font-weight: bold; font-size: 14px;">
-            <span>MY FOLDERS</span>
-            <span (click)="addUserFolder()"
-                  style="cursor: pointer; font-size: 18px; width: 20px; text-align: center;"
-                  title="Add Folder">+</span>
-          </div>
-          @for(folder of userFolders(); track folder) {
+            <li (click)="loadInbox()" [class.active]="currentFolder() === 'inbox'">Inbox</li>
+            <li (click)="loadFolder('starred')" [class.active]="currentFolder() === 'starred'">Starred</li>
+            <li (click)="loadSent()" [class.active]="currentFolder() === 'sent'">Sent</li>
+            <li (click)="loadDrafts()" [class.active]="currentFolder() === 'drafts'">Drafts</li>
+            <li (click)="loadFolder('important')" [class.active]="currentFolder() === 'important'">Important</li>
+            <li (click)="loadFolder('scheduled')" [class.active]="currentFolder() === 'scheduled'">Scheduled</li>
+            <li (click)="loadFolder('all')" [class.active]="currentFolder() === 'all'">All Mail</li>
+            <li (click)="loadFolder('spam')" [class.active]="currentFolder() === 'spam'">Spam</li>
+            <li (click)="loadFolder('trash')" [class.active]="currentFolder() === 'trash'">Trash</li>
+            <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+            <div
+                style= "display: flex; justify-content: space-between; padding: 0 10px; margin-bottom: 8px; color: #5f6368; font-weight: bold; font-size: 14px;">
+                <span>MY FOLDERS</span>
+                <span (click)="addUserFolder()"
+                    style="cursor: pointer; font-size: 18px; width: 20px; text-align: center;"
+                    title="Add Folder">+</span>
+            </div>
+            @for(folder of userFolders(); track folder) {
             <li (click)="loadFolder(folder)" [class.active]="currentFolder() === folder"
                 style="display: flex; justify-content: space-between; align-items: center;">
 
@@ -311,7 +308,7 @@
               {{ isPriorityMode() ? '⭐ Priority View' : '📧 Default View' }}
             </button>
 
-          </div>
+        </div>
 
           <div class="selectbar">
             <div class="left-selector">
