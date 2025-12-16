@@ -75,6 +75,15 @@ public class Mail {
     )
     private List<User> receiverRel = new ArrayList<>();
 
+    // Owner of this mail copy (for trash, drafts, and folder management)
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @Column(name = "owner_id", insertable = false, updatable = false)
+    private Long ownerId;
+
     public Long getMailId() {
         return mailId;
     }
@@ -169,5 +178,29 @@ public class Mail {
 
     public void setFolderName(String folderName) {
         this.folderName = folderName;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

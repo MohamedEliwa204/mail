@@ -32,6 +32,7 @@ public class DraftCommand implements MailCommand {
                 .timestamp(LocalDateTime.now())
                 .folderName("DRAFTS")
                 .isRead(true)
+                .owner(senderUser)  // Set owner for draft
                 .build();
 
         mailRepository.save(draft);

@@ -27,6 +27,7 @@ public class MailService {
     private final GetMailCommand getMailCommand;
     private final MailRepository mailRepository;
     private final AttachmentService attachmentService;
+    private final eg.edu.alexu.cse.mail_server.Repository.UserRepository userRepository;
 
     public void send(ComposeEmailDTO composeEmailDTO) {
         sendCommand.execute(composeEmailDTO);
@@ -48,19 +49,37 @@ public class MailService {
 
     // Get inbox mails
     public List<EmailViewDto> getInboxMails(String userEmail) {
-        List<Mail> mails = mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, "INBOX");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "INBOX");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
     // Get sent mails
     public List<EmailViewDto> getSentMails(String userEmail) {
-        List<Mail> mails = mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "SENT");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "SENT");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
     // Get draft mails
     public List<EmailViewDto> getDraftMails(String userEmail) {
-        List<Mail> mails = mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "DRAFTS");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "DRAFTS");
+        return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
+    }
+
+    // Get trash mails
+    public List<EmailViewDto> getTrashMails(String userEmail) {
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "TRASH");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
@@ -89,10 +108,22 @@ public class MailService {
     }
 
     // Delete mail (soft delete - move to trash)
+    // Note: This requires userId parameter for ownership verification
+    public void deleteMail(Long mailId, Long userId) {
+        Mail mail = mailRepository.findByMailIdAndOwnerId(mailId, userId);
+        if (mail == null) {
+            throw new IllegalArgumentException("Mail not found or you don't have permission to delete it");
+        }
+        mail.setFolderName("TRASH");
+        mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
+        mailRepository.save(mail);
+    }
+
+    // Overload for backward compatibility (when userId is not available)
     public void deleteMail(Long mailId) {
         Mail mail = getMailById(mailId);
-        mail.setFolderName("trash");
-        mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
+        mail.setFolderName("TRASH");
+        mail.setDeletedAt(java.time.LocalDateTime.now());
         mailRepository.save(mail);
     }
 
@@ -102,7 +133,7 @@ public class MailService {
      */
     public void deleteOldTrashEmails() {
         java.time.LocalDateTime thirtyDaysAgo = java.time.LocalDateTime.now().minusDays(30);
-        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("trash", thirtyDaysAgo);
+        List<Mail> oldTrashMails = mailRepository.findByFolderNameAndDeletedAtBefore("TRASH", thirtyDaysAgo);
 
         if (!oldTrashMails.isEmpty()) {
             mailRepository.deleteAll(oldTrashMails);
@@ -134,10 +165,11 @@ public class MailService {
                 .body(originalMail.getBody())
                 .priority(originalMail.getPriority())
                 .timestamp(java.time.LocalDateTime.now()) // New timestamp for the copy
-                .folderName(folderName.toLowerCase()) // Store folder name in lowercase
+                .folderName(folderName.toUpperCase()) // Store folder name in uppercase
                 .isRead(originalMail.isRead())
                 .receiverRel(originalMail.getReceiverRel())
                 .attachments(originalMail.getAttachments()) // Reference same attachments
+                .owner(originalMail.getOwner()) // Preserve owner
                 .build();
 
         mailRepository.save(copiedMail);
