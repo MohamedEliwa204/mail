@@ -112,7 +112,17 @@ export class MailService {
      Request: PUT /api/mail/{mailId}/read
      Body: Empty */
   markAsRead(mailId: number): Observable<any> {
-    return this.http.put(`${this.apiURL}/${mailId}/read`, {});
+    const url = `${this.apiURL}/${mailId}/read`;
+    console.log('MailService.markAsRead called with mailId:', mailId);
+    console.log('Request URL:', url);
+    return this.http.put(url, {});
+  }
+
+  /* [BACKEND REQ] Mark Unread
+     Request: PUT /api/mail/{mailId}/unread
+     Body: Empty */
+  markAsUnread(mailId: number): Observable<any> {
+    return this.http.put(`${this.apiURL}/${mailId}/unread`, {});
   }
 
   /* [BACKEND REQ] Delete Mail
@@ -219,13 +229,17 @@ export class MailService {
   loadSortedMails(email: string, criteria: string, order:boolean): Observable<any> {
     return this.http.get(`${this.apiURL}/sortMail/${email}/${criteria}/${order}`);
   }
-}
-  /* [BACKEND REQ] Copy Email to Folder
-     Request: POST /api/folder/copy?mailId={mailId}&folderName={folderName}
-     Response: Success message */
   copyEmailToFolder(mailId: number, folderName: string): Observable<any> {
     return this.http.post(`http://localhost:8080/api/folder/copy`, null, {
       params: { mailId: mailId.toString(), folderName }
     });
   }
 }
+  /* [BACKEND REQ] Copy Email to Folder
+     Request: POST /api/folder/copy?mailId={mailId}&folderName={folderName}
+     Response: Success message */
+
+
+
+
+
