@@ -121,6 +121,25 @@ public class FilterBuilder {
         if (isReadFilter != null) filters.add(isReadFilter);
         if (folderFilter != null) filters.add(folderFilter);
         if (hasAttachments != null) filters.add(hasAttachments);
+        
+        // Reset all filters after build to avoid stale state (singleton bean)
+        reset();
+        
         return filters;
+    }
+    
+    // Reset all filter fields to avoid retaining state between requests
+    private void reset() {
+        senderFilter = null;
+        receiverFilter = null;
+        bodyFilter = null;
+        subjectFilter = null;
+        priorityFilter = null;
+        exactDateFilter = null;
+        beforeDateFilter = null;
+        afterDateFilter = null;
+        isReadFilter = null;
+        folderFilter = null;
+        hasAttachments = null;
     }
 }
