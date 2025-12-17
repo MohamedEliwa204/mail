@@ -359,11 +359,11 @@
               @if(currentFolder() == 'inbox'){
                 <img class="sort-btn" src="icons/srtdesasc.svg" alt="sort" (click)="toggleSortOrder()">
               }
-              
+
               <div class="page-display" (click)="showSortMenu()">
                   {{pageFrom()}}-{{pageTo()}} of {{mails().length}}
                 </div>
-                
+
                 <div class="sort-menu" [style.display]="sortMenu()? 'block': 'none'"
                 style="background-color: #e2dcdc;">
                   <div class="main-item" style="background-color: #bdbaba;">Sort by:</div>
@@ -417,7 +417,7 @@
                      [title]="currentFolder() === 'drafts' ? 'Click to edit and send' : ''">
 
                     <div class="one-mail-div" (click)="currentFolder() === 'drafts' ? openDraftInCompose(mails()[i]) : setselectedMail(mails()[i])">
-    
+
     <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].id)">
     <input type="checkbox" [checked]="isSelected(mails()[i].id)"
             style="cursor: pointer; width: 18px; height: 18px;">
@@ -438,7 +438,7 @@
         }
     </div>
 </div>
-                        
+
 
                         <div style="display: flex; align-items: center; gap: 6px;" [style.font-weight]="mails()[i].isRead ? '400' : '600'">
                         <!-- High Priority Indicator (Red Dot for priority = 1) -->
