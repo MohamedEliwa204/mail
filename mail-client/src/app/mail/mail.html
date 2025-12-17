@@ -6,7 +6,7 @@
         <div class="searchbar" style="position: relative;">
 
           <div class="search">
-            <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="onSearch()"
+            <input type="text" [(ngModel)]="searchQuery" (keydown.enter)="generalSearch()"
                    [placeholder]="'Search by ' + searchMethod() + '...'">
           </div>
 

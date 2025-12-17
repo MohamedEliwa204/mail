@@ -22,7 +22,7 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     List<Mail> findBySenderAndFolderNameOrderByTimestampDesc(String sender, String folderName);
     // Find all emails where the user is either sender or receiver
-    @Query("SELECT m FROM Mail m WHERE m.senderRel.userId = :userId OR :userId IN (SELECT r.userId FROM m.receiverRel r)")
+    @Query("SELECT DISTINCT m FROM Mail m LEFT JOIN m.receiverRel r WHERE m.senderRel.userId = :userId OR r.userId = :userId")
     List<Mail> findAllByUserId(@Param("userId") Long userId);
 
 
@@ -47,4 +47,13 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     List<Mail> findByReceiverAndFolderNameOrderByPriorityDesc(String receiver, String folderName);
 
 
+    // Owner-based queries for personal folders (trash, drafts, custom folders)
+    List<Mail> findByOwnerIdAndFolderNameOrderByTimestampDesc(Long ownerId, String folderName);
+
+    // Find trash emails for a specific owner (for loading trash folder)
+    List<Mail> findByOwnerIdAndFolderName(Long ownerId, String folderName);
+
+    // Find mail by ID and owner (for deletion security)
+    @Query("SELECT m FROM Mail m WHERE m.mailId = :mailId AND m.ownerId = :ownerId")
+    Mail findByMailIdAndOwnerId(@Param("mailId") Long mailId, @Param("ownerId") Long ownerId);
 }

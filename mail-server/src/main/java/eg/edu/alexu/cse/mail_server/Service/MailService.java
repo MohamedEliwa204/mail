@@ -28,6 +28,7 @@ public class MailService {
     private final GetMailCommand getMailCommand;
     private final MailRepository mailRepository;
     private final AttachmentService attachmentService;
+    private final eg.edu.alexu.cse.mail_server.Repository.UserRepository userRepository;
 
     public void send(ComposeEmailDTO composeEmailDTO) {
         sendCommand.execute(composeEmailDTO);
@@ -49,29 +50,52 @@ public class MailService {
 
     // Get inbox mails
     public List<EmailViewDto> getInboxMails(String userEmail) {
-        List<Mail> mails = mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, "INBOX");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "INBOX");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
     // Get sent mails
     public List<EmailViewDto> getSentMails(String userEmail) {
-        List<Mail> mails = mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "SENT");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "SENT");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
     // Get draft mails
     public List<EmailViewDto> getDraftMails(String userEmail) {
-        List<Mail> mails = mailRepository.findBySenderAndFolderNameOrderByTimestampDesc(userEmail, "DRAFTS");
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "DRAFTS");
+        return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
+    }
+
+    // Get trash mails
+    public List<EmailViewDto> getTrashMails(String userEmail) {
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+        List<Mail> mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, "trash");
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
     // Get mails by folder
     public List<EmailViewDto> getMailsByFolder(String userEmail, String folderName) {
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+
         List<Mail> mails;
-        if ("all".equals(folderName)) {
+        if ("all".equalsIgnoreCase(folderName)) {
             mails = mailRepository.findByReceiverOrSenderOrderByTimestampDesc(userEmail, userEmail);
         } else {
-            mails = mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, folderName);
+            // Use ownerId to load mails for the given folder (including "trash")
+            mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, folderName);
         }
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
@@ -90,10 +114,22 @@ public class MailService {
     }
 
     // Delete mail (soft delete - move to trash)
+    // Note: This requires userId parameter for ownership verification
+    public void deleteMail(Long mailId, Long userId) {
+        Mail mail = mailRepository.findByMailIdAndOwnerId(mailId, userId);
+        if (mail == null) {
+            throw new IllegalArgumentException("Mail not found or you don't have permission to delete it");
+        }
+        mail.setFolderName("trash");
+        mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
+        mailRepository.save(mail);
+    }
+
+    // Overload for backward compatibility (when userId is not available)
     public void deleteMail(Long mailId) {
         Mail mail = getMailById(mailId);
         mail.setFolderName("trash");
-        mail.setDeletedAt(java.time.LocalDateTime.now()); // Track when moved to trash
+        mail.setDeletedAt(java.time.LocalDateTime.now());
         mailRepository.save(mail);
     }
 
@@ -126,21 +162,31 @@ public class MailService {
             throw new IllegalArgumentException("Folder name cannot be empty");
         }
 
-        // Create a copy of the email
+        // Create a copy of the email (DO NOT copy mailId - let DB generate new one)
         Mail copiedMail = Mail.builder()
+                // mailId is NOT set - database will auto-generate
                 .sender(originalMail.getSender())
-                .senderRel(originalMail.getSenderRel())
+                .senderRel(originalMail.getSenderRel()) // Same user reference (not a collection)
                 .receiver(originalMail.getReceiver())
                 .subject(originalMail.getSubject())
                 .body(originalMail.getBody())
                 .priority(originalMail.getPriority())
                 .timestamp(java.time.LocalDateTime.now()) // New timestamp for the copy
-                .folderName(folderName.toLowerCase()) // Store folder name in lowercase
+                .folderName(folderName.toUpperCase()) // Store folder name in uppercase
                 .isRead(originalMail.isRead())
-                .receiverRel(originalMail.getReceiverRel())
-                .attachments(originalMail.getAttachments()) // Reference same attachments
+                .owner(originalMail.getOwner()) // Preserve owner
                 .build();
 
+        // Create NEW collection instances to avoid Hibernate shared reference error
+        if (originalMail.getReceiverRel() != null) {
+            copiedMail.setReceiverRel(new ArrayList<>(originalMail.getReceiverRel()));
+        }
+
+        if (originalMail.getAttachments() != null) {
+            copiedMail.setAttachments(new ArrayList<>(originalMail.getAttachments()));
+        }
+
+        // Save the mail
         mailRepository.save(copiedMail);
     }
 

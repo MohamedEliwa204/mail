@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { AuthenticationService } from '../services/authentication-service';
 import { Router } from '@angular/router';
-import { MailService, Mail as MailEntity, ComposeEmailDTO, Contact } from '../services/mail-service';
+import { MailService, Mail as MailEntity, ComposeEmailDTO, Contact, MailFilterDTO } from '../services/mail-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, forkJoin } from 'rxjs';
@@ -290,14 +290,27 @@ export class Mail implements OnInit {
 
     if (!folderName || this.selectedIds().size === 0) return;
 
-    if (confirm(`Move ${this.selectedIds().size} mails to "${folderName}"?`)) {
-      // [BACKEND INTERACTION: MOVE MAILS]
-      // Request: PUT /api/mail/move-batch
-      // Body: { mailIds: [1, 2], targetFolder: "spam" }
-      this.mails.update(currentMails =>
-        currentMails.filter(m => !this.selectedIds().has(m.id))
+    const selectedMailIds = Array.from(this.selectedIds());
+
+    if (confirm(`Copy ${selectedMailIds.length} email(s) to "${folderName}"?`)) {
+      // Call backend API to copy each selected email to the folder
+      const copyRequests = selectedMailIds.map(mailId =>
+        this.mailService.copyEmailToFolder(mailId, folderName)
       );
-      this.selectedIds.set(new Set());
+
+      // Execute all copy requests in parallel
+      forkJoin(copyRequests).subscribe({
+        next: () => {
+          alert(`Successfully copied ${selectedMailIds.length} email(s) to "${folderName}"`);
+          // Optionally refresh the current folder view
+          this.refresh();
+          this.selectedIds.set(new Set());
+        },
+        error: (error) => {
+          console.error('Error copying emails:', error);
+          alert(`Failed to copy emails to "${folderName}". Please try again.`);
+        }
+      });
     }
   }
 
@@ -406,17 +419,11 @@ export class Mail implements OnInit {
 
   //compose email
   isComposing = false;
-  isEditingDraft = signal<boolean>(false); // Track if we're editing an existing draft
-
   compseToggle() {
     this.isComposing = !this.isComposing;
     // Always load contacts when opening compose (for autocomplete)
     if (this.isComposing) {
       this.loadContacts();
-    }
-    // Reset draft editing flag when opening fresh compose
-    if (this.isComposing) {
-      this.isEditingDraft.set(false);
     }
   }
 
@@ -455,7 +462,7 @@ export class Mail implements OnInit {
     this.contacts().forEach(contact => {
       contact.emails.forEach(email => {
         if (email.toLowerCase().includes(receiverInput) ||
-            contact.name.toLowerCase().includes(receiverInput)) {
+          contact.name.toLowerCase().includes(receiverInput)) {
           suggestions.push({ name: contact.name, email });
         }
       });
@@ -497,16 +504,17 @@ export class Mail implements OnInit {
     console.log(this.composedMail.subject)
     console.log(this.composedMail.body)
     console.log(this.composedMail.priority)
-    if(this.composedMail.receivers.length > 0){
+    if (this.composedMail.receivers.length > 0) {
       this.mailService.sendMailWithAttachments(formData).subscribe({
         next: res => {
           console.log(res.message)
           setTimeout(() => {
-          alert('Email sent successfully!');
-          this.refresh();
-          this.resetComposeForm();
-        }, 500);
-          this.refresh()},
+            alert('Email sent successfully!');
+            this.refresh();
+            this.resetComposeForm();
+          }, 500);
+          this.refresh()
+        },
         error: e => {
           if (e.error && e.error.error) {
             console.log(`Error: ${e.error.error}`);
@@ -550,17 +558,10 @@ export class Mail implements OnInit {
    * Called when user clicks X button before sending
    */
   saveDraftAndClose() {
-    // If we opened an existing draft, just close without saving
-    if (this.isEditingDraft()) {
-      console.log('Closing draft without saving (was already a draft)');
-      this.resetComposeForm();
-      return;
-    }
-
     // Check if there's any content to save
     const hasContent = this.composedMail.subject.trim() !== '' ||
-                       this.composedMail.body.trim() !== '' ||
-                       this.composedMail.receivers.length > 0;
+      this.composedMail.body.trim() !== '' ||
+      this.composedMail.receivers.length > 0;
 
     if (!hasContent) {
       // Nothing to save, just close
@@ -568,7 +569,7 @@ export class Mail implements OnInit {
       return;
     }
 
-    // Save as new draft
+    // Save as draft
     this.mailService.draftEmail(this.composedMail).subscribe({
       next: (res) => {
         console.log('Email saved as draft:', res.message);
@@ -603,6 +604,7 @@ export class Mail implements OnInit {
   searchMethod = signal<string>('subject');
   isFilterMenuOpen = signal<boolean>(false);
 
+
   // Advanced filter properties
   searchFrom = signal<string>('');
   searchTo = signal<string>('');
@@ -612,6 +614,48 @@ export class Mail implements OnInit {
   exactDate = signal<string>('');
   searchFolder = signal<string>('all');
   hasAttachment = signal<boolean>(false);
+
+  // General search that search all fields for the query
+  generalSearch() {
+    const query = this.searchQuery().trim().toLowerCase();
+    const userId = this.currentUser()?.id;
+    if (userId) {
+      let mailFilterDto: MailFilterDTO = {
+        userId: this.currentUser()?.id,
+        sender: [query],
+        receiver: [query],
+        subject: query,
+        body: query,
+      }
+      this.mailService.searchMails(this.searchFolder(), mailFilterDto).subscribe({
+        next: (mails) => {
+          const mappedMails = mails.map((m: any) => ({
+            id: m.id || m.mailId,
+            sender: m.sender,
+            receiver: m.receiver,
+            body: m.body,
+            subject: m.subject,
+            timestamp: m.timestamp,
+            priority: m.priority,
+            folderName: m.folderName,
+            isRead: m.isRead ?? m.read,
+            attachments: m.attachments
+          }));
+          this.mails.set(mappedMails);
+          this.isLoading.set(false);
+          this.currentFolder.set('search');
+        },
+        error: (error) => {
+          console.error('Error filtering mails:', error);
+          this.isLoading.set(false);
+        }
+      })
+    }
+    else {
+      this.isLoading.set(false);
+    }
+
+  }
   isRead = signal<boolean | null>(null);
 
   onSearch() {
@@ -628,72 +672,90 @@ export class Mail implements OnInit {
 
     this.isLoading.set(true);
 
-    // Date calculation
-    let dateBefore: Date | null = null;
-    let dateAfter: Date | null = null;
+    // Date calculation - only process if user specified date filters
+    let beforeDate: string | undefined = undefined;
+    let afterDate: string | undefined = undefined;
+    let exactDateValue: string | undefined = undefined;
 
     if (exactDate) {
-      dateBefore = new Date(exactDate);
-      dateAfter = new Date(exactDate);
-    } else {
-      // Fallback: use "now"
-      dateBefore = new Date();
-      dateAfter = new Date();
+      // User specified an exact date
+      exactDateValue = new Date(exactDate).toISOString().slice(0, 19);
+    } else if (dateRange) {
+      // User specified a date range
+      let dateBefore = new Date();
+      let dateAfter = new Date();
+      let adder = 0;
+
+      if (dateRange === "1 day") adder = 1;
+      else if (dateRange === "3 days") adder = 3;
+      else if (dateRange === "1 week") adder = 7;
+      else if (dateRange === "2 weeks") adder = 14;
+      else if (dateRange === "1 month") adder = 1;
+      else if (dateRange === "2 months") adder = 2;
+      else if (dateRange === "6 months") adder = 6;
+      else if (dateRange === "1 year") adder = 1;
+
+      if (dateRange.includes("month")) {
+        dateBefore.setMonth(dateBefore.getMonth() - adder);
+      } else if (dateRange.includes("year")) {
+        dateBefore.setFullYear(dateBefore.getFullYear() - adder);
+      } else if (adder > 0) {
+        dateBefore.setDate(dateBefore.getDate() - adder);
+      }
+
+      // Only set dates if a valid range was specified
+      if (adder > 0) {
+        beforeDate = dateBefore.toISOString().slice(0, 19);
+        afterDate = dateAfter.toISOString().slice(0, 19);
+      }
     }
-    let adder = 0;
 
-    if (dateRange === "1 day") adder = 1;
-    else if (dateRange === "3 days") adder = 3;
-    else if (dateRange === "1 week") adder = 7;
-    else if (dateRange === "2 weeks") adder = 14;
-    else if (dateRange === "1 month") adder = 1;
-    else if (dateRange === "2 months") adder = 2;
-    else if (dateRange === "6 months") adder = 6;
-    else if (dateRange === "1 year") adder = 1;
-
-    if (dateRange.includes("month")) {
-      dateBefore.setMonth(dateBefore.getMonth() - adder);
-      dateAfter.setMonth(dateAfter.getMonth() + adder);
-    } else if (dateRange.includes("year")) {
-      dateBefore.setFullYear(dateBefore.getFullYear() - adder);
-      dateAfter.setFullYear(dateAfter.getFullYear() + adder);
-    } else {
-      dateBefore.setDate(dateBefore.getDate() - adder);
-      dateAfter.setDate(dateAfter.getDate() + adder);
-    }
-
-    const beforeDate = dateBefore.toISOString().slice(0, 19);
-    const afterDate = dateAfter.toISOString().slice(0, 19);
-
-    const filter = {
+    const filter: MailFilterDTO = {
       userId: this.currentUser()?.id,
-      sender: from,
-      receiver: to,
-      subject: subject,
-      body: words,
-      exactDate: exactDate,
-      dateAfter: afterDate,
-      dateBefore: beforeDate,
-      isRead: isRead,
-      hasAttachments: hasAttachments,
-      folder: folder,
+      sender: from.length > 0 ? from : undefined,
+      receiver: to.length > 0 ? to : undefined,
+      subject: subject || undefined,
+      body: words || undefined,
+      exactDate: exactDateValue,
+      afterDate: afterDate,
+      beforeDate: beforeDate,
+      isRead: isRead !== null ? isRead : undefined,
     };
 
     // --- Console Logs for Testing ---
     console.log('--- Filter Object Test ---');
-    console.log('User ID:', filter.userId);
-    console.log('Sender:', filter.sender);
-    console.log('Receiver:', filter.receiver);
-    console.log('Subject:', filter.subject);
-    console.log('Body / Words:', filter.body);
-    console.log('Exact Date:', filter.exactDate);
-    console.log('Date Before:', filter.dateBefore);
-    console.log('Date After:', filter.dateAfter);
-    console.log('Is Read:', filter.isRead);
-    console.log('Has Attachments:', filter.hasAttachments);
-    console.log('Folder:', filter.folder);
-    console.log('--- Full Filter Object ---');
-    console.log(filter);
+    console.log('Filter:', filter);
+
+    // Call the backend filter API
+    const userId = this.currentUser()?.id;
+    if (userId) {
+      this.mailService.filterMailsAnd(userId, filter).subscribe({
+        next: (mails) => {
+          // Map backend response to frontend Mail interface
+          const mappedMails = mails.map((m: any) => ({
+            id: m.id || m.mailId,
+            sender: m.sender,
+            receiver: m.receiver,
+            body: m.body,
+            subject: m.subject,
+            timestamp: m.timestamp,
+            priority: m.priority,
+            folderName: m.folderName,
+            isRead: m.isRead ?? m.read,
+            attachments: m.attachments
+          }));
+          this.mails.set(mappedMails);
+          this.isLoading.set(false);
+          this.currentFolder.set('search');
+        },
+        error: (error) => {
+          console.error('Error filtering mails:', error);
+          this.isLoading.set(false);
+        }
+      });
+    } else {
+      this.isLoading.set(false);
+    }
   }
 
   toggleFilterMenu() {
@@ -721,15 +783,17 @@ export class Mail implements OnInit {
 
     if (userEmail) {
       this.mailService.getContacts(userEmail, this.ascendingSorting()).subscribe({
-        next: contacts => {this.contacts.set(contacts);
-                          console.log("CONTACTS ARE RETRIEVED!!");
-                        console.log(contacts)},
+        next: contacts => {
+          this.contacts.set(contacts);
+          console.log("CONTACTS ARE RETRIEVED!!");
+          console.log(contacts)
+        },
         error: err => console.log("ERROR!!: " + err)
       });
     }
   }
 
-  sortContacts(){
+  sortContacts() {
     this.ascendingSorting.set(!this.ascendingSorting())
 
     this.loadContacts()
@@ -838,9 +902,6 @@ export class Mail implements OnInit {
     // For now, we'll start with empty attachments
     this.selectedAttachments.set([]);
 
-    // Mark that we're editing an existing draft
-    this.isEditingDraft.set(true);
-
     // Open compose window
     this.isComposing = true;
 
@@ -862,11 +923,11 @@ export class Mail implements OnInit {
     console.log("mail is:" + mail.body)
     console.log("mail is:" + mail.id)
     console.log("mail is:" + mail.subject)
-    
+
     this.mailService.trashMail(mail.id).subscribe({
       next: () => {
         console.log("Deleted Successfully!");
-        this.setselectedMail(null); 
+        this.setselectedMail(null);
       },
       error: (err) => console.log("Error!!: ", err)
     })

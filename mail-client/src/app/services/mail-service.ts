@@ -33,10 +33,23 @@ export interface Mail {
 
 export interface ComposeEmailDTO {
   sender?: string;
-  receivers: string[]; 
+  receivers: string[];
   subject: string;
   body: string;
   priority: number;
+}
+
+export interface MailFilterDTO {
+  userId?: number;
+  sender?: string[];      // Backend expects List<String>
+  receiver?: string[];    // Backend expects List<String>
+  subject?: string;
+  body?: string;
+  exactDate?: string;     // ISO format: "2023-12-25T10:30:00" - Spring parses to LocalDateTime
+  afterDate?: string;     // ISO format: "2023-12-25T10:30:00"
+  beforeDate?: string;    // ISO format: "2023-12-25T10:30:00"
+  isRead?: boolean;
+  priority?: number;
 }
 
 @Injectable({
@@ -109,39 +122,64 @@ export class MailService {
   }
 
   createFolder(userEmail: string, folderName: string): Observable<any> {
-    return this.http.post(`${this.apiURL}/folders/${userEmail}`, {}, { 
-      params: { folderName } 
+    return this.http.post(`${this.apiURL}/folders/${userEmail}`, {}, {
+      params: { folderName }
     });
   }
 
   deleteFolder(userEmail: string, folderName: string): Observable<any> {
-    return this.http.delete(`${this.apiURL}/folders/${userEmail}`, { 
-      params: { folderName } 
+    return this.http.delete(`${this.apiURL}/folders/${userEmail}`, {
+      params: { folderName }
     });
   }
 
   renameFolder(userEmail: string, oldName: string, newName: string): Observable<any> {
-    return this.http.put(`${this.apiURL}/folders/${userEmail}`, {}, { 
-      params: { oldName, newName } 
+    return this.http.put(`${this.apiURL}/folders/${userEmail}`, {}, {
+      params: { oldName, newName }
     });
   }
 
-  searchMails(userEmail: string, folder: string, method: string, query: string): Observable<Mail[]> {
-    return this.http.get<Mail[]>(`${this.apiURL}/search`, {
-      params: {
-        email: userEmail,
-        folder: folder,
-        method: method,
-        query: query
-      }
-    });
+  // searchMails(folder: string, mailFilterDto: MailFilterDTO): Observable<Mail[]> {
+  //   return this.http.post<Mail[]>(`${this.apiURL}/search`, {
+  //     ...mailFilterDto,
+  //     folder: folder
+  //   });
+  // }
+
+  /* [BACKEND REQ] Filter Mails with AND logic
+     Request: POST /api/filter/{userId}/and
+     Body: MailFilterDTO (JSON)
+     Response: JSON Array of Mail objects */
+  filterMailsAnd(userId: number, filter: MailFilterDTO): Observable<Mail[]> {
+    return this.http.post<Mail[]>(`http://localhost:8080/api/filter/${userId}/and`, filter);
+  }
+
+  /* [BACKEND REQ] Filter Mails with OR logic
+     Request: POST /api/filter/{userId}/or
+     Body: MailFilterDTO (JSON)
+     Response: JSON Array of Mail objects */
+  filterMailsOr(userId: number, filter: MailFilterDTO): Observable<Mail[]> {
+    return this.http.post<Mail[]>(`http://localhost:8080/api/filter/${userId}/or`, filter);
+  }
+
+  /* [BACKEND REQ] Search Mails (basic search using OR logic)
+     Request: POST /api/filter/{userId}/or
+     Body: MailFilterDTO (JSON)
+     Response: JSON Array of Mail objects */
+  searchMails(folder: string, filter: MailFilterDTO): Observable<Mail[]> {
+    // Use OR logic for basic search to match any field
+    const userId = filter.userId;
+    if (!userId) {
+      throw new Error('User ID is required for search');
+    }
+    return this.http.post<Mail[]>(`http://localhost:8080/api/filter/${userId}/or`, filter);
   }
 
   sendMailWithAttachments(formData: FormData): Observable<any> {
     return this.http.post(`${this.apiURL}/send-with-attachments`, formData);
   }
 
-  
+
   getContacts(userEmail: string, sortingType: boolean): Observable<Contact[]> {
     return this.http.get<Contact[]>(`${this.apiURL}/contacts`, {
       params: {
@@ -167,5 +205,14 @@ export class MailService {
 
   loadSortedMails(email: string, criteria: string, order:boolean): Observable<any> {
     return this.http.get(`${this.apiURL}/sortMail/${email}/${criteria}/${order}`);
+  }
+}
+  /* [BACKEND REQ] Copy Email to Folder
+     Request: POST /api/folder/copy?mailId={mailId}&folderName={folderName}
+     Response: Success message */
+  copyEmailToFolder(mailId: number, folderName: string): Observable<any> {
+    return this.http.post(`http://localhost:8080/api/folder/copy`, null, {
+      params: { mailId: mailId.toString(), folderName }
+    });
   }
 }
