@@ -85,11 +85,16 @@ public class MailService {
 
     // Get mails by folder
     public List<EmailViewDto> getMailsByFolder(String userEmail, String folderName) {
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"))
+                .getUserId();
+
         List<Mail> mails;
-        if ("all".equals(folderName)) {
+        if ("all".equalsIgnoreCase(folderName)) {
             mails = mailRepository.findByReceiverOrSenderOrderByTimestampDesc(userEmail, userEmail);
         } else {
-            mails = mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(userEmail, folderName);
+            // Use ownerId to load mails for the given folder (including "trash")
+            mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, folderName);
         }
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
