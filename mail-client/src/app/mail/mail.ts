@@ -498,7 +498,7 @@ export class Mail implements OnInit {
     const input = event.target as HTMLInputElement;
     this.receiverInputValue.set(input.value);
     this.composedMail.receivers[0] = input.value;}
-    
+
   printSuggestions(){
     console.log(this.filteredContactSuggestions);
   }
@@ -507,7 +507,7 @@ export class Mail implements OnInit {
     this.composedMail.receivers[0] = email;
     this.receiverInputValue.set(email); // Update signal to close dropdown
     // reset state and close dropdown by clearing index
-    // and clear input for next entry 
+    // and clear input for next entry
     // (if you didn't clear the input the dropdown will presist)
     this.activeSuggestionIndex.set(-1);
     this.receiverInputValue.set(''); // Clear input for next entry
@@ -1059,12 +1059,12 @@ export class Mail implements OnInit {
     console.log("mail is:" + mail.id)
     console.log("mail is:" + mail.subject)
 
-    this.mailService.trashMail(mail.id).subscribe({
+    this.mailService.deleteMail(mail.id).subscribe({
       next: () => {
         console.log("Deleted Successfully!");
         this.setselectedMail(null);
       },
-      error: (err) => console.log("Error!!: ", err)
+      error: (err: any) => console.log("Error!!: ", err)
     })
   }
 
@@ -1110,5 +1110,5 @@ export class Mail implements OnInit {
     });
   }
 
-  
+
 }
