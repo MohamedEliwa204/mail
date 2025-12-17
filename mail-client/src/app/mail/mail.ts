@@ -463,6 +463,10 @@ export class Mail implements OnInit {
     return suggestions.slice(0, 5);
   });
 
+  printSuggestions(){
+    console.log(this.filteredContactSuggestions);
+  }
+
   selectContactEmail(email: string) {
     this.composedMail.receivers[0] = email;
   }
@@ -768,7 +772,6 @@ export class Mail implements OnInit {
   }
 
   saveContact() {
-
     const userEmail = this.currentUser()?.email;
 
     const name = this.contactFormName().trim();
@@ -869,4 +872,37 @@ export class Mail implements OnInit {
     })
   }
 
+  isComposeToOpen = signal<boolean>(false);
+
+  sortMenu = signal<boolean>(false)
+
+  sortCriteria = signal<string>('')
+
+  sortOrder = signal<boolean>(false)
+
+  showSortMenu(){
+    if (this.currentFolder() == 'inbox') {
+      this.sortMenu.set(!this.sortMenu())
+      this.loadSortedMails()
+    }
+  }
+
+  toggleSortOrder(){
+    this.sortOrder.set(!this.sortOrder())
+    this.loadSortedMails()
+  }
+
+  loadSortedMails(){
+    this.mailService.loadSortedMails(this.sortCriteria(), this.sortOrder()).subscribe({
+      next: (mails) => {
+        this.mails.set(mails);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading inbox:', error);
+        this.errorMessage.set('Failed to load inbox');
+        this.isLoading.set(false);
+      }
+    });
+  }
 }

@@ -203,4 +203,10 @@ public class MailService {
                 .build();
     }
 
+    public List<Mail> getSortedMails(String critera, boolean order){
+        switch(critera){
+            case:
+        }
+    }
+
 }

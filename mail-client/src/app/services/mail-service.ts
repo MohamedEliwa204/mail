@@ -164,4 +164,8 @@ export class MailService {
   deleteContact(contactId: number): Observable<any> {
     return this.http.delete(`${this.apiURL}/contacts/${contactId}`);
   }
+
+  loadSortedMails(criteria: string, order:boolean): Observable<any> {
+    return this.http.get(`${this.apiURL}/sortMail/${criteria}/${order}`);
+  }
 }

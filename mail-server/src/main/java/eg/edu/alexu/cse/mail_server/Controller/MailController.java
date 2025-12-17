@@ -74,6 +74,11 @@ public class MailController {
         return mailService.getMailById(mailId);
     }
 
+    @GetMapping("/sortMail/{criteria}/{order}")
+    public List<Mail> getSortedMails(@PathVariable String criteria, @PathVariable boolean order){
+        return mailService.getSortedMails(criteria, order);
+    }
+
     // Mark as read
     @PutMapping("/{mailId}/read")
     public Map<String, String> markAsRead(@PathVariable Long mailId) {
