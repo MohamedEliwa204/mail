@@ -304,25 +304,27 @@ export class Mail implements OnInit {
 
     if (!folderName || this.selectedIds().size === 0) return;
 
-    if (confirm(`Move ${this.selectedIds().size} mails to "${folderName}"?`)) {
-      // [BACKEND INTERACTION: MOVE MAILS]
-      // Request: PUT /api/mail/move-batch
-      // Body: { mailIds: [1, 2], targetFolder: "spam" }
-      // TODO: Replace with actual moveMails method when implemented in mailService
-      // this.selectedIds().forEach(id => {
-      //   this.mailService.renameFolder(this.currentUser()?.email || '', , folderName).subscribe();
-      // });
-      
-      // Frontend simulation until backend method is implemented
-      this.selectedIds().forEach(id => {
-        console.log(`Simulating move of mailId ${id} to folder ${folderName}`);
-        this.mailService.moveMailToFolder(id, folderName).subscribe();
-      });
+    const selectedMailIds = Array.from(this.selectedIds());
 
-      this.mails.update(currentMails =>
-        currentMails.filter(m => !this.selectedIds().has(m.id))
+    if (confirm(`Copy ${selectedMailIds.length} email(s) to "${folderName}"?`)) {
+      // Call backend API to copy each selected email to the folder
+      const copyRequests = selectedMailIds.map(mailId =>
+        this.mailService.copyEmailToFolder(mailId, folderName)
       );
-      this.selectedIds.set(new Set());
+
+      // Execute all copy requests in parallel
+      forkJoin(copyRequests).subscribe({
+        next: () => {
+          alert(`Successfully copied ${selectedMailIds.length} email(s) to "${folderName}"`);
+          // Optionally refresh the current folder view
+          this.refresh();
+          this.selectedIds.set(new Set());
+        },
+        error: (error) => {
+          console.error('Error copying emails:', error);
+          alert(`Failed to copy emails to "${folderName}". Please try again.`);
+        }
+      });
     }
   }
 
@@ -495,7 +497,10 @@ export class Mail implements OnInit {
   onReceiverInput(event: Event) {
     const input = event.target as HTMLInputElement;
     this.receiverInputValue.set(input.value);
-    this.composedMail.receivers[0] = input.value;
+    this.composedMail.receivers[0] = input.value;}
+    
+  printSuggestions(){
+    console.log(this.filteredContactSuggestions);
   }
 
   selectContactEmail(email: string) {
@@ -685,7 +690,7 @@ export class Mail implements OnInit {
   searchFolder = signal<string>('all');
   hasAttachment = signal<boolean>(false);
 
-  // General search that search all fields for the query 
+  // General search that search all fields for the query
   generalSearch() {
     const query = this.searchQuery().trim().toLowerCase();
     const userId = this.currentUser()?.id;
@@ -700,7 +705,7 @@ export class Mail implements OnInit {
       this.mailService.searchMails(this.searchFolder(), mailFilterDto).subscribe({
         next: (mails) => {
           const mappedMails = mails.map((m: any) => ({
-            id: m.id,
+            id: m.id || m.mailId,
             sender: m.sender,
             receiver: m.receiver,
             body: m.body,
@@ -803,7 +808,7 @@ export class Mail implements OnInit {
         next: (mails) => {
           // Map backend response to frontend Mail interface
           const mappedMails = mails.map((m: any) => ({
-            id: m.id,
+            id: m.id || m.mailId,
             sender: m.sender,
             receiver: m.receiver,
             body: m.body,
@@ -906,7 +911,6 @@ export class Mail implements OnInit {
   }
 
   saveContact() {
-
     const userEmail = this.currentUser()?.email;
 
     const name = this.contactFormName().trim();
@@ -994,14 +998,57 @@ export class Mail implements OnInit {
     console.log("mail is:" + mail.body)
     console.log("mail is:" + mail.id)
     console.log("mail is:" + mail.subject)
-    
+
     this.mailService.trashMail(mail.id).subscribe({
       next: () => {
         console.log("Deleted Successfully!");
-        this.setselectedMail(null); 
+        this.setselectedMail(null);
       },
       error: (err) => console.log("Error!!: ", err)
     })
   }
 
+  isComposeToOpen = signal<boolean>(false);
+
+  sortMenu = signal<boolean>(false)
+
+  sortCriteria = signal<string>('')
+
+  sortOrder = signal<boolean>(false)
+
+  showSortMenu(){
+    if (this.currentFolder() == 'inbox') {
+      this.sortMenu.set(!this.sortMenu())
+    }
+  }
+
+  toggleSortOrder(){
+    this.sortOrder.set(!this.sortOrder())
+    this.loadSortedMails()
+  }
+
+  setSortCriteria(criteria: string){
+    this.sortCriteria.set(criteria);
+    this.loadSortedMails()
+  }
+
+  loadSortedMails(){
+    const email = this.currentUser()?.email;
+    if(email == undefined){
+      return
+    }
+    this.mailService.loadSortedMails(email , this.sortCriteria(), this.sortOrder()).subscribe({
+      next: (mails) => {
+        this.mails.set(mails);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading inbox:', error);
+        this.errorMessage.set('Failed to load inbox');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  
 }

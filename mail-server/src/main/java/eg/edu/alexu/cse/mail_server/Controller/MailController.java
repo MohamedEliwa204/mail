@@ -62,6 +62,12 @@ public class MailController {
         return mailService.getDraftMails(userEmail);
     }
 
+    // Get trash emails
+    @GetMapping("/trash/{userEmail}")
+    public List<EmailViewDto> getTrashMails(@PathVariable String userEmail) {
+        return mailService.getTrashMails(userEmail);
+    }
+
     // Get emails by folder
     @GetMapping("/folder/{userEmail}/{folderName}")
     public List<EmailViewDto> getMailsByFolder(@PathVariable String userEmail, @PathVariable String folderName) {
@@ -72,6 +78,11 @@ public class MailController {
     @GetMapping("/{mailId}")
     public Mail getMailById(@PathVariable Long mailId) {
         return mailService.getMailById(mailId);
+    }
+
+    @GetMapping("/sortMail/{email}/{criteria}/{order}")
+    public List<Mail> getSortedMails(@PathVariable String email, @PathVariable String criteria, @PathVariable boolean order){
+        return mailService.getSortedMails(email, criteria, order);
     }
 
     // Mark as read
