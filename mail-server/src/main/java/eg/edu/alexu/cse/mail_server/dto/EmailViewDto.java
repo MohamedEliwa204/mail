@@ -3,6 +3,7 @@ package eg.edu.alexu.cse.mail_server.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class EmailViewDto {
     private String body;
     private LocalDateTime timestamp;
     private int priority;
+    @JsonProperty("isRead")
     private boolean isRead;
     private String folderName;
 

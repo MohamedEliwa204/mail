@@ -407,7 +407,7 @@
 
                         <div style="display: flex; align-items: center; gap: 6px;" [style.font-weight]="mails()[i].isRead ? '400' : '600'">
                         <!-- High Priority Indicator (Red Dot for priority = 1) -->
-                          @if(mails()[i].priority === 1) {
+                          @if(mails()[i].priority === 5) {
                             <span
                               style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
                               title="High Priority"></span>
@@ -419,6 +419,7 @@
                       </div>
 
                       <!-- Mark as read/unread button -->
+
                       <div
                         class="mail-read-toggle"
                         (click)="toggleReadStatus($event, mails()[i])"

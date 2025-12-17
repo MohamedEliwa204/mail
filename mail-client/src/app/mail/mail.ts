@@ -592,6 +592,7 @@ export class Mail implements OnInit {
     // Automatically mark as read when opening an email
     if (mail && !mail.isRead) {
       this.markAsRead(mail.id);
+
     }
   }
 
@@ -601,8 +602,11 @@ export class Mail implements OnInit {
 
   // Mark email as read
   markAsRead(mailId: number) {
+    console.log('Attempting to mark email as read:', mailId);
+
     this.mailService.markAsRead(mailId).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Mark as read SUCCESS:', response);
         // Update the mail in the list
         this.mails.update(currentMails =>
           currentMails.map(m => m.id === mailId ? { ...m, isRead: true } : m)
@@ -613,7 +617,8 @@ export class Mail implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error marking email as read:', error);
+        console.error('ERROR marking email as read:', mailId, error);
+        console.error('Error details:', JSON.stringify(error));
       }
     });
   }
