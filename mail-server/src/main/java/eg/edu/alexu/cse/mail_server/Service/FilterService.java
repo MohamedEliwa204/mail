@@ -115,6 +115,7 @@ public class FilterService {
                 .withReceiverFilter(filterDTO.getReceiver())
                 .withFolderFilter(filterDTO.getFolder())
                 .withHasAttachmentsFilter(filterDTO.getHasAttachments())
+                .withAttachmentFilter(filterDTO.getAttachmentSearch())
                 .build();
     }
 

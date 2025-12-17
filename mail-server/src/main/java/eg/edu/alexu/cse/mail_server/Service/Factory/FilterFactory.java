@@ -27,6 +27,7 @@ public class FilterFactory {
             case "isRead" -> new IsReadFilter() ;
             case "folder" -> new FolderFilter() ;
             case "hasAttachments" -> new HasAttachement() ;
+            case "attachment" -> new AttachmentFilter("") ; // Query will be set by builder
             default -> throw new IllegalArgumentException("undefined filter");
         } ;
     }
