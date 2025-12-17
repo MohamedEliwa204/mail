@@ -288,9 +288,9 @@
                     @for(att of selectedMail()?.attachments; track $index) {
                       <div
                         style="background: #f1f3f4; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; gap: 8px; border: 1px solid #dadce0;">
-                        <span style="font-size: 14px; color: #173db0;">{{ att.fileName }}</span> <a href="#"
-                                                                                                    (click)="$event.preventDefault();" title="Download"
-                                                                                                    style="text-decoration: none; color: #1a73e8; font-weight: bold;">⬇</a>
+                        <span style="font-size: 14px; color: #173db0;">{{ att.fileName }}</span>
+                        <a href="#" (click)="$event.preventDefault(); downloadAttachment(att)" title="Download"
+                          style="text-decoration: none; color: #1a73e8; font-weight: bold; cursor: pointer;">⬇</a>
                       </div>
                     }
                   </div>
@@ -450,7 +450,7 @@
                           {{mails()[i].subject}}
                         </div>
 
-                        <div [style.font-weight]="mails()[i].isRead ? '400' : '600'">{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}</div>
+                        <div [style.font-weight]="mails()[i].isRead ? '400' : '600'">{{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}
                       </div>
 
                       <!-- Mark as read/unread button -->

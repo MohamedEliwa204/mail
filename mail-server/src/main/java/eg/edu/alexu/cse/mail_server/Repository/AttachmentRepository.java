@@ -1,10 +1,12 @@
 package eg.edu.alexu.cse.mail_server.Repository;
 
-import eg.edu.alexu.cse.mail_server.Entity.Attachment;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 
 
 @Repository
@@ -15,4 +17,6 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
      * Uses the 'mail' field in Attachment entity and accesses its 'mailId' property
      */
     List<Attachment> findByMailMailId(Long mailId);
+
+    Optional<Attachment> findByStoredFileName(String storedFileName);
 }

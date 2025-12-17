@@ -1,54 +1,45 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.AttachmentRepository;
 import eg.edu.alexu.cse.mail_server.dto.AttachmentDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 
 @Service
 @RequiredArgsConstructor
 public class AttachmentService {
-    private static final String UPLOAD_DIR = "attachments/";
     private final AttachmentRepository attachmentRepository;
+    private final FileStorageService fileStorageService;
 
+    /**
+     * Save attachment file to disk and persist metadata to database
+     * 
+     * @param file The multipart file to save
+     * @param mail The mail entity this attachment belongs to
+     * @return Saved attachment entity
+     * @throws IOException if file operations fail
+     */
     public Attachment saveAttachment(MultipartFile file, Mail mail) throws IOException {
-
-        String uniqueFileName = UUID.randomUUID().toString() + "_" +
-                file.getOriginalFilename();
-
-
-        String filePath = UPLOAD_DIR + mail.getMailId() + "/" + uniqueFileName;
-        Path path = Paths.get(filePath);
-
-        Files.createDirectories(path.getParent());
-        Files.write(path, file.getBytes());
-
-
+        // Use FileStorageService to handle file system operations
+        Attachment attachment = fileStorageService.saveFile(file, mail);
+        
+        // Extract text content for searching (optional)
         String indexedContent = extractTextContent(file);
-
-        Attachment attachment = Attachment.builder()
-                .fileName(file.getOriginalFilename())
-                .contentType(file.getContentType())
-                .fileSize(file.getSize())
-                .filePath(filePath)
-                .indexedContent(indexedContent)
-                .uploadDate(LocalDateTime.now())
-                .mail(mail)
-                .build();
-
+        attachment.setIndexedContent(indexedContent);
+        
+        // Save attachment metadata to database
         return attachmentRepository.save(attachment);
     }
 
@@ -115,11 +106,7 @@ public class AttachmentService {
      * @return file content as byte array
      */
     public byte[] readAttachmentFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        if (!Files.exists(path)) {
-            throw new IOException("File not found: " + filePath);
-        }
-        return Files.readAllBytes(path);
+        return fileStorageService.readFileBytes(filePath);
     }
 
     private String extractTextContent(MultipartFile file) {

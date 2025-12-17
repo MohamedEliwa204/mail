@@ -679,6 +679,23 @@ export class Mail implements OnInit {
     this.selectedMail.set(null)
   }
 
+  /**
+   * Download attachment by opening it in a new tab
+   * @param attachment - The attachment to download
+   */
+  downloadAttachment(attachment: any) {
+    // Use the stored filename if available, otherwise fall back to ID
+    if (attachment.fileName || attachment.id) {
+      // Construct download URL using the backend endpoint
+      const downloadUrl = `http://localhost:8080/api/mail/attachments/id/${attachment.id}`;
+      
+      // Open in new tab - backend will handle inline display or download based on content type
+      window.open(downloadUrl, '_blank');
+    } else {
+      alert('Attachment information not available');
+    }
+  }
+
   // Mark email as read
   markAsRead(mailId: number) {
     console.log('Attempting to mark email as read:', mailId);
