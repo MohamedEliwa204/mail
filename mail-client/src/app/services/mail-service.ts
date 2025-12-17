@@ -112,6 +112,13 @@ export class MailService {
     return this.http.put(`${this.apiURL}/${mailId}/read`, {});
   }
 
+  /* [BACKEND REQ] Mark Unread
+     Request: PUT /api/mail/{mailId}/unread
+     Body: Empty */
+  markAsUnread(mailId: number): Observable<any> {
+    return this.http.put(`${this.apiURL}/${mailId}/unread`, {});
+  }
+
   trashMail(mailId: number | undefined): Observable<any> {
     return this.http.delete(`${this.apiURL}/${mailId}`);
   }

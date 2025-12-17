@@ -41,7 +41,7 @@
 .one-mail {
     display: flex;
     /* Checkbox | Sender | Subject | Timestamp */
-    flex-direction: row; 
+    flex-direction: row;
     align-items: center;
 
     padding: 10px 14px;
@@ -88,13 +88,26 @@
     white-space: nowrap;
 }
 .one-mail.selected {
-    background-color: #c2dbff !important; 
+    background-color: #c2dbff !important;
     border-color: #3b82f6;
 }
 .mail-checkbox {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.mail-read-toggle {
+    border-radius: 50%;
+    padding: 5px;
+    margin: 2px;
+    color: #5f6368;
+    transition: all 0.2s ease;
+}
+
+.mail-read-toggle:hover {
+    background-color: #e8eaed;
+    color: #1a73e8;
 }
 
 .mail-trash{
@@ -111,7 +124,7 @@
     width: 100%;
     display: grid;
     /* Checkbox | Sender | Subject | Timestamp */
-    grid-template-columns: 40px 3fr 5fr 1fr; 
+    grid-template-columns: 40px 3fr 5fr 1fr;
     align-items: center;
 
     padding: 14px 18px;

@@ -588,11 +588,66 @@ export class Mail implements OnInit {
   selectedMail = signal<MailEntity | null>(null);
 
   setselectedMail(mail: MailEntity | null) {
-    this.selectedMail.set(mail)
+    this.selectedMail.set(mail);
+    // Automatically mark as read when opening an email
+    if (mail && !mail.isRead) {
+      this.markAsRead(mail.id);
+    }
   }
 
   clearselectedMail() {
     this.selectedMail.set(null)
+  }
+
+  // Mark email as read
+  markAsRead(mailId: number) {
+    this.mailService.markAsRead(mailId).subscribe({
+      next: () => {
+        // Update the mail in the list
+        this.mails.update(currentMails =>
+          currentMails.map(m => m.id === mailId ? { ...m, isRead: true } : m)
+        );
+        // Update selected mail if it's the one being marked
+        if (this.selectedMail()?.id === mailId) {
+          this.selectedMail.update(mail => mail ? { ...mail, isRead: true } : null);
+        }
+      },
+      error: (error) => {
+        console.error('Error marking email as read:', error);
+      }
+    });
+  }
+
+  // Toggle read/unread status
+  toggleReadStatus(event: Event, mail: MailEntity) {
+    event.stopPropagation(); // Prevent opening the email
+    const newStatus = !mail.isRead;
+
+    if (newStatus) {
+      // Mark as read
+      this.mailService.markAsRead(mail.id).subscribe({
+        next: () => {
+          this.mails.update(currentMails =>
+            currentMails.map(m => m.id === mail.id ? { ...m, isRead: true } : m)
+          );
+        },
+        error: (error) => {
+          console.error('Error marking as read:', error);
+        }
+      });
+    } else {
+      // Mark as unread
+      this.mailService.markAsUnread(mail.id).subscribe({
+        next: () => {
+          this.mails.update(currentMails =>
+            currentMails.map(m => m.id === mail.id ? { ...m, isRead: false } : m)
+          );
+        },
+        error: (error) => {
+          console.error('Error marking as unread:', error);
+        }
+      });
+    }
   }
 
   //Search & Filter Logic

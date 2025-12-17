@@ -112,6 +112,12 @@ public class MailService {
         mailRepository.save(mail);
     }
 
+    public void markAsUnread(Long mailId) {
+        Mail mail = getMailById(mailId);
+        mail.setRead(false);
+        mailRepository.save(mail);
+    }
+
     // Delete mail (soft delete - move to trash)
     // Note: This requires userId parameter for ownership verification
     public void deleteMail(Long mailId, Long userId) {

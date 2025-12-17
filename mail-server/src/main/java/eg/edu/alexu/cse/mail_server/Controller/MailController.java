@@ -87,6 +87,13 @@ public class MailController {
         return Map.of("message", "Mail marked as read");
     }
 
+    // Mark as unread
+    @PutMapping("/{mailId}/unread")
+    public Map<String, String> markAsUnread(@PathVariable Long mailId) {
+        mailService.markAsUnread(mailId);
+        return Map.of("message", "Mail marked as unread");
+    }
+
     // Delete mail (move to trash)
     @DeleteMapping("/{mailId}")
     public Map<String, String> deleteMail(@PathVariable Long mailId) {
