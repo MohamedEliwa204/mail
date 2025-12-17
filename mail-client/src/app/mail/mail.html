@@ -156,10 +156,10 @@
         </div>
         <div class="to-input" (click)="onComposeAreaClick($event)">
           <p>To:</p>
-          <input id="compose-to-input" type="text" 
-                 [ngModel]="composedMail.receivers[0]" 
+          <input id="compose-to-input" type="text"
+                 [ngModel]="composedMail.receivers[0]"
                  (input)="onReceiverInput($event)"
-                 (keydown)="onReceiverKeyDown($event)" 
+                 (keydown)="onReceiverKeyDown($event)"
                  placeholder="Type recipient email...">
           <!-- Debug Info -->
           <small style="color: #666; font-size: 11px;">

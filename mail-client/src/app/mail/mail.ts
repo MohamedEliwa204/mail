@@ -367,8 +367,6 @@ export class Mail implements OnInit {
     this.currentFolder.set('sent');
     this.isLoading.set(true);
 
-    // [BACKEND INTERACTION: GET SENT]
-    // Request: GET /api/mail/sent/{email}
     this.mailService.getSentMails(userEmail).subscribe({
       next: (mails) => {
         this.mails.set(mails);
@@ -546,35 +544,6 @@ export class Mail implements OnInit {
     }
   }
 
-  IsendComposedMail() {
-    console.log(this.composedMail.sender)
-    console.log(this.composedMail.receivers)
-    console.log(this.composedMail.subject)
-    console.log(this.composedMail.body)
-    console.log(this.composedMail.priority)
-    if (this.composedMail.receivers.length > 0) {
-      this.mailService.sendMail(this.composedMail).subscribe({
-        next: res => {
-          console.log(res.message)
-          this.refresh()
-        },
-        error: e => {
-          if (e.error && e.error.error) {
-            console.log(`Error: ${e.error.error}`);
-          }
-          else {
-            console.log('Unknown error', e);
-          }
-        }
-      });
-      this.composedMail.receivers = []
-      this.composedMail.subject = ''
-      this.composedMail.body = ''
-      this.composedMail.priority = 1
-      console.log("Email is sent")
-    }
-  }
-
   sendComposedMail() {
     if (this.composedMail.receivers.length === 0) {
       alert('Please enter at least one recipient');
@@ -692,7 +661,7 @@ export class Mail implements OnInit {
   //mail preview
   selectedMail = signal<MailEntity | null>(null);
 
-  setselectedMail(mail: MailEntity) {
+  setselectedMail(mail: MailEntity | null) {
     this.selectedMail.set(mail)
   }
 
@@ -859,8 +828,6 @@ export class Mail implements OnInit {
     }
   }
 
-
-
   toggleFilterMenu() {
     this.isFilterMenuOpen.update(v => !v);
   }
@@ -981,9 +948,6 @@ export class Mail implements OnInit {
   }
 
   deleteContactById(contactId: number) {
-    // [BACKEND INTERACTION: DELETE CONTACT]
-    // Request: DELETE /api/contacts/{id}
-
     console.log(contactId);
 
     this.mailService.deleteContact(contactId).subscribe({
@@ -1018,12 +982,26 @@ export class Mail implements OnInit {
 
   // Save as Draft
   saveDraft() {
-    // [BACKEND INTERACTION: SAVE DRAFT]
-    // 1. BE Task: Save email to drafts folder without sending.
-    // 2. Request: POST /api/mail/draft
-    // 3. Body: ComposeEmailDTO
     console.log('💾 Saving Draft:', this.composedMail);
     alert('Draft saved successfully!');
     this.resetComposeForm();
   }
+
+  trash(mail: MailEntity | null){
+    if (mail == null) {
+      return
+    }
+    console.log("mail is:" + mail.body)
+    console.log("mail is:" + mail.id)
+    console.log("mail is:" + mail.subject)
+    
+    this.mailService.trashMail(mail.id).subscribe({
+      next: () => {
+        console.log("Deleted Successfully!");
+        this.setselectedMail(null); 
+      },
+      error: (err) => console.log("Error!!: ", err)
+    })
+  }
+
 }
