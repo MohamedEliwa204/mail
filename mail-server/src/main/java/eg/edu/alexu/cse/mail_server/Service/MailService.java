@@ -161,10 +161,11 @@ public class MailService {
             throw new IllegalArgumentException("Folder name cannot be empty");
         }
 
-        // Create a copy of the email
+        // Create a copy of the email (DO NOT copy mailId - let DB generate new one)
         Mail copiedMail = Mail.builder()
+                // mailId is NOT set - database will auto-generate
                 .sender(originalMail.getSender())
-                .senderRel(originalMail.getSenderRel())
+                .senderRel(originalMail.getSenderRel()) // Same user reference (not a collection)
                 .receiver(originalMail.getReceiver())
                 .subject(originalMail.getSubject())
                 .body(originalMail.getBody())
@@ -172,11 +173,19 @@ public class MailService {
                 .timestamp(java.time.LocalDateTime.now()) // New timestamp for the copy
                 .folderName(folderName.toUpperCase()) // Store folder name in uppercase
                 .isRead(originalMail.isRead())
-                .receiverRel(originalMail.getReceiverRel())
-                .attachments(originalMail.getAttachments()) // Reference same attachments
                 .owner(originalMail.getOwner()) // Preserve owner
                 .build();
 
+        // Create NEW collection instances to avoid Hibernate shared reference error
+        if (originalMail.getReceiverRel() != null) {
+            copiedMail.setReceiverRel(new ArrayList<>(originalMail.getReceiverRel()));
+        }
+
+        if (originalMail.getAttachments() != null) {
+            copiedMail.setAttachments(new ArrayList<>(originalMail.getAttachments()));
+        }
+
+        // Save the mail
         mailRepository.save(copiedMail);
     }
 

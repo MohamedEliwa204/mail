@@ -202,4 +202,13 @@ export class MailService {
   deleteContact(contactId: number): Observable<any> {
     return this.http.delete(`${this.apiURL}/contacts/${contactId}`);
   }
+
+  /* [BACKEND REQ] Copy Email to Folder
+     Request: POST /api/folder/copy?mailId={mailId}&folderName={folderName}
+     Response: Success message */
+  copyEmailToFolder(mailId: number, folderName: string): Observable<any> {
+    return this.http.post(`http://localhost:8080/api/folder/copy`, null, {
+      params: { mailId: mailId.toString(), folderName }
+    });
+  }
 }

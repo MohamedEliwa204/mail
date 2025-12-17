@@ -290,14 +290,27 @@ export class Mail implements OnInit {
 
     if (!folderName || this.selectedIds().size === 0) return;
 
-    if (confirm(`Move ${this.selectedIds().size} mails to "${folderName}"?`)) {
-      // [BACKEND INTERACTION: MOVE MAILS]
-      // Request: PUT /api/mail/move-batch
-      // Body: { mailIds: [1, 2], targetFolder: "spam" }
-      this.mails.update(currentMails =>
-        currentMails.filter(m => !this.selectedIds().has(m.id))
+    const selectedMailIds = Array.from(this.selectedIds());
+
+    if (confirm(`Copy ${selectedMailIds.length} email(s) to "${folderName}"?`)) {
+      // Call backend API to copy each selected email to the folder
+      const copyRequests = selectedMailIds.map(mailId =>
+        this.mailService.copyEmailToFolder(mailId, folderName)
       );
-      this.selectedIds.set(new Set());
+
+      // Execute all copy requests in parallel
+      forkJoin(copyRequests).subscribe({
+        next: () => {
+          alert(`Successfully copied ${selectedMailIds.length} email(s) to "${folderName}"`);
+          // Optionally refresh the current folder view
+          this.refresh();
+          this.selectedIds.set(new Set());
+        },
+        error: (error) => {
+          console.error('Error copying emails:', error);
+          alert(`Failed to copy emails to "${folderName}". Please try again.`);
+        }
+      });
     }
   }
 

@@ -17,7 +17,8 @@ public class FolderController {
 
     /**
      * Copy an email to a custom folder
-     * @param mailId ID of the email to copy
+     *
+     * @param mailId     ID of the email to copy
      * @param folderName Name of the target folder
      * @return Success message
      */
