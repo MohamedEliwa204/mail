@@ -93,7 +93,9 @@ public class MailService {
 
         List<Mail> mails;
         if ("all".equalsIgnoreCase(folderName)) {
-            mails = mailRepository.findByReceiverOrSenderOrderByTimestampDesc(userEmail, userEmail);
+            // Only include the primary mailbox folders for the owner (INBOX, SENT, trash)
+            java.util.List<String> primaryFolders = java.util.Arrays.asList("INBOX", "SENT", "trash");
+            mails = mailRepository.findByOwnerIdAndFolderNameInOrderByTimestampDesc(userId, primaryFolders);
         } else {
             // Use ownerId to load mails for the given folder (including "trash")
             mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, folderName);
@@ -289,5 +291,3 @@ public class MailService {
     }
 
 }
-
-
