@@ -20,9 +20,6 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     List<Mail> findByReceiverAndSenderContainingIgnoreCase(String receiver, String sender);
 
-    // Sorted versions for API endpoints
-    List<Mail> findByReceiverAndFolderNameOrderByTimestampDesc(String receiver, String folderName);
-
     List<Mail> findBySenderAndFolderNameOrderByTimestampDesc(String sender, String folderName);
     // Find all emails where the user is either sender or receiver
     @Query("SELECT DISTINCT m FROM Mail m LEFT JOIN m.receiverRel r WHERE m.senderRel.userId = :userId OR r.userId = :userId")
@@ -34,6 +31,21 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     // Find trash emails older than specified date for automatic deletion
     List<Mail> findByFolderNameAndDeletedAtBefore(String folderName, java.time.LocalDateTime deletedAt);
+
+    List<Mail> findByReceiver(String receiver);
+
+    List<Mail> findByReceiverAndFolderNameOrderBySenderAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderBySenderDesc(String receiver, String folderName);
+
+    List<Mail> findByReceiverAndFolderNameOrderBySubjectAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderBySubjectDesc(String receiver, String folderName);
+
+    List<Mail> findByReceiverAndFolderNameOrderByTimestampAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderByTimestampDesc(String receiver, String folderName);
+
+    List<Mail> findByReceiverAndFolderNameOrderByPriorityAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderByPriorityDesc(String receiver, String folderName);
+
 
     // Owner-based queries for personal folders (trash, drafts, custom folders)
     List<Mail> findByOwnerIdAndFolderNameOrderByTimestampDesc(Long ownerId, String folderName);

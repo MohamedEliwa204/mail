@@ -102,22 +102,36 @@ export class Mail implements OnInit {
   }
   //Selection Logic
   selectedIds = signal<Set<number>>(new Set());
+
+  // Use a method that explicitly reads the signal to ensure reactivity
   isSelected(mailId: number): boolean {
-    return this.selectedIds().has(mailId);
+    const ids = this.selectedIds();
+    return ids.has(mailId);
   }
 
   //Toggle selection for a single mail
   toggleSelection(event: Event, mailId: number) {
     event.stopPropagation();
-    this.selectedIds.update(ids => {
-      const newIds = new Set(ids);
-      if (newIds.has(mailId)) {
-        newIds.delete(mailId);
-      } else {
-        newIds.add(mailId);
-      }
-      return newIds;
-    });
+    event.preventDefault();
+    console.log('Toggle called for mailId:', mailId);
+    console.log('Current selected IDs before:', Array.from(this.selectedIds()));
+
+    // Create a completely new Set to ensure Angular detects the change
+    const currentIds = this.selectedIds();
+    const newIds = new Set<number>();
+
+    // Copy existing IDs
+    currentIds.forEach(id => newIds.add(id));
+
+    // Toggle the target ID
+    if (newIds.has(mailId)) {
+      newIds.delete(mailId);
+    } else {
+      newIds.add(mailId);
+    }
+
+    console.log('New selected IDs after:', Array.from(newIds));
+    this.selectedIds.set(newIds);
   }
 
   //Select/Deselect All (Current Page Only)
@@ -155,11 +169,11 @@ export class Mail implements OnInit {
       // 1. BE Task: Delete multiple emails.
       // 2. FE Sends: List of mailIds.
       // 3. Request: Loop DELETE /api/mail/{id} OR Single Call POST /api/mail/delete-batch [ids]
-      /*
+
       this.selectedIds().forEach(id => {
-         this.mailService.deleteMail(id).subscribe();
+        this.mailService.deleteMail(id).subscribe();
       });
-      */
+
 
       // Frontend Update
       this.mails.update(currentMails =>
@@ -333,6 +347,9 @@ export class Mail implements OnInit {
     // Request: GET /api/mail/inbox/{email}
     this.mailService.getInboxMails(userEmail).subscribe({
       next: (mails) => {
+        console.log('=== LOADED MAILS ===');
+        console.log('Mail IDs:', mails.map(m => m.id));
+        console.log('Full mails:', mails);
         this.mails.set(mails);
         this.isLoading.set(false);
       },
@@ -453,8 +470,14 @@ export class Mail implements OnInit {
   }
 
   // ==================== COMPOSE AUTOCOMPLETE ====================
+  // Active suggestion index for keyboard navigation
+  activeSuggestionIndex = signal<number>(-1);
+
+  // Signal to track receiver input for reactive autocomplete
+  receiverInputValue = signal<string>('');
+
   filteredContactSuggestions = computed(() => {
-    const receiverInput = (this.composedMail.receivers[0] || '').trim().toLowerCase();
+    const receiverInput = this.receiverInputValue().trim().toLowerCase();
     if (!receiverInput || receiverInput.length < 2) return [];
     if (this.contacts().length === 0) return [];
 
@@ -470,8 +493,60 @@ export class Mail implements OnInit {
     return suggestions.slice(0, 5);
   });
 
+  // Update receiver input signal when user types
+  onReceiverInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.receiverInputValue.set(input.value);
+    this.composedMail.receivers[0] = input.value;}
+    
+  printSuggestions(){
+    console.log(this.filteredContactSuggestions);
+  }
+
   selectContactEmail(email: string) {
     this.composedMail.receivers[0] = email;
+    this.receiverInputValue.set(email); // Update signal to close dropdown
+    // reset state and close dropdown by clearing index
+    // and clear input for next entry 
+    // (if you didn't clear the input the dropdown will presist)
+    this.activeSuggestionIndex.set(-1);
+    this.receiverInputValue.set(''); // Clear input for next entry
+  }
+
+  // Handle keydown in the receivers input for navigating suggestions
+  onReceiverKeyDown(event: KeyboardEvent) {
+    const suggestions = this.filteredContactSuggestions();
+    if (!suggestions || suggestions.length === 0) {
+      this.activeSuggestionIndex.set(-1);
+      return;
+    }
+
+    const current = this.activeSuggestionIndex();
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const next = current < suggestions.length - 1 ? current + 1 : 0;
+      this.activeSuggestionIndex.set(next);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const prev = current > 0 ? current - 1 : suggestions.length - 1;
+      this.activeSuggestionIndex.set(prev);
+    } else if (event.key === 'Enter') {
+      if (current >= 0 && current < suggestions.length) {
+        event.preventDefault();
+        this.selectContactEmail(suggestions[current].email);
+      }
+    } else if (event.key === 'Escape') {
+      this.activeSuggestionIndex.set(-1);
+    }
+  }
+
+  // Close suggestions when clicking outside the suggestions list/input
+  onComposeAreaClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // If click is not on suggestion list items, reset index
+    if (!target.closest('.suggestions-list') && !target.closest('#compose-to-input')) {
+      this.activeSuggestionIndex.set(-1);
+    }
   }
 
   sendComposedMail() {
@@ -555,9 +630,13 @@ export class Mail implements OnInit {
    */
   saveDraftAndClose() {
     // Check if there's any content to save
+
+    // this checks if there is at least one non-empty receiver
+    // to avoid saving drafts with only empty receivers
+    const hasValidReceiver = this.composedMail.receivers.some(r => r.trim() !== '');
     const hasContent = this.composedMail.subject.trim() !== '' ||
       this.composedMail.body.trim() !== '' ||
-      this.composedMail.receivers.length > 0;
+      hasValidReceiver;
 
     if (!hasContent) {
       // Nothing to save, just close
@@ -892,7 +971,6 @@ export class Mail implements OnInit {
   }
 
   saveContact() {
-
     const userEmail = this.currentUser()?.email;
 
     const name = this.contactFormName().trim();
@@ -990,4 +1068,47 @@ export class Mail implements OnInit {
     })
   }
 
+  isComposeToOpen = signal<boolean>(false);
+
+  sortMenu = signal<boolean>(false)
+
+  sortCriteria = signal<string>('')
+
+  sortOrder = signal<boolean>(false)
+
+  showSortMenu(){
+    if (this.currentFolder() == 'inbox') {
+      this.sortMenu.set(!this.sortMenu())
+    }
+  }
+
+  toggleSortOrder(){
+    this.sortOrder.set(!this.sortOrder())
+    this.loadSortedMails()
+  }
+
+  setSortCriteria(criteria: string){
+    this.sortCriteria.set(criteria);
+    this.loadSortedMails()
+  }
+
+  loadSortedMails(){
+    const email = this.currentUser()?.email;
+    if(email == undefined){
+      return
+    }
+    this.mailService.loadSortedMails(email , this.sortCriteria(), this.sortOrder()).subscribe({
+      next: (mails) => {
+        this.mails.set(mails);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading inbox:', error);
+        this.errorMessage.set('Failed to load inbox');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  
 }

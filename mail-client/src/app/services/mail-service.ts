@@ -19,7 +19,7 @@ export interface Attachment {
 }
 
 export interface Mail {
-  id: number;
+  id: number;  // Changed from mailId to match backend response
   sender: string;
   receiver: string;
   body: string;
@@ -101,6 +101,9 @@ export class MailService {
     return this.http.post(`${this.apiURL}/send`, composeEmailDTO);
   }
 
+  /* [BACKEND REQ] Save Draft
+     Request: POST /api/mail/draft
+     Body: ComposeEmailDTO (JSON) */
   draftEmail(composeEmailDTO: ComposeEmailDTO): Observable<any> {
     return this.http.post(`${this.apiURL}/draft`, composeEmailDTO);
   }
@@ -122,8 +125,18 @@ export class MailService {
     return this.http.put(`${this.apiURL}/${mailId}/unread`, {});
   }
 
-  trashMail(mailId: number | undefined): Observable<any> {
+  /* [BACKEND REQ] Delete Mail
+     Request: DELETE /api/mail/{mailId} */
+  deleteMail(mailId: number): Observable<any> {
     return this.http.delete(`${this.apiURL}/${mailId}`);
+  }
+
+  /* [BACKEND REQ] Move Mail to Folder
+     Request: POST /api/folder/copy?mailId={id}&folderName={name} */
+  moveMailToFolder(mailId: number, folderName: string): Observable<any> {
+    return this.http.post(`http://localhost:8080/api/folder/copy`, {}, {
+      params: { mailId: mailId.toString(), folderName }
+    });
   }
 
   /* [BACKEND REQ] User Folders CRUD */
@@ -144,7 +157,7 @@ export class MailService {
   }
 
   renameFolder(userEmail: string, oldName: string, newName: string): Observable<any> {
-    return this.http.put(`${this.apiURL}/folders/${userEmail}`, {}, {
+    return this.http.post(`http://localhost:8080/api/folders/copy`, {}, {
       params: { oldName, newName }
     });
   }
