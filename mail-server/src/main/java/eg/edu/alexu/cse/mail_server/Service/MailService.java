@@ -2,6 +2,7 @@ package eg.edu.alexu.cse.mail_server.Service;
 
 import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
+import eg.edu.alexu.cse.mail_server.Entity.User;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Service.command.DraftCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.GetMailCommand;
@@ -137,9 +138,29 @@ public class MailService {
                 .folderName(folderName.toLowerCase()) // Store folder name in lowercase
                 .isRead(originalMail.isRead())
                 .receiverRel(originalMail.getReceiverRel())
-                .attachments(originalMail.getAttachments()) // Reference same attachments
                 .build();
-
+        // Copy attachments
+        // otherwise they will still reference the original mail
+        // which will lead to issues with JPA/Hibernate
+        List<Attachment> copiedAttachments = new ArrayList<>();
+        for (Attachment attachment : originalMail.getAttachments()) {
+            Attachment copiedAttachment = Attachment.builder()
+                    .fileName(attachment.getFileName())
+                    .contentType(attachment.getContentType())
+                    .fileSize(attachment.getFileSize())
+                    .filePath(attachment.getFilePath())
+                    .indexedContent(attachment.getIndexedContent())
+                    .uploadDate(attachment.getUploadDate())
+                    .mail(copiedMail) // Link to the copied mail
+                    .build();
+            copiedAttachments.add(copiedAttachment);
+        }
+        
+        // Copy the list of receivers (reference the same User objects)
+        List<User> copiedReceivers = new ArrayList<>(originalMail.getReceiverRel());
+        copiedMail.setReceiverRel(copiedReceivers);
+        
+        copiedMail.setAttachments(copiedAttachments);
         mailRepository.save(copiedMail);
     }
 

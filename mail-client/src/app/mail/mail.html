@@ -154,9 +154,13 @@
             <img src="icons/quit.svg" alt="close">
           </div>
         </div>
-        <div class="to-input">
+        <div class="to-input" (click)="onComposeAreaClick($event)">
           <p>To:</p>
-          <input type="text" [(ngModel)]="composedMail.receivers[0]" placeholder="Type recipient email...">
+          <input id="compose-to-input" type="text" 
+                 [ngModel]="composedMail.receivers[0]" 
+                 (input)="onReceiverInput($event)"
+                 (keydown)="onReceiverKeyDown($event)" 
+                 placeholder="Type recipient email...">
           <!-- Debug Info -->
           <small style="color: #666; font-size: 11px;">
             Suggestions: {{ filteredContactSuggestions().length }} | Contacts: {{ contacts().length }}
@@ -166,12 +170,12 @@
         <!-- Autocomplete Suggestions Dropdown -->
         @if(filteredContactSuggestions().length > 0) {
           <div style="position: relative; margin-top: -8px; margin-left: 20px; margin-right: 20px; z-index: 9999;">
-            <ul
+            <ul class="suggestions-list"
               style="position: absolute; top: 0; left: 0; right: 0; background: white; border: 1px solid #dadce0; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 9999; max-height: 200px; overflow-y: auto; margin: 0; padding: 0; list-style: none;">
-              @for(suggestion of filteredContactSuggestions(); track suggestion.email) {
+              @for(suggestion of filteredContactSuggestions(); track suggestion.email; let i = $index) {
                 <li (click)="selectContactEmail(suggestion.email)"
-                    style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;"
-                    onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">
+                    [style.background]="activeSuggestionIndex() === i ? '#f1f3f4' : 'white'"
+                    style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s;">
                   <div style="font-weight: 500; font-size: 14px; color: #202124;">
                     {{ suggestion.name }}
                   </div>
@@ -388,15 +392,15 @@
             @for(i of generatePage(); track i){
 
               @if(mails()[i]){
-                <div class="one-mail" [class.selected]="isSelected(mails()[i].mailId)"
-                     [style.background-color]="isSelected(mails()[i].mailId) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
+                <div class="one-mail" [class.selected]="selectedIds().has(mails()[i].id)"
+                     [style.background-color]="selectedIds().has(mails()[i].id) ? '#c2dbff' : (mails()[i].isRead ? '#f5f7fa' : '#ffffff')"
                      (click)="currentFolder() === 'drafts' ? openDraftInCompose(mails()[i]) : setselectedMail(mails()[i])"
                      [style.cursor]="currentFolder() === 'drafts' ? 'pointer' : 'default'"
                      [title]="currentFolder() === 'drafts' ? 'Click to edit and send' : ''">
 
-                  <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].mailId)">
-                    <input type="checkbox" [checked]="isSelected(mails()[i].mailId)"
-                           style="cursor: pointer; width: 18px; height: 18px;">
+                  <div class="mail-checkbox" (click)="toggleSelection($event, mails()[i].id)">
+                    <input type="checkbox" [checked]="selectedIds().has(mails()[i].id)"
+                           style="cursor: pointer; width: 18px; height: 18px; pointer-events: none;">
                   </div>
 
                   <div>{{mails()[i].sender}}</div>

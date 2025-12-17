@@ -19,7 +19,7 @@ export interface Attachment {
 }
 
 export interface Mail {
-  mailId: number;
+  id: number;  // Changed from mailId to match backend response
   sender: string;
   receiver: string;
   body: string;
@@ -121,6 +121,14 @@ export class MailService {
     return this.http.delete(`${this.apiURL}/${mailId}`);
   }
 
+  /* [BACKEND REQ] Move Mail to Folder
+     Request: POST /api/folder/copy?mailId={id}&folderName={name} */
+  moveMailToFolder(mailId: number, folderName: string): Observable<any> {
+    return this.http.post(`http://localhost:8080/api/folder/copy`, {}, {
+      params: { mailId: mailId.toString(), folderName }
+    });
+  }
+
   /* [BACKEND REQ] User Folders CRUD */
   getUserFolders(userEmail: string): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiURL}/folders/${userEmail}`);
@@ -139,7 +147,7 @@ export class MailService {
   }
 
   renameFolder(userEmail: string, oldName: string, newName: string): Observable<any> {
-    return this.http.put(`${this.apiURL}/folders/${userEmail}`, {}, {
+    return this.http.post(`http://localhost:8080/api/folders/copy`, {}, {
       params: { oldName, newName }
     });
   }
