@@ -203,6 +203,10 @@ export class MailService {
     return this.http.delete(`${this.apiURL}/contacts/${contactId}`);
   }
 
+  loadSortedMails(email: string, criteria: string, order:boolean): Observable<any> {
+    return this.http.get(`${this.apiURL}/sortMail/${email}/${criteria}/${order}`);
+  }
+}
   /* [BACKEND REQ] Copy Email to Folder
      Request: POST /api/folder/copy?mailId={mailId}&folderName={folderName}
      Response: Success message */
