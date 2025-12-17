@@ -20,9 +20,6 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     List<Mail> findByReceiverAndSenderContainingIgnoreCase(String receiver, String sender);
 
-    // Sorted versions for API endpoints
-    List<Mail> findByReceiverAndFolderNameOrderByTimestampDesc(String receiver, String folderName);
-
     List<Mail> findBySenderAndFolderNameOrderByTimestampDesc(String sender, String folderName);
     // Find all emails where the user is either sender or receiver
     @Query("SELECT m FROM Mail m WHERE m.senderRel.userId = :userId OR :userId IN (SELECT r.userId FROM m.receiverRel r)")
@@ -35,19 +32,19 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     // Find trash emails older than specified date for automatic deletion
     List<Mail> findByFolderNameAndDeletedAtBefore(String folderName, java.time.LocalDateTime deletedAt);
 
+    List<Mail> findByReceiver(String receiver);
 
+    List<Mail> findByReceiverAndFolderNameOrderBySenderAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderBySenderDesc(String receiver, String folderName);
 
-    List<Mail> findByReceiverOrderBySenderAsc(String receiver);
-    List<Mail> findByReceiverOrderBySenderDesc(String receiver);
+    List<Mail> findByReceiverAndFolderNameOrderBySubjectAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderBySubjectDesc(String receiver, String folderName);
 
-    List<Mail> findByReceiverOrderBySubjectAsc(String receiver);
-    List<Mail> findByReceiverOrderBySubjectDesc(String receiver);
+    List<Mail> findByReceiverAndFolderNameOrderByTimestampAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderByTimestampDesc(String receiver, String folderName);
 
-    List<Mail> findByReceiverOrderByTimpstampAsc(String receiver);
-    List<Mail> findByReceiverOrderByTimpstampDesc(String receiver);
-
-    List<Mail> findByReceiverOrderByPriorityAsc(String receiver);
-    List<Mail> findByReceiverOrderByPriorityDesc(String receiver);
+    List<Mail> findByReceiverAndFolderNameOrderByPriorityAsc(String receiver, String folderName);
+    List<Mail> findByReceiverAndFolderNameOrderByPriorityDesc(String receiver, String folderName);
 
 
 }

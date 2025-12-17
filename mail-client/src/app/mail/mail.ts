@@ -891,6 +891,11 @@ export class Mail implements OnInit {
     this.loadSortedMails()
   }
 
+  setSortCriteria(criteria: string){
+    this.sortCriteria.set(criteria);
+    this.loadSortedMails()
+  }
+
   loadSortedMails(){
     const email = this.currentUser()?.email;
     if(email == undefined){
@@ -909,7 +914,5 @@ export class Mail implements OnInit {
     });
   }
 
-  setSortCriteria(criteria: string){
-    this.sortCriteria.set(criteria);
-  }
+  
 }

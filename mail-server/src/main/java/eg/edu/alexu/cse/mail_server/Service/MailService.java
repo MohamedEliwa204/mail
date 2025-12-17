@@ -1,5 +1,14 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
@@ -10,14 +19,6 @@ import eg.edu.alexu.cse.mail_server.dto.AttachmentDTO;
 import eg.edu.alexu.cse.mail_server.dto.ComposeEmailDTO;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -207,27 +208,30 @@ public class MailService {
         switch(critera){
             case "sender":
                 if(order)
-                   return mailRepository.findByReceiverOrderBySenderAsc(email);
+                   return mailRepository.findByReceiverAndFolderNameOrderBySenderAsc(email, "INBOX");
                 else
-                    return mailRepository.findByReceiverOrderBySenderDesc(email); 
+                    return mailRepository.findByReceiverAndFolderNameOrderBySenderDesc(email, "INBOX"); 
                 
             case "subject":
                 if(order)
-                   return mailRepository.findByReceiverOrderBySubjectAsc(email);
+                   return mailRepository.findByReceiverAndFolderNameOrderBySubjectAsc(email, "INBOX");
                 else
-                    return mailRepository.findByReceiverOrderBySubjectDesc(email); 
+                    return mailRepository.findByReceiverAndFolderNameOrderBySubjectDesc(email, "INBOX"); 
 
             case "date":
                 if(order)
-                   return mailRepository.findByReceiverOrderByTimpstampAsc(email);
+                   return mailRepository.findByReceiverAndFolderNameOrderByTimestampAsc(email, "INBOX");
                 else
-                    return mailRepository.findByReceiverOrderByTimpstampAsc(email); 
+                    return mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(email, "INBOX"); 
 
             case "priority":
                 if(order)
-                   return mailRepository.findByReceiverOrderByPriorityAsc(email);
+                   return mailRepository.findByReceiverAndFolderNameOrderByPriorityAsc(email, "INBOX");
                 else
-                    return mailRepository.findByReceiverOrderByPriorityAsc(email);
+                    return mailRepository.findByReceiverAndFolderNameOrderByPriorityDesc(email, "INBOX");
+
+            default:
+                return mailRepository.findByReceiver(email);
         }
     }
 
