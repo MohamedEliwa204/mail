@@ -1,25 +1,33 @@
 package eg.edu.alexu.cse.mail_server.dto;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
 @Data
 @Builder
+@AllArgsConstructor
 public class EmailViewDto {
     private Long id;
     private String sender;
+    private String receiver;
     private String subject;
     private String body;
     private LocalDateTime timestamp;
     private int priority;
+    @JsonProperty("isRead")
     private boolean isRead;
+    private String folderName;
+
+    // Full attachment data with file content (includes Base64 encoded files)
+    private List<AttachmentDTO> attachments;
 
 
-    private List<String> attachmentNames;
-
+    // No-args constructor required for Jackson deserialization
     public EmailViewDto() {
     }
 
@@ -79,6 +87,7 @@ public class EmailViewDto {
         isRead = read;
     }
 
+    /* 
     public List<String> getAttachmentNames() {
         return attachmentNames;
     }
@@ -86,4 +95,5 @@ public class EmailViewDto {
     public void setAttachmentNames(List<String> attachmentNames) {
         this.attachmentNames = attachmentNames;
     }
+    */
 }

@@ -1,5 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,10 @@ public class Mail {
     @Builder.Default
     private boolean isRead = false; // for ui
 
+    // Track when email was moved to trash for automatic deletion after 30 days
+    private LocalDateTime deletedAt;
+
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_id")
     private List<Attachment> attachments;
@@ -56,10 +61,12 @@ public class Mail {
     // Relations it will also ease the process of
     // Navigating between emails and users
     // Currently the relations are bidirectional
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id" , nullable = false)
     private User senderRel ;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "mail_recivers",
@@ -67,6 +74,15 @@ public class Mail {
             inverseJoinColumns = @JoinColumn(name = "receiver_id")
     )
     private List<User> receiverRel = new ArrayList<>();
+
+    // Owner of this mail copy (for trash, drafts, and folder management)
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @Column(name = "owner_id", insertable = false, updatable = false)
+    private Long ownerId;
 
     public Long getMailId() {
         return mailId;
@@ -162,5 +178,29 @@ public class Mail {
 
     public void setFolderName(String folderName) {
         this.folderName = folderName;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

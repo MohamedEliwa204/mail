@@ -47,7 +47,7 @@ public class FilterController {
     }
 
     /**
-     * Search emails (default: AND logic)
+     * Search emails (default: OR logic)
      * Only returns emails for the specified user
      * @param userId the ID of the user performing the search
      * @param mailFilterDTO the search criteria
@@ -58,6 +58,6 @@ public class FilterController {
             @PathVariable Long userId,
             @RequestBody MailFilterDTO mailFilterDTO) {
         mailFilterDTO.setUserId(userId);
-        return filterService.getEmailsAnd(mailFilterDTO);
+        return filterService.getEmailsOr(mailFilterDTO);
     }
 }

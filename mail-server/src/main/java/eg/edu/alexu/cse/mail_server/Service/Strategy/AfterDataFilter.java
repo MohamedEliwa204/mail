@@ -35,8 +35,8 @@ public class AfterDataFilter implements FilterStrategy {
 
         long daysDifference = java.time.Duration.between(date, mailDate).toDays();
 
-        // Maximum meaningful difference (e.g., 90 days)
-        long maxDifference = 3 * 30;
+        // Maximum meaningful difference (e.g., 360 days)
+        long maxDifference = 12 * 30;
 
         // Closer emails get higher score: linear inverse scaling
         int score = (int) Math.max(0, 100 - (daysDifference * 100) / maxDifference);

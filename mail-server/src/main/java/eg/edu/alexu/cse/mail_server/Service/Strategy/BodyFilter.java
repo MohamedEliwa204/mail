@@ -1,18 +1,17 @@
 package eg.edu.alexu.cse.mail_server.Service.Strategy;
 
-import eg.edu.alexu.cse.mail_server.Entity.Mail;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.stereotype.Component;
-
-import java.io.Serial;
 import java.util.Optional;
 
-// Also Or search if any words matches return true
+import eg.edu.alexu.cse.mail_server.Entity.Mail;
+
+/**
+ * BodyFilter implements realistic email body search behavior
+ * Matches whole words and word prefixes (like Gmail/Outlook)
+ */
 public class BodyFilter implements FilterStrategy {
 
-    private String body ;
+    private String body;
+
     public BodyFilter() {
     }
 
@@ -22,48 +21,96 @@ public class BodyFilter implements FilterStrategy {
 
     @Override
     public boolean filter(Mail mail) {
-        // Since the body field can be null
-        // the filter supports empty bodies
-        String mailBody = Optional.ofNullable(mail.getBody()).orElse("").toLowerCase() ;
+        String mailBody = Optional.ofNullable(mail.getBody()).orElse("").toLowerCase();
 
-        String[] words = body.toLowerCase().split("[\\s,.;:!?]+");
+        if (mailBody.isEmpty() || body == null || body.isEmpty())
+            return false;
 
-        for (String word : words) if (mailBody.contains(word)) return true;
+        // Exact full body match
+        if (mailBody.equals(body))
+            return true;
+
+        String[] queryWords = body.split("[\\s,.;:!?]+");
+        String[] bodyWords = mailBody.split("[\\s,.;:!?]+");
+
+        // Match if any query word is found as whole word or prefix in body
+        for (String queryWord : queryWords) {
+            if (queryWord.isEmpty())
+                continue;
+
+            for (String bodyWord : bodyWords) {
+                if (bodyWord.isEmpty())
+                    continue;
+
+                // Exact match or prefix match (realistic email search)
+                // Instead of old way of contains, we do startsWith for prefix matching
+                if (bodyWord.equals(queryWord) || bodyWord.startsWith(queryWord)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
     /**
-     * Returns a score based on how closely the mail's subject matches the query.
-     * Exact match: 100
-     * Partial word matches: 10 points each (max 90)
-     * Substring matches: 5 points each (max 50)
+     * Returns a score based on how closely the mail's body matches the query.
+     * Full exact match: 100
+     * Exact word matches: 15 points each (max 90)
+     * Prefix matches: 8 points each (max 50)
      */
-
+    @Override
     public int getScore(Mail mail) {
-        String subject = Optional.ofNullable(mail.getBody()).
-                orElse("").
-                toLowerCase();
-        if (subject.equals(body)) return 100 ;
+        String mailBody = Optional.ofNullable(mail.getBody()).orElse("").toLowerCase();
 
-        // Splitting the query into words
-        // any punctuation is valid
-        String[] words = body.toLowerCase().split("[\\s,.;:!?]+") ;
+        // Exact full match
+        if (mailBody.equals(body)) {
+            return 100;
+        }
 
-        // Calculating the number of exact partial matches
-        int partialMatches = 0 ;
-        for (String word : words) if (subject.contains(word)) partialMatches++ ;
+        // then check for full body contains the query exactly
+        if (mailBody.contains(body)) {
+            return 90;
+        }
 
-        if (partialMatches > 0) return Math.min(partialMatches*10 , 90) ;
+        String[] queryWords = body.split("[\\s,.;:!?]+");
+        String[] bodyWords = mailBody.split("[\\s,.;:!?]+");
 
-        // Calculating the number of partial words matches
-        int wordPartialMatches = 0 ;
-        for (String word : words) {
-            for (int i = 1 ; i < word.length() ; i++ ){
-                String sub = word.substring(0, i);
-                if (subject.contains(sub)) wordPartialMatches++ ;
+        int exactMatches = 0;
+        int prefixMatches = 0;
+
+        for (String queryWord : queryWords) {
+            if (queryWord.isEmpty())
+                continue;
+
+            boolean foundExact = false;
+            boolean foundPrefix = false;
+
+            for (String bodyWord : bodyWords) {
+                if (bodyWord.isEmpty())
+                    continue;
+
+                if (bodyWord.equals(queryWord)) {
+                    foundExact = true;
+                    break;
+                } else if (!foundPrefix && bodyWord.startsWith(queryWord)) {
+                    foundPrefix = true;
+                }
             }
-        };
-        if (wordPartialMatches > 0) return Math.min(wordPartialMatches*5 , 50);
+
+            if (foundExact) {
+                exactMatches++;
+            } else if (foundPrefix) {
+                prefixMatches++;
+            }
+        }
+
+        // Prioritize exact matches over prefix matches
+        if (exactMatches > 0) {
+            return Math.min(exactMatches * 15, 90);
+        }
+        if (prefixMatches > 0) {
+            return Math.min(prefixMatches * 8, 50);
+        }
 
         return 0;
     }
@@ -73,6 +120,6 @@ public class BodyFilter implements FilterStrategy {
     }
 
     public void setBody(String body) {
-        this.body = body.toLowerCase().trim();
+        this.body = body != null ? body.toLowerCase().trim() : null;
     }
 }

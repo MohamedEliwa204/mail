@@ -20,17 +20,19 @@ public class DraftCommand implements MailCommand {
     @Override
     @Transactional
     public void execute(ComposeEmailDTO dto) {
-        if (userRepository.findByEmail(dto.getSender()).isEmpty()) {
-            throw new RuntimeException("Sender email not found: " + dto.getSender());
-        }
+        var senderUser = userRepository.findByEmail(dto.getSender())
+                .orElseThrow(() -> new RuntimeException("Sender email not found: " + dto.getSender()));
+
         Mail draft = Mail.builder()
                 .sender(dto.getSender())
+                .senderRel(senderUser)
                 .receiver(String.join(", ", dto.getReceivers()))
                 .subject(dto.getSubject())
                 .body(dto.getBody())
                 .timestamp(LocalDateTime.now())
                 .folderName("DRAFTS")
                 .isRead(true)
+                .owner(senderUser)  // Set owner for draft
                 .build();
 
         mailRepository.save(draft);

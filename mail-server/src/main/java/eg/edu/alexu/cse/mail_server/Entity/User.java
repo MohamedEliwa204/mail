@@ -1,5 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,11 +37,20 @@ public class User {
     private String email;
 
     // Easy navigation between user and emails
+    @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL , mappedBy = "senderRel")
     private List<Mail> sentEmail = new ArrayList<>();
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "receiverRel" , fetch = FetchType.LAZY)
     private List<Mail> receivedEmail = new ArrayList<>();
+
+    @OneToMany(
+        mappedBy = "user",
+        fetch = FetchType.LAZY,
+        cascade = CascadeType.ALL
+    )
+    private List<Contact> contacts;
 
     public Long getUserId() {
         return userId;
