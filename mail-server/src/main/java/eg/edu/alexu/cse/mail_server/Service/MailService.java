@@ -203,10 +203,34 @@ public class MailService {
                 .build();
     }
 
-    public List<Mail> getSortedMails(String critera, boolean order){
+    public List<Mail> getSortedMails(String email, String critera, boolean order){
         switch(critera){
-            case:
+            case "sender":
+                if(order)
+                   return mailRepository.findByReceiverOrderBySenderAsc(email);
+                else
+                    return mailRepository.findByReceiverOrderBySenderDesc(email); 
+                
+            case "subject":
+                if(order)
+                   return mailRepository.findByReceiverOrderBySubjectAsc(email);
+                else
+                    return mailRepository.findByReceiverOrderBySubjectDesc(email); 
+
+            case "date":
+                if(order)
+                   return mailRepository.findByReceiverOrderByTimpstampAsc(email);
+                else
+                    return mailRepository.findByReceiverOrderByTimpstampAsc(email); 
+
+            case "priority":
+                if(order)
+                   return mailRepository.findByReceiverOrderByPriorityAsc(email);
+                else
+                    return mailRepository.findByReceiverOrderByPriorityAsc(email);
         }
     }
 
 }
+
+

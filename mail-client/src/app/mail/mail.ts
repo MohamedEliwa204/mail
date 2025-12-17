@@ -883,7 +883,6 @@ export class Mail implements OnInit {
   showSortMenu(){
     if (this.currentFolder() == 'inbox') {
       this.sortMenu.set(!this.sortMenu())
-      this.loadSortedMails()
     }
   }
 
@@ -893,7 +892,11 @@ export class Mail implements OnInit {
   }
 
   loadSortedMails(){
-    this.mailService.loadSortedMails(this.sortCriteria(), this.sortOrder()).subscribe({
+    const email = this.currentUser()?.email;
+    if(email == undefined){
+      return
+    }
+    this.mailService.loadSortedMails(email , this.sortCriteria(), this.sortOrder()).subscribe({
       next: (mails) => {
         this.mails.set(mails);
         this.isLoading.set(false);
@@ -904,5 +907,9 @@ export class Mail implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  setSortCriteria(criteria: string){
+    this.sortCriteria.set(criteria);
   }
 }

@@ -34,4 +34,20 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     // Find trash emails older than specified date for automatic deletion
     List<Mail> findByFolderNameAndDeletedAtBefore(String folderName, java.time.LocalDateTime deletedAt);
+
+
+
+    List<Mail> findByReceiverOrderBySenderAsc(String receiver);
+    List<Mail> findByReceiverOrderBySenderDesc(String receiver);
+
+    List<Mail> findByReceiverOrderBySubjectAsc(String receiver);
+    List<Mail> findByReceiverOrderBySubjectDesc(String receiver);
+
+    List<Mail> findByReceiverOrderByTimpstampAsc(String receiver);
+    List<Mail> findByReceiverOrderByTimpstampDesc(String receiver);
+
+    List<Mail> findByReceiverOrderByPriorityAsc(String receiver);
+    List<Mail> findByReceiverOrderByPriorityDesc(String receiver);
+
+
 }

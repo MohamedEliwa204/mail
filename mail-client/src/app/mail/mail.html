@@ -359,10 +359,10 @@
                 style="background-color: #e2dcdc;">
                   <div class="main-item" style="background-color: #bdbaba;">Sort by:</div>
 
-                  <div class="sort-item">Sender</div>
-                  <div class="sort-item">Subject</div>
-                  <div class="sort-item">Date</div>
-                  <div class="sort-item">Priority</div>
+                  <div class="sort-item" (click)="setSortCriteria('sender')">Sender</div>
+                  <div class="sort-item" (click)="setSortCriteria('subject')">Subject</div>
+                  <div class="sort-item" (click)="setSortCriteria('date')">Date</div>
+                  <div class="sort-item" (click)="setSortCriteria('priority')">Priority</div>
                 </div>
               <button class="page-left" (click)="pagingLeft()">
                 <img src="icons/arrowback.svg" alt="Page Left">

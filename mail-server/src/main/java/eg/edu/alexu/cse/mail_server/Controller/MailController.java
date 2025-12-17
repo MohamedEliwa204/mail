@@ -74,9 +74,9 @@ public class MailController {
         return mailService.getMailById(mailId);
     }
 
-    @GetMapping("/sortMail/{criteria}/{order}")
-    public List<Mail> getSortedMails(@PathVariable String criteria, @PathVariable boolean order){
-        return mailService.getSortedMails(criteria, order);
+    @GetMapping("/sortMail/{email}/{criteria}/{order}")
+    public List<Mail> getSortedMails(@PathVariable String email, @PathVariable String criteria, @PathVariable boolean order){
+        return mailService.getSortedMails(email, criteria, order);
     }
 
     // Mark as read
