@@ -191,6 +191,15 @@
         <div class="subject-input">
           <p>Subject:</p>
           <input type="text" [(ngModel)]="composedMail.subject" (click)="printSuggestions()">
+          <div style="position: relative; top: 5px;">{{ displayPriority() }}</div>
+          <button (click)="setPriortyMenu()">Priority</button>
+          <div class="priority-select" [style.display]="isPrioritySelected()? 'block': 'none'">
+            <div (click)="choosePriority(1)">⚪ Normal</div>
+            <div (click)="choosePriority(2)">🟢 Important</div>
+            <div (click)="choosePriority(3)">🔵 Very Important</div>
+            <div (click)="choosePriority(4)">🟠 Urgent</div>
+            <div (click)="choosePriority(5)">🔴 Extremely Urgent</div>
+          </div>
         </div>
         <textarea class="compose-text-area" [(ngModel)]="composedMail.body"></textarea>
 
