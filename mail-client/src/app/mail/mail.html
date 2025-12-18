@@ -462,23 +462,11 @@
       {{mails()[i].subject}}
     </div>
 
-    <!-- Priority Level (Text/Badge) -->
-    <div class="mail-priority">
-      @if(mails()[i].priority === 5) {
-        <span class="priority-badge priority-urgent">عاجل</span>
-      }
-      @else if(mails()[i].priority === 4) {
-        <span class="priority-badge priority-high">مهم جداً</span>
-      }
-      @else if(mails()[i].priority === 3) {
-        <span class="priority-badge priority-medium">مهم</span>
-      }
-    </div>
-
     <!-- Timestamp -->
     <div class="mail-timestamp" [style.font-weight]="mails()[i].isRead ? '400' : '500'">
       {{mails()[i].timestamp | date:'dd-MM-yy h:mm a'}}
     </div>
+
 
     <!-- Mark as read/unread button -->
     <div

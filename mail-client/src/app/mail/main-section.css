@@ -147,11 +147,11 @@
     background-color: #cfd3db;
 }
 
-.one-mail-div {
+.one-mail-div{
     width: 100%;
     display: grid;
-    /* Checkbox | Unread | Sender | Subject | Priority | Timestamp | Read Toggle */
-    grid-template-columns: 40px 20px 220px 1fr 100px 130px 40px;
+    /* Checkbox | Unread | Sender | Subject | Timestamp | Read Toggle */
+    grid-template-columns: 40px 20px 220px 1fr 150px 40px;
     align-items: center;
     gap: 12px;
 
