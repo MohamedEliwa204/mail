@@ -50,10 +50,17 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     // Owner-based queries for personal folders (trash, drafts, custom folders)
     List<Mail> findByOwnerIdAndFolderNameOrderByTimestampDesc(Long ownerId, String folderName);
 
+    // Find all emails for a specific owner (all folders) ordered by timestamp
+    List<Mail> findByOwnerIdOrderByTimestampDesc(Long ownerId);
+
     // Find trash emails for a specific owner (for loading trash folder)
     List<Mail> findByOwnerIdAndFolderName(Long ownerId, String folderName);
 
     // Find mail by ID and owner (for deletion security)
     @Query("SELECT m FROM Mail m WHERE m.mailId = :mailId AND m.ownerId = :ownerId")
     Mail findByMailIdAndOwnerId(@Param("mailId") Long mailId, @Param("ownerId") Long ownerId);
+
+    // Find mails for an owner restricted to a set of folder names (e.g., INBOX, SENT, TRASH)
+    @Query("SELECT m FROM Mail m WHERE m.ownerId = :ownerId AND m.folderName IN :folderNames ORDER BY m.timestamp DESC")
+    List<Mail> findByOwnerIdAndFolderNameInOrderByTimestampDesc(@Param("ownerId") Long ownerId, @Param("folderNames") java.util.List<String> folderNames);
 }

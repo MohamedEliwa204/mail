@@ -141,29 +141,21 @@ public class AttachmentFilter implements FilterStrategy{
     }
 
     private String extractText(Attachment att) {
-        try {
-            // First check if indexed content is available
-            if (att.getIndexedContent() != null && !att.getIndexedContent().isEmpty()) {
-                return att.getIndexedContent();
-            }
-            
-            // If not, read from file path
-            String filePath = att.getFilePath();
-            if (filePath == null || filePath.isEmpty()) {
-                return "";
-            }
-            
-            Path path = Paths.get(filePath);
-            if (!Files.exists(path)) {
-                return "";
-            }
-            
-            byte[] fileData = Files.readAllBytes(path);
-            ByteArrayInputStream stream = new ByteArrayInputStream(fileData);
-            return tika.parseToString(stream);
+        // 1. FAST PATH: Return pre-calculated text from DB
+        if (att.getIndexedContent() != null && !att.getIndexedContent().isEmpty()) {
+            return att.getIndexedContent();
         }
-        catch (Exception e) {
-            // Catch all exceptions including IOException, TikaException, and RuntimeException
+
+        // 2. SLOW PATH: Parse file (Only use this for debugging or recovery)
+        Path path = Paths.get(att.getFilePath());
+        if (!Files.exists(path)) return "";
+
+        // Use try-with-resources to ensure the file closes
+        try (java.io.InputStream stream = Files.newInputStream(path)) {
+            // Tika parses the stream directly. Much more memory efficient.
+            return tika.parseToString(stream);
+        } catch (Exception e) {
+            System.err.println("Error parsing file: " + att.getFileName());
             return "";
         }
     }

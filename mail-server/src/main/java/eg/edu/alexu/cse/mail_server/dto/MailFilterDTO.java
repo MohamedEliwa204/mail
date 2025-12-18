@@ -17,7 +17,7 @@ public class MailFilterDTO {
     private Integer priority;
     private String folder ;
     private Boolean hasAttachments;
-    // Attachment will be added soon
+    private String attachmentSearch; // Search query for attachment content/filename
 
     public Long getUserId() {
         return userId;
@@ -121,5 +121,13 @@ public class MailFilterDTO {
 
     public void setHasAttachments(Boolean hasAttachments) {
         this.hasAttachments = hasAttachments;
+    }
+
+    public String getAttachmentSearch() {
+        return attachmentSearch;
+    }
+
+    public void setAttachmentSearch(String attachmentSearch) {
+        this.attachmentSearch = attachmentSearch;
     }
 }
