@@ -43,7 +43,7 @@ public class FilterService {
 
     /**
      * Filter emails using AND logic - all criteria must match
-     * Only returns emails related to the specified user (as sender or receiver)
+     * Only returns emails owned by the specified user (owner-based filtering)
      */
     public List<EmailViewDto> getEmailsAnd(MailFilterDTO dto) {
         // Validate userId is provided
@@ -51,11 +51,8 @@ public class FilterService {
             throw new IllegalArgumentException("User ID is required for filtering");
         }
 
-        // Get only emails related to this user
-        // Use query with attachments if hasAttachments filter is active
-        List<Mail> mails = dto.getHasAttachments() != null 
-            ? mailRepository.findAllByUserIdWithAttachments(dto.getUserId())
-            : mailRepository.findAllByUserId(dto.getUserId());
+        // Get only emails owned by this user (owner-based query)
+        List<Mail> mails = mailRepository.findByOwnerIdOrderByTimestampDesc(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
@@ -69,7 +66,7 @@ public class FilterService {
 
     /**
      * Filter emails using OR logic - at least one criterion must match
-     * Only returns emails related to the specified user (as sender or receiver)
+     * Only returns emails owned by the specified user (owner-based filtering)
      */
     public List<EmailViewDto> getEmailsOr(MailFilterDTO dto) {
         // Validate userId is provided
@@ -77,11 +74,8 @@ public class FilterService {
             throw new IllegalArgumentException("User ID is required for filtering");
         }
 
-        // Get only emails related to this user
-        // Use query with attachments if hasAttachments filter is active
-        List<Mail> mails = dto.getHasAttachments() != null 
-            ? mailRepository.findAllByUserIdWithAttachments(dto.getUserId())
-            : mailRepository.findAllByUserId(dto.getUserId());
+        // Get only emails owned by this user (owner-based query)
+        List<Mail> mails = mailRepository.findByOwnerIdOrderByTimestampDesc(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");

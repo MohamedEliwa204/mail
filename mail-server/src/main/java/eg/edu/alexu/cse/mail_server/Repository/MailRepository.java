@@ -27,7 +27,7 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
 
     // Find all emails with attachments eagerly loaded (for hasAttachments filter)
     @Query("SELECT DISTINCT m FROM Mail m LEFT JOIN FETCH m.attachments LEFT JOIN m.receiverRel r WHERE m.senderRel.userId = :userId OR r.userId = :userId")
-    List<Mail> findAllByUserIdWithAttachments(@Param("userId") Long userId);
+    List<Mail> findAllByOwnerIdWithAttachments(@Param("userId") Long userId);
 
 
     @Query("SELECT m FROM Mail m WHERE m.receiver = :email OR m.sender = :email ORDER BY m.timestamp DESC")
