@@ -34,7 +34,11 @@
 
                     <div class="filter-item">
                         <label for="words-input">Has the words</label>
-                        <input id="words-input" type="text" placeholder="Search in content" [(ngModel)]="searchWords">
+                        <input id="words-input" type="text" placeholder="Search in email content" [(ngModel)]="searchWords">
+                    </div>
+                    <div class="filter-item">
+                      <label for="words-input">search in document</label>
+                      <input id="document-input" type="text" placeholder="Search in document content" [(ngModel)]="searchDocument">
                     </div>
 
                     <div class="Date">
@@ -368,11 +372,11 @@
               @if(currentFolder() == 'inbox'){
                 <img class="sort-btn" src="icons/srtdesasc.svg" alt="sort" (click)="toggleSortOrder()">
               }
-              
+
               <div class="page-display" (click)="showSortMenu()">
                   {{pageFrom()}}-{{pageTo()}} of {{mails().length}}
                 </div>
-                
+
                 <div class="sort-menu" [style.display]="sortMenu()? 'block': 'none'"
                 style="background-color: #e2dcdc;">
                   <div class="main-item" style="background-color: #bdbaba;">Sort by:</div>
@@ -451,6 +455,18 @@
             {{mails()[i].sender}}
         }
     </div>
+</div>
+
+
+                        <div style="display: flex; align-items: center; gap: 6px;" [style.font-weight]="mails()[i].isRead ? '400' : '600'">
+                        <!-- High Priority Indicator (Red Dot for priority = 1) -->
+                          @if(mails()[i].priority === 5) {
+                            <span
+                              style="display: inline-block; width: 8px; height: 8px; background-color: #d93025; border-radius: 50%;"
+                              title="High Priority"></span>
+                          }
+                          {{mails()[i].subject}}
+                        </div>
 
     <!-- Subject with Priority Indicator -->
     <div class="mail-subject" [style.font-weight]="mails()[i].isRead ? '400' : '600'">

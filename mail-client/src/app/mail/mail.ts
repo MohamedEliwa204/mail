@@ -731,7 +731,7 @@ export class Mail implements OnInit {
     if (attachment.fileName || attachment.id) {
       // Construct download URL using the backend endpoint
       const downloadUrl = `http://localhost:8080/api/mail/attachments/id/${attachment.id}`;
-      
+
       // Open in new tab - backend will handle inline display or download based on content type
       window.open(downloadUrl, '_blank');
     } else {
@@ -805,6 +805,7 @@ export class Mail implements OnInit {
   searchTo = signal<string>('');
   searchSubject = signal<string>('');
   searchWords = signal<string>('');
+  searchDocument = signal<string>('');
   dateRange = signal<string>('');
   exactDate = signal<string>('');
   searchFolder = signal<string>('all');
@@ -864,7 +865,7 @@ export class Mail implements OnInit {
     const hasAttachments = this.hasAttachment();
     const isRead = this.isRead();
     const folder = this.searchFolder();
-
+    const documentContent = this.searchDocument();
     this.isLoading.set(true);
 
     // Date calculation - only process if user specified date filters
@@ -878,7 +879,7 @@ export class Mail implements OnInit {
     } else if (dateRange) {
       // User specified a date range
       let dateBefore = new Date();
-      let dateAfter = new Date();
+      const dateAfter = new Date(); // Keep current date for "after" comparison
       let adder = 0;
 
       if (dateRange === "1 day") adder = 1;
@@ -900,8 +901,8 @@ export class Mail implements OnInit {
 
       // Only set dates if a valid range was specified
       if (adder > 0) {
-        beforeDate = dateBefore.toISOString().slice(0, 19);
-        afterDate = dateAfter.toISOString().slice(0, 19);
+        afterDate = dateBefore.toISOString().slice(0, 19);  // Emails after this old date
+        beforeDate = dateAfter.toISOString().slice(0, 19);  // Emails before now
       }
     }
 
@@ -914,7 +915,10 @@ export class Mail implements OnInit {
       exactDate: exactDateValue,
       afterDate: afterDate,
       beforeDate: beforeDate,
+      attachmentSearch: documentContent || undefined,
       isRead: isRead !== null ? isRead : undefined,
+      hasAttachments: hasAttachments || undefined,
+      folder: folder !== 'all' ? folder : undefined,
     };
 
     // --- Console Logs for Testing ---

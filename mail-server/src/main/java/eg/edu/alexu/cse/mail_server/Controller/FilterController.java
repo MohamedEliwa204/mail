@@ -28,6 +28,9 @@ public class FilterController {
             @PathVariable Long userId,
             @RequestBody MailFilterDTO mailFilterDTO) {
         mailFilterDTO.setUserId(userId);
+        System.out.println(mailFilterDTO.getUserId());
+        System.out.println(mailFilterDTO.getReceiver());
+        System.out.println(mailFilterDTO.getSubject());
         return filterService.getEmailsAnd(mailFilterDTO);
     }
 

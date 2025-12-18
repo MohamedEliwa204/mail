@@ -23,6 +23,7 @@ public class FilterBuilder {
     private IsReadFilter isReadFilter;
     private FolderFilter folderFilter;
     private HasAttachement hasAttachments;
+    private AttachmentFilter attachmentFilter;
 
     @Autowired
     public FilterBuilder(FilterFactory filterFactory) {
@@ -107,6 +108,12 @@ public class FilterBuilder {
         return this;
     }
 
+    public FilterBuilder withAttachmentFilter(String query) {
+        if (query == null || query.isEmpty()) return this;
+        attachmentFilter = new AttachmentFilter(query);
+        return this;
+    }
+
     // Build method: return all active filters as a list
     public List<FilterStrategy> build() {
         List<FilterStrategy> filters = new java.util.ArrayList<>();
@@ -121,6 +128,27 @@ public class FilterBuilder {
         if (isReadFilter != null) filters.add(isReadFilter);
         if (folderFilter != null) filters.add(folderFilter);
         if (hasAttachments != null) filters.add(hasAttachments);
+        if (attachmentFilter != null) filters.add(attachmentFilter);
+        
+        // Reset all filters after build to avoid stale state (singleton bean)
+        reset();
+        
         return filters;
+    }
+    
+    // Reset all filter fields to avoid retaining state between requests
+    private void reset() {
+        senderFilter = null;
+        receiverFilter = null;
+        bodyFilter = null;
+        subjectFilter = null;
+        priorityFilter = null;
+        exactDateFilter = null;
+        beforeDateFilter = null;
+        afterDateFilter = null;
+        isReadFilter = null;
+        folderFilter = null;
+        hasAttachments = null;
+        attachmentFilter = null ;
     }
 }
