@@ -85,6 +85,7 @@ public class MailService {
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
+
     // Get mails by folder
     public List<EmailViewDto> getMailsByFolder(String userEmail, String folderName) {
         Long userId = userRepository.findByEmail(userEmail)
@@ -368,6 +369,17 @@ public class MailService {
             default:
                 return mailRepository.findByReceiver(email);
         }
+    }
+
+    /**
+     * Get user-defined custom folders (excluding system folders)
+     * System folders: INBOX, SENT, DRAFTS, trash
+     *
+     * @param userId ID of the user
+     * @return List of custom folder names
+     */
+    public List<String> getUserCustomFolders(Long userId) {
+        return mailRepository.findDistinctFolderNamesByOwnerId(userId);
     }
 
 }

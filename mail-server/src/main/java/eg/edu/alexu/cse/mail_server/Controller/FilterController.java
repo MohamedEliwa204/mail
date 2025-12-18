@@ -34,6 +34,7 @@ public class FilterController {
         return filterService.getEmailsAnd(mailFilterDTO);
     }
 
+
     /**
      * Filter emails using OR logic - at least one criterion must match
      * Only returns emails for the specified user
