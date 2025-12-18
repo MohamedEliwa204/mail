@@ -109,9 +109,33 @@ public class AttachmentService {
         return fileStorageService.readFileBytes(filePath);
     }
 
+    /**
+     * Extract text content from attachment file for search indexing
+     * Uses Apache Tika to parse various file formats (PDF, DOCX, TXT, etc.)
+     *
+     * @param file the file to extract text from
+     * @return extracted text content, or empty string if extraction fails
+     */
     private String extractTextContent(MultipartFile file) {
+        try {
+            // Use Apache Tika to extract text from various file formats
+            org.apache.tika.Tika tika = new org.apache.tika.Tika();
 
-        return "";
+            // Parse the file and extract text content
+            String content = tika.parseToString(file.getInputStream());
+
+            // Limit content size to avoid database issues (e.g., 50KB of text)
+            if (content.length() > 50000) {
+                content = content.substring(0, 50000);
+            }
+
+            return content;
+        } catch (Exception e) {
+            // If extraction fails (unsupported format, corrupted file, etc.)
+            // Return empty string to gracefully handle the error
+            System.err.println("Failed to extract text from file: " + file.getOriginalFilename() + " - " + e.getMessage());
+            return "";
+        }
     }
 
 }
