@@ -25,6 +25,10 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     @Query("SELECT DISTINCT m FROM Mail m LEFT JOIN m.receiverRel r WHERE m.senderRel.userId = :userId OR r.userId = :userId")
     List<Mail> findAllByUserId(@Param("userId") Long userId);
 
+    // Find all emails with attachments eagerly loaded (for hasAttachments filter)
+    @Query("SELECT DISTINCT m FROM Mail m LEFT JOIN FETCH m.attachments LEFT JOIN m.receiverRel r WHERE m.senderRel.userId = :userId OR r.userId = :userId")
+    List<Mail> findAllByUserIdWithAttachments(@Param("userId") Long userId);
+
 
     @Query("SELECT m FROM Mail m WHERE m.receiver = :email OR m.sender = :email ORDER BY m.timestamp DESC")
     List<Mail> findByReceiverOrSenderOrderByTimestampDesc(@Param("email") String email1, @Param("email") String email2);
@@ -60,7 +64,9 @@ public interface MailRepository extends JpaRepository<Mail, Long> {
     @Query("SELECT m FROM Mail m WHERE m.mailId = :mailId AND m.ownerId = :ownerId")
     Mail findByMailIdAndOwnerId(@Param("mailId") Long mailId, @Param("ownerId") Long ownerId);
 
-    // Find mails for an owner restricted to a set of folder names (e.g., INBOX, SENT, TRASH)
-    @Query("SELECT m FROM Mail m WHERE m.ownerId = :ownerId AND m.folderName IN :folderNames ORDER BY m.timestamp DESC")
-    List<Mail> findByOwnerIdAndFolderNameInOrderByTimestampDesc(@Param("ownerId") Long ownerId, @Param("folderNames") java.util.List<String> folderNames);
+    // Get distinct folder names for a user (excluding system folders)
+    @Query("SELECT DISTINCT m.folderName FROM Mail m WHERE m.ownerId = :ownerId AND m.folderName NOT IN ('INBOX', 'SENT', 'DRAFTS', 'trash')")
+    List<String> findDistinctFolderNamesByOwnerId(@Param("ownerId") Long ownerId);
+
+    List<Mail> findByOwnerIdAndFolderNameInOrderByTimestampDesc(Long userId, List<String> primaryFolders);
 }

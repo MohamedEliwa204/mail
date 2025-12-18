@@ -50,7 +50,10 @@ public class FilterService {
         }
 
         // Get only emails related to this user
-        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
+        // Use query with attachments if hasAttachments filter is active
+        List<Mail> mails = dto.getHasAttachments() != null 
+            ? mailRepository.findAllByUserIdWithAttachments(dto.getUserId())
+            : mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
@@ -73,7 +76,10 @@ public class FilterService {
         }
 
         // Get only emails related to this user
-        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
+        // Use query with attachments if hasAttachments filter is active
+        List<Mail> mails = dto.getHasAttachments() != null 
+            ? mailRepository.findAllByUserIdWithAttachments(dto.getUserId())
+            : mailRepository.findAllByUserId(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
