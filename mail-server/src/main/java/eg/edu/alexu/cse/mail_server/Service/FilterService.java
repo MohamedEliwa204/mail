@@ -1,5 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
@@ -7,6 +8,7 @@ import eg.edu.alexu.cse.mail_server.Service.Decorator.AndDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.OrDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Factory.FilterBuilder;
 import eg.edu.alexu.cse.mail_server.Service.Strategy.*;
+import eg.edu.alexu.cse.mail_server.dto.AttachmentDTO;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import eg.edu.alexu.cse.mail_server.dto.MailFilterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,13 +92,37 @@ public class FilterService {
     }
 
     private EmailViewDto toDTO(Mail mail) {
+        // Load attachment metadata (filename, size, type) for search results
+        List<AttachmentDTO> attachmentDTOs = null;
+        if (mail.getAttachments() != null && !mail.getAttachments().isEmpty()) {
+            attachmentDTOs = new ArrayList<>();
+            for (Attachment attachment : mail.getAttachments()) {
+                try {
+                    // Include metadata only (not file content) for performance
+                    AttachmentDTO attachmentDTO = AttachmentDTO.builder()
+                            .id(attachment.getId())
+                            .fileName(attachment.getFileName())
+                            .contentType(attachment.getContentType())
+                            .fileSize(attachment.getFileSize())
+                            .build();
+                    attachmentDTOs.add(attachmentDTO);
+                } catch (Exception e) {
+                    System.err.println("Failed to load attachment metadata: " + attachment.getId());
+                }
+            }
+        }
+
         EmailViewDto dto = new EmailViewDto();
         dto.setId(mail.getMailId());
         dto.setSender(mail.getSenderRel().getFirstName() + " " + mail.getSenderRel().getLastName());
+        dto.setReceiver(mail.getReceiver());
         dto.setSubject(mail.getSubject());
         dto.setBody(mail.getBody());
         dto.setTimestamp(mail.getTimestamp());
+        dto.setPriority(mail.getPriority());
+        dto.setFolderName(mail.getFolderName());
         dto.setRead(mail.isRead());
+        dto.setAttachments(attachmentDTOs);
         return dto;
     }
 
