@@ -1,5 +1,6 @@
 package eg.edu.alexu.cse.mail_server.Service;
 
+import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Repository.UserRepository;
@@ -7,6 +8,7 @@ import eg.edu.alexu.cse.mail_server.Service.Decorator.AndDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Decorator.OrDecorator;
 import eg.edu.alexu.cse.mail_server.Service.Factory.FilterBuilder;
 import eg.edu.alexu.cse.mail_server.Service.Strategy.*;
+import eg.edu.alexu.cse.mail_server.dto.AttachmentDTO;
 import eg.edu.alexu.cse.mail_server.dto.EmailViewDto;
 import eg.edu.alexu.cse.mail_server.dto.MailFilterDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,7 @@ public class FilterService {
 
     /**
      * Filter emails using AND logic - all criteria must match
-     * Only returns emails related to the specified user (as sender or receiver)
+     * Only returns emails owned by the specified user (owner-based filtering)
      */
     public List<EmailViewDto> getEmailsAnd(MailFilterDTO dto) {
         // Validate userId is provided
@@ -49,8 +51,8 @@ public class FilterService {
             throw new IllegalArgumentException("User ID is required for filtering");
         }
 
-        // Get only emails related to this user
-        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
+        // Get only emails owned by this user (owner-based query)
+        List<Mail> mails = mailRepository.findByOwnerIdOrderByTimestampDesc(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
@@ -64,7 +66,7 @@ public class FilterService {
 
     /**
      * Filter emails using OR logic - at least one criterion must match
-     * Only returns emails related to the specified user (as sender or receiver)
+     * Only returns emails owned by the specified user (owner-based filtering)
      */
     public List<EmailViewDto> getEmailsOr(MailFilterDTO dto) {
         // Validate userId is provided
@@ -72,8 +74,8 @@ public class FilterService {
             throw new IllegalArgumentException("User ID is required for filtering");
         }
 
-        // Get only emails related to this user
-        List<Mail> mails = mailRepository.findAllByUserId(dto.getUserId());
+        // Get only emails owned by this user (owner-based query)
+        List<Mail> mails = mailRepository.findByOwnerIdOrderByTimestampDesc(dto.getUserId());
         List<FilterStrategy> activeFilters = buildFilters(dto) ;
 
         if (activeFilters.isEmpty()) throw new IllegalArgumentException("Invalid filters");
@@ -84,13 +86,37 @@ public class FilterService {
     }
 
     private EmailViewDto toDTO(Mail mail) {
+        // Load attachment metadata (filename, size, type) for search results
+        List<AttachmentDTO> attachmentDTOs = null;
+        if (mail.getAttachments() != null && !mail.getAttachments().isEmpty()) {
+            attachmentDTOs = new ArrayList<>();
+            for (Attachment attachment : mail.getAttachments()) {
+                try {
+                    // Include metadata only (not file content) for performance
+                    AttachmentDTO attachmentDTO = AttachmentDTO.builder()
+                            .id(attachment.getId())
+                            .fileName(attachment.getFileName())
+                            .contentType(attachment.getContentType())
+                            .fileSize(attachment.getFileSize())
+                            .build();
+                    attachmentDTOs.add(attachmentDTO);
+                } catch (Exception e) {
+                    System.err.println("Failed to load attachment metadata: " + attachment.getId());
+                }
+            }
+        }
+
         EmailViewDto dto = new EmailViewDto();
         dto.setId(mail.getMailId());
         dto.setSender(mail.getSenderRel().getFirstName() + " " + mail.getSenderRel().getLastName());
+        dto.setReceiver(mail.getReceiver());
         dto.setSubject(mail.getSubject());
         dto.setBody(mail.getBody());
         dto.setTimestamp(mail.getTimestamp());
+        dto.setPriority(mail.getPriority());
+        dto.setFolderName(mail.getFolderName());
         dto.setRead(mail.isRead());
+        dto.setAttachments(attachmentDTOs);
         return dto;
     }
 
@@ -115,6 +141,7 @@ public class FilterService {
                 .withReceiverFilter(filterDTO.getReceiver())
                 .withFolderFilter(filterDTO.getFolder())
                 .withHasAttachmentsFilter(filterDTO.getHasAttachments())
+                .withAttachmentFilter(filterDTO.getAttachmentSearch())
                 .build();
     }
 

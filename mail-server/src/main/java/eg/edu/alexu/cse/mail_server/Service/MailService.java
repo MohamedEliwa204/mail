@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -11,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import eg.edu.alexu.cse.mail_server.Entity.Attachment;
 import eg.edu.alexu.cse.mail_server.Entity.Mail;
-import eg.edu.alexu.cse.mail_server.Entity.User;
 import eg.edu.alexu.cse.mail_server.Repository.MailRepository;
 import eg.edu.alexu.cse.mail_server.Service.command.DraftCommand;
 import eg.edu.alexu.cse.mail_server.Service.command.GetMailCommand;
@@ -85,6 +85,7 @@ public class MailService {
         return mails.stream().map(this::convertToEmailViewDto).collect(Collectors.toList());
     }
 
+
     // Get mails by folder
     public List<EmailViewDto> getMailsByFolder(String userEmail, String folderName) {
         Long userId = userRepository.findByEmail(userEmail)
@@ -93,7 +94,9 @@ public class MailService {
 
         List<Mail> mails;
         if ("all".equalsIgnoreCase(folderName)) {
-            mails = mailRepository.findByReceiverOrSenderOrderByTimestampDesc(userEmail, userEmail);
+            // Only include the primary mailbox folders for the owner (INBOX, SENT, trash)
+            java.util.List<String> primaryFolders = java.util.Arrays.asList("INBOX", "SENT", "trash");
+            mails = mailRepository.findByOwnerIdAndFolderNameInOrderByTimestampDesc(userId, primaryFolders);
         } else {
             // Use ownerId to load mails for the given folder (including "trash")
             mails = mailRepository.findByOwnerIdAndFolderNameOrderByTimestampDesc(userId, folderName);
@@ -258,36 +261,125 @@ public class MailService {
     }
 
     public List<Mail> getSortedMails(String email, String critera, boolean order){
+
+        List<Mail> mailList = mailRepository.findByReceiverAndFolderNameOrderBySenderAsc(email, "INBOX");
+        
         switch(critera){
             case "sender":
-                if(order)
-                   return mailRepository.findByReceiverAndFolderNameOrderBySenderAsc(email, "INBOX");
-                else
-                    return mailRepository.findByReceiverAndFolderNameOrderBySenderDesc(email, "INBOX"); 
+                if(order){
+                   PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                            ((a, b) -> a.getSender().toLowerCase().compareTo(b.getSender().toLowerCase()))
+                   );
+                   mailQueue.addAll(mailList);
+                   mailList.clear();
+                   while (!mailQueue.isEmpty())
+                        mailList.add(mailQueue.poll());
+                    return mailList;
+                   //return mailRepository.findByReceiverAndFolderNameOrderBySenderAsc(email, "INBOX"); 
+                }
+                else{
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                                ((a, b) -> b.getSender().toLowerCase().compareTo(a.getSender().toLowerCase()))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderBySenderDesc(email, "INBOX");
+                }
+                     
                 
             case "subject":
-                if(order)
-                   return mailRepository.findByReceiverAndFolderNameOrderBySubjectAsc(email, "INBOX");
-                else
-                    return mailRepository.findByReceiverAndFolderNameOrderBySubjectDesc(email, "INBOX"); 
+                if(order){
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                            ((a, b) -> a.getSubject().toLowerCase().compareTo(b.getSubject().toLowerCase()))
+                   );
+                   mailQueue.addAll(mailList);
+                   mailList.clear();
+                   while (!mailQueue.isEmpty())
+                        mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderBySubjectAsc(email, "INBOX");
+                }
+ 
+                else{
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                                ((a, b) -> b.getSubject().toLowerCase().compareTo(a.getSubject().toLowerCase()))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderBySubjectDesc(email, "INBOX"); 
+                }
+                    
 
             case "date":
-                if(order)
-                   return mailRepository.findByReceiverAndFolderNameOrderByTimestampAsc(email, "INBOX");
-                else
-                    return mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(email, "INBOX"); 
+                if(order){
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                            ((a, b) -> a.getTimestamp().compareTo(b.getTimestamp()))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                        return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderByTimestampAsc(email, "INBOX");
+                }
+                else{
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                                ((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderByTimestampDesc(email, "INBOX"); 
+                }
 
             case "priority":
-                if(order)
-                   return mailRepository.findByReceiverAndFolderNameOrderByPriorityAsc(email, "INBOX");
-                else
-                    return mailRepository.findByReceiverAndFolderNameOrderByPriorityDesc(email, "INBOX");
+                if(order){
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                            ((a, b) -> Integer.valueOf(a.getPriority()).compareTo(Integer.valueOf(b.getPriority())))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderByPriorityAsc(email, "INBOX");
+                }
+                   
+                else{
+                    PriorityQueue<Mail> mailQueue = new PriorityQueue<Mail>(mailList.size(), 
+                                ((a, b) -> Integer.valueOf(b.getPriority()).compareTo(Integer.valueOf(a.getPriority())))
+                    );
+                    mailQueue.addAll(mailList);
+                    mailList.clear();
+                    while (!mailQueue.isEmpty())
+                            mailList.add(mailQueue.poll());
+                    return mailList;
+                    //return mailRepository.findByReceiverAndFolderNameOrderByPriorityDesc(email, "INBOX");
+                }
+                    
 
             default:
                 return mailRepository.findByReceiver(email);
         }
     }
 
+    /**
+     * Get user-defined custom folders (excluding system folders)
+     * System folders: INBOX, SENT, DRAFTS, trash
+     *
+     * @param userId ID of the user
+     * @return List of custom folder names
+     */
+    public List<String> getUserCustomFolders(Long userId) {
+        return mailRepository.findDistinctFolderNamesByOwnerId(userId);
+    }
+
 }
-
-

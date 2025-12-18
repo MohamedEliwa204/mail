@@ -50,6 +50,9 @@ export interface MailFilterDTO {
   beforeDate?: string;    // ISO format: "2023-12-25T10:30:00"
   isRead?: boolean;
   priority?: number;
+  folder?: string;        // Folder name to search in
+  hasAttachments?: boolean; // Filter emails with/without attachments
+  attachmentSearch?: string; // Search query for attachment content/filename
 }
 
 @Injectable({
