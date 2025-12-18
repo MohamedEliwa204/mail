@@ -331,7 +331,25 @@ export class Mail implements OnInit {
   // Toggle Priority Mode
   togglePriorityMode() {
     this.isPriorityMode.update(value => !value);
-    this.loadInbox();
+    this.loadPrioritySorting();
+  }
+
+  loadPrioritySorting(){
+    const email = this.currentUser()?.email;
+    if(email == undefined){
+      return
+    }
+    this.mailService.loadSortedMails(email , "priority", this.isPriorityMode()).subscribe({
+      next: (mails) => {
+        this.mails.set(mails);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading inbox:', error);
+        this.errorMessage.set('Failed to load inbox');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   // Load inbox mails
@@ -434,24 +452,6 @@ export class Mail implements OnInit {
     else this.loadFolder(folder);
   }
 
-  //compose email
-  isComposing = false;
-  compseToggle() {
-    this.isComposing = !this.isComposing;
-    // Always load contacts when opening compose (for autocomplete)
-    if (this.isComposing) {
-      this.loadContacts();
-    }
-  }
-
-  composedMail: ComposeEmailDTO = {
-    sender: this.currentUser()?.email,
-    receivers: [''],
-    subject: '',
-    body: '',
-    priority: 1
-  }
-
   // Attachment handling
   selectedAttachments = signal<File[]>([]);
 
@@ -540,6 +540,49 @@ export class Mail implements OnInit {
     }
   }
 
+  //compose email
+  isComposing = false;
+  compseToggle() {
+    this.isComposing = !this.isComposing;
+    // Always load contacts when opening compose (for autocomplete)
+    if (this.isComposing) {
+      this.loadContacts();
+    }
+  }
+
+  isPrioritySelected = signal<boolean>(false)
+
+  setPriortyMenu(){
+    this.isPrioritySelected.set(!this.isPrioritySelected())
+  }
+
+  selectedPriority = signal<number>(1)
+
+  displayPriority(){
+    switch (this.selectedPriority()) {
+      case 1: return "⚪"
+      case 2: return "🟢"
+      case 3: return "🔵"
+      case 4: return "🟠"
+      case 5: return "🔴"
+      default: return "⚪"
+    }
+  }
+
+  composedMail: ComposeEmailDTO = {
+    sender: this.currentUser()?.email,
+    receivers: [''],
+    subject: '',
+    body: '',
+    priority: this.selectedPriority()
+  }
+
+  choosePriority(level: number) {
+    this.selectedPriority.set(level);
+    this.composedMail.priority = level;
+    this.isPrioritySelected.set(false);  
+  }
+
   // Close suggestions when clicking outside the suggestions list/input
   onComposeAreaClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -598,7 +641,7 @@ export class Mail implements OnInit {
       this.composedMail.receivers = []
       this.composedMail.subject = ''
       this.composedMail.body = ''
-      this.composedMail.priority = 1
+      this.composedMail.priority = this.selectedPriority()
       console.log("Email is sent")
     }
 
@@ -1130,6 +1173,4 @@ export class Mail implements OnInit {
       }
     });
   }
-
-
 }
